@@ -1,78 +1,143 @@
-# Kruti — Random Choice Wheel
+# Wheel Spin
 
-Kruti is a lightweight browser game that turns everyday decisions into a colorful wheel of fortune. Add the choices you cannot decide between, start the wheel, and let it select a winner for you.
+Многопользовательское колесо случайного выбора. Host создаёт комнату и
+запускает колесо, гости подключаются по ссылке и анонимно предлагают новые
+слоты.
 
-It works well for choosing food, picking a player or team, selecting a challenge, deciding who goes first, running a small giveaway, or making any other random choice with friends.
+## Возможности MVP
 
-## How to Play
+- Комнаты со случайным восьмизначным кодом и invite-ссылкой
+- Необязательный пароль, который хранится только в виде Argon2id-хеша
+- Анонимные сессии без регистрации
+- Только host редактирует колесо и запускает вращение
+- Гости отправляют полностью анонимные предложения
+- Автоматические имена `Алекс`, `Алекс 2`, `Алекс 3`
+- Одинаковое серверное вращение для всех подключённых участников
+- Восстановление комнаты и текущего spin после обновления страницы
+- До 20 локальных шаблонов слотов без аккаунта и нагрузки на backend
+- Последние 10 результатов
+- Удаление комнаты после 7 дней без активности
+- Адаптивный mobile-first интерфейс на основе визуала исходного прототипа
 
-1. Enter a name for your wheel.
-2. Add at least two options.
-3. Choose a spin duration using a preset or enter a custom time from 1 to 300 seconds.
-4. Press **Spin the wheel** or use the button in the center of the wheel.
-5. Wait for the wheel to stop and reveal the selected option.
-6. Spin again whenever you need another result.
+## Ограничения
 
-## Features
+- До 50 участников в комнате
+- До 100 слотов
+- До 10 ожидающих предложений от одного гостя
+- Вращение длится от 1 до 300 секунд
+- Права host привязаны к защищённой cookie браузера, в котором создана комната
 
-- Custom wheel titles and options
-- Add and remove choices at any time before a spin
-- Equal probability for every option
-- Preset and custom spin durations
-- Secure random selection through the browser's Web Crypto API when available
-- Animated winner reveal and live countdown
-- Automatic local saving of the wheel title and options
-- Responsive layout for desktop and mobile screens
-- No build tools, accounts, back end, or external JavaScript dependencies
+## Стек
 
-## Fair Selection
+- React, React Router, TypeScript и Vite
+- NestJS, Fastify и Socket.IO
+- PostgreSQL и Prisma
+- Redis adapter для Socket.IO
+- Vitest
+- Docker и Railway
 
-Every segment has the same chance of winning:
+Frontend и backend собираются в один публичный контейнер. NestJS раздаёт
+React SPA, REST API и WebSocket на одном домене. PostgreSQL и Redis остаются
+доступны только через private network Railway.
 
-```text
-probability = 100 / number of options
-```
+## Архитектура
 
-The winning option is selected before the animation starts. The wheel then calculates its final rotation so that the chosen segment stops under the pointer. When supported by the browser, Kruti uses `crypto.getRandomValues()` and rejection sampling to avoid modulo bias.
+Frontend следует Feature-Sliced Design:
 
-## Run Locally
+- `app` — инициализация приложения, router и глобальные стили
+- `pages` — компоненты маршрутов `/`, `/r/:code` и fallback-страница
+- `features` — пользовательские действия, не привязанные к одной странице
+- `entities` — модель, API, realtime-state и UI комнаты
+- `shared` — HTTP-клиент, i18n, router helpers и переиспользуемый UI
 
-The game is built with plain HTML, CSS, and JavaScript, so no installation or compilation is required.
+Backend организован как modular monolith NestJS. Бизнес-модуль `rooms`
+разделён на `presentation`, `application`, `domain` и `infrastructure`.
+Database, security, realtime и конфигурация находятся в `shared`.
 
-You can open `index.html` directly in a browser or start any static file server from the project directory:
+## Локальный запуск
+
+Требования: Node.js 22+, npm и локальные PostgreSQL/Redis. Если доступен Docker:
 
 ```bash
-npx serve .
+docker compose up -d
 ```
 
-Then open the local address shown in the terminal.
+Создайте `.env` из `.env.example`, затем:
 
-## Local Data
+```bash
+npm install
+npm run db:generate
+npm run db:migrate
+npm run dev
+```
 
-The wheel title and option list are stored in the browser's `localStorage`. They remain available after a page reload, but only in the same browser and on the same device. The game continues to work with its default values if local storage is unavailable.
+- Frontend: `http://localhost:5173`
+- Backend: `http://localhost:3000`
+- Healthcheck: `http://localhost:3000/health`
 
-## Project Structure
+Vite проксирует `/api` и `/socket.io` на backend.
+
+## Production-сборка
+
+```bash
+npm run build
+npm start
+```
+
+После сборки backend раздаёт frontend из `apps/web/dist`.
+
+## Проверки качества
+
+```bash
+npm run format        # применить Prettier
+npm run format:check  # проверить форматирование
+npm run lint          # проверить ESLint
+npm run typecheck     # проверить TypeScript
+npm run validate      # все проверки и тесты
+npm run verify        # validate + production-сборка
+```
+
+GitHub Actions запускает `validate` и `build` для каждого pull request и push
+в `main`. Dockerfile также выполняет `validate`, поэтому Railway не соберёт
+версию с ошибками ESLint, Prettier, TypeScript или тестов.
+
+## Railway
+
+1. Создайте Railway Project и подключите этот GitHub-репозиторий как service
+   приложения.
+2. Добавьте PostgreSQL и Redis в тот же project и environment.
+3. Передайте приложению приватные переменные:
+   - `DATABASE_URL` из PostgreSQL service
+   - `REDIS_URL` из Redis service
+   - `COOKIE_SECURE=true`
+4. Создайте public domain только для приложения.
+
+`railway.json` настраивает Dockerfile, миграцию Prisma перед запуском,
+healthcheck и одну реплику в EU West. Для нескольких реплик Redis adapter уже
+подключён, а запуск spin защищён атомарным изменением статуса комнаты в
+PostgreSQL.
+
+## Структура
 
 ```text
-.
-├── index.html   # Page structure and game controls
-├── styles.css   # Layout, responsive design, and animations
-├── app.js       # Wheel rendering, random selection, and persistence
-└── README.md    # Project documentation
+apps/
+├── api/
+│   ├── prisma/                         схема и миграции PostgreSQL
+│   ├── src/
+│   │   ├── app/                        корневой NestJS module
+│   │   ├── modules/rooms/              вертикальный бизнес-модуль комнат
+│   │   ├── modules/system/             SPA, health и readiness endpoints
+│   │   └── shared/                     database, security, realtime, config
+│   └── test/                           тесты правил комнат и колеса
+└── web/
+    └── src/
+        ├── app/                        app bootstrap, router и стили
+        ├── pages/                      страницы маршрутов
+        ├── features/                   пользовательские функции
+        ├── entities/                   модель и UI комнаты
+        └── shared/                     общий API, i18n, helpers и UI
+
+Dockerfile
+docker-compose.yml
+railway.json
 ```
-
-## Technology
-
-- HTML5
-- CSS3
-- Vanilla JavaScript
-- Canvas API for drawing the wheel
-- Web Crypto API for random selection
-- Web Storage API for local persistence
-
-## Notes
-
-- At least two options are required to start a spin.
-- Option names can contain up to 80 characters.
-- Wheel titles can contain up to 60 characters.
-- Spin duration is limited to 1–300 seconds.

@@ -1,0 +1,15 @@
+import { Module } from "@nestjs/common";
+import { DatabaseModule } from "../../shared/database/database.module";
+import { SecurityModule } from "../../shared/security/security.module";
+import { RoomsService } from "./application/rooms.service";
+import { JoinLimiterService } from "./infrastructure/join-limiter.service";
+import { RoomCleanupService } from "./infrastructure/room-cleanup.service";
+import { RoomsController } from "./presentation/http/rooms.controller";
+import { RoomsGateway } from "./presentation/ws/rooms.gateway";
+
+@Module({
+  imports: [DatabaseModule, SecurityModule],
+  controllers: [RoomsController],
+  providers: [RoomsService, RoomsGateway, JoinLimiterService, RoomCleanupService],
+})
+export class RoomsModule {}
