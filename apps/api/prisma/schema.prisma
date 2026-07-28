@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum RoomStatus {
+  LOBBY
+  SPINNING
+  CLOSED
+}
+
+enum ParticipantRole {
+  HOST
+  GUEST
+}
+
+enum ProposalStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+model Room {
+  id             String        @id @default(uuid())
+  code           String        @unique
+  title          String
+  passwordHash   String?
+  status         RoomStatus    @default(LOBBY)
+  version        Int           @default(1)
+  currentRotation Float        @default(0)
+  activeSpinId   String?
+  createdAt      DateTime      @default(now())
+  lastActivityAt DateTime      @default(now())
+  expiresAt      DateTime
+  participants   Participant[]
+  options        Option[]
+  proposals      Proposal[]
+  spins          Spin[]
+
+  @@index([expiresAt])
+}
+
+model Participant {
+  id           String          @id @default(uuid())
+  roomId       String
+  room         Room            @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  displayName  String
+  normalizedName String
+  role         ParticipantRole
+  sessionHash  String          @unique
+  connectedAt  DateTime        @default(now())
+  lastSeenAt   DateTime        @default(now())
+  proposals    Proposal[]
+
+  @@index([roomId])
+  @@unique([roomId, normalizedName])
+}
+
+model Option {
+  id        String   @id @default(uuid())
+  roomId    String
+  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  label     String
+  position  Int
+  createdAt DateTime @default(now())
+
+  @@unique([roomId, position])
+  @@index([roomId])
+}
+
+model Proposal {
+  id            String         @id @default(uuid())
+  roomId        String
+  room          Room           @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  participantId String
+  participant   Participant    @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  label         String
+  status        ProposalStatus @default(PENDING)
+  createdAt     DateTime       @default(now())
+  reviewedAt    DateTime?
+
+  @@index([roomId, status])
+  @@index([participantId, status])
+}
+
+model Spin {
+  id              String   @id @default(uuid())
+  roomId          String
+  room            Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  requestId       String
+  optionsSnapshot Json
+  winnerOptionId  String
+  winnerIndex     Int
+  winnerLabel     String
+  startedAt       DateTime
+  durationMs      Int
+  finalRotation   Float
+  createdAt       DateTime @default(now())
+
+  @@unique([roomId, requestId])
+  @@index([roomId, createdAt])
+}
