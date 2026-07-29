@@ -18,12 +18,16 @@ export function Wheel({
   activeSpin,
   canceledSpinId,
   canSpin,
+  isHost,
+  connected,
   onSpin,
 }: {
   options: Option[];
   activeSpin: ActiveSpin | null;
   canceledSpinId?: string | null;
   canSpin: boolean;
+  isHost: boolean;
+  connected: boolean;
   onSpin: () => void;
 }) {
   const { t } = useI18n();
@@ -40,6 +44,11 @@ export function Wheel({
   const [winner, setWinner] = useState("");
   const visibleOptions = activeSpin?.optionsSnapshot ?? options;
   const emptyLabel = t("addOptions");
+  const guestCenterLabel = !connected
+    ? t("reconnectingCenter")
+    : activeSpin
+      ? t("spinningCenter")
+      : t("hostSpins");
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -165,15 +174,32 @@ export function Wheel({
         >
           <canvas ref={canvasRef} aria-label={t("wheelAria")} />
         </div>
-        <button
-          className="spin-center"
-          type="button"
-          aria-label={canSpin ? t("startSpin") : t("hostStarts")}
-          disabled={!canSpin}
-          onClick={onSpin}
-        >
-          <span>{canSpin ? t("spinAction") : t("wait")}</span>
-        </button>
+        {isHost ? (
+          <button
+            className="spin-center"
+            type="button"
+            aria-label={t("startSpin")}
+            disabled={!canSpin}
+            onClick={onSpin}
+          >
+            <span>{t("spinAction")}</span>
+          </button>
+        ) : (
+          <div
+            className={`spin-center guest-spin-center ${activeSpin ? "spinning" : ""} ${!connected ? "reconnecting" : ""}`}
+            role="status"
+            aria-live="polite"
+            aria-label={guestCenterLabel}
+          >
+            <span className="guest-spin-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M19 8a8 8 0 1 0 1 7" />
+                <path d="M19 3v5h-5" />
+              </svg>
+            </span>
+            <span>{guestCenterLabel}</span>
+          </div>
+        )}
       </div>
       {winner && (
         <div

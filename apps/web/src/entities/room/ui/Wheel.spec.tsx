@@ -86,13 +86,76 @@ describe("Wheel", () => {
 
     const { container } = render(
       <I18nProvider>
-        <Wheel options={options} activeSpin={null} canSpin onSpin={() => {}} />
+        <Wheel
+          options={options}
+          activeSpin={null}
+          canSpin
+          isHost
+          connected
+          onSpin={() => {}}
+        />
       </I18nProvider>,
     );
 
     const canvas = container.querySelector("canvas");
     expect(canvas?.width).toBe(347);
     expect(canvas?.height).toBe(347);
+  });
+
+  it("shows guests a non-interactive center status", () => {
+    const view = render(
+      <I18nProvider>
+        <Wheel
+          options={options}
+          activeSpin={null}
+          canSpin={false}
+          isHost={false}
+          connected
+          onSpin={() => {}}
+        />
+      </I18nProvider>,
+    );
+
+    expect(screen.getByRole("status", { name: "HOST SPINS" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Start spin" })).toBeNull();
+
+    view.rerender(
+      <I18nProvider>
+        <Wheel
+          options={options}
+          activeSpin={{
+            id: "guest-spin",
+            optionsSnapshot: options,
+            winnerIndex: 0,
+            winnerLabel: "Pizza",
+            startedAt: new Date(Date.now() + 10_000).toISOString(),
+            durationMs: 100,
+            finalRotation: 1080,
+          }}
+          canSpin={false}
+          isHost={false}
+          connected
+          onSpin={() => {}}
+        />
+      </I18nProvider>,
+    );
+
+    expect(screen.getByRole("status", { name: "SPINNING" })).toBeTruthy();
+
+    view.rerender(
+      <I18nProvider>
+        <Wheel
+          options={options}
+          activeSpin={null}
+          canSpin={false}
+          isHost={false}
+          connected={false}
+          onSpin={() => {}}
+        />
+      </I18nProvider>,
+    );
+
+    expect(screen.getByRole("status", { name: "RECONNECTING" })).toBeTruthy();
   });
 
   it("shows the result after the server clears the active spin", async () => {
@@ -115,6 +178,8 @@ describe("Wheel", () => {
           activeSpin={activeSpin}
           canceledSpinId={null}
           canSpin={false}
+          isHost
+          connected
           onSpin={() => {}}
         />
       </I18nProvider>,
@@ -122,7 +187,14 @@ describe("Wheel", () => {
 
     view.rerender(
       <I18nProvider>
-        <Wheel options={options} activeSpin={null} canSpin onSpin={() => {}} />
+        <Wheel
+          options={options}
+          activeSpin={null}
+          canSpin
+          isHost
+          connected
+          onSpin={() => {}}
+        />
       </I18nProvider>,
     );
 
@@ -153,6 +225,8 @@ describe("Wheel", () => {
           options={options}
           activeSpin={activeSpin}
           canSpin={false}
+          isHost
+          connected
           onSpin={() => {}}
         />
       </I18nProvider>,
@@ -190,6 +264,8 @@ describe("Wheel", () => {
           options={options}
           activeSpin={activeSpin}
           canSpin={false}
+          isHost
+          connected
           onSpin={() => {}}
         />
       </I18nProvider>,
@@ -205,6 +281,8 @@ describe("Wheel", () => {
           activeSpin={null}
           canceledSpinId="spin-canceled"
           canSpin
+          isHost
+          connected
           onSpin={() => {}}
         />
       </I18nProvider>,

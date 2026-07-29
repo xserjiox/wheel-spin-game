@@ -150,6 +150,8 @@ export function RoomPage({
             activeSpin={state.activeSpin}
             canceledSpinId={canceledSpinId}
             canSpin={isHost && connected && !isSpinning && state.options.length >= 2}
+            isHost={isHost}
+            connected={connected}
             onSpin={run}
           />
 
