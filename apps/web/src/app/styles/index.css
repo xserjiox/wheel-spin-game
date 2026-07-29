@@ -864,6 +864,23 @@ input::placeholder {
   gap: 18px;
 }
 
+.join-card label {
+  display: grid;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.join-card input {
+  width: 100%;
+}
+
+.join-card input:focus-visible {
+  border-color: var(--purple);
+  outline-offset: 2px;
+}
+
 .join-card .large-mark {
   width: 48px;
   height: 48px;
