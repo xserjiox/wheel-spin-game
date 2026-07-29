@@ -662,15 +662,41 @@ input::placeholder {
   white-space: nowrap;
 }
 
-.saved-room-copy > span {
+.saved-room-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  align-items: center;
+}
+
+.saved-room-code,
+.saved-room-role {
   width: fit-content;
   padding: 2px 6px;
-  background: #ece8df;
   color: var(--ink);
   font-family: "Unbounded", sans-serif;
   font-size: 9px;
   font-weight: 750;
   letter-spacing: 0.06em;
+}
+
+.saved-room-code {
+  background: #ece8df;
+}
+
+.saved-room-role {
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  font-size: 8px;
+  letter-spacing: 0.08em;
+}
+
+.saved-room-role.host {
+  background: var(--acid);
+}
+
+.saved-room-role.guest {
+  background: #e9e3ff;
 }
 
 .saved-room-copy small {

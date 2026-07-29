@@ -1,7 +1,7 @@
 import { type FormEvent, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createRoom, restoreRoom, type RoomNavigationState } from "@/entities/room";
-import { useSavedHostRooms, type SavedHostRoom } from "@/entities/saved-room";
+import { useSavedRooms, type SavedRoom } from "@/entities/saved-room";
 import { LanguageSwitcher } from "@/features/change-language";
 import { SavedRoomList } from "@/features/manage-saved-rooms";
 import { WheelTemplatePicker } from "@/features/manage-wheel-templates";
@@ -22,7 +22,7 @@ export function HomePage() {
   const { defaultRoomOptions, t } = useI18n();
   const localizedDefaultTitle = t("defaultTitle");
   const previousDefaultTitle = useRef(localizedDefaultTitle);
-  const { rooms, save: saveHostRoom, remove: removeHostRoom } = useSavedHostRooms();
+  const { rooms, save: saveRoom, remove: removeRoom } = useSavedRooms();
   const [mode, setMode] = useState<"create" | "join" | "rooms">("create");
   const [hostName, setHostName] = useState("");
   const [title, setTitle] = useState(localizedDefaultTitle);
@@ -52,7 +52,7 @@ export function HomePage() {
         password,
         options: templateOptions ?? defaultRoomOptions,
       } satisfies CreateInput);
-      saveHostRoom(result.state);
+      saveRoom(result.state);
       navigate(roomPath(result.code), {
         state: {
           initialRoomState: result.state,
@@ -68,20 +68,20 @@ export function HomePage() {
     }
   };
 
-  const openSavedRoom = async (room: SavedHostRoom) => {
+  const openSavedRoom = async (room: SavedRoom) => {
     setOpeningCode(room.code);
     setError("");
 
     try {
       const result = await restoreRoom(room.code);
-      if (result.state.role !== "HOST") {
-        removeHostRoom(room.code);
-        setError(t("hostAccessExpired"));
+      if (result.state.role !== room.role) {
+        removeRoom(room.code);
+        setError(t("roomAccessExpired"));
         setOpeningCode(null);
         return;
       }
 
-      saveHostRoom(result.state);
+      saveRoom(result.state);
       navigate(roomPath(room.code), {
         state: {
           initialRoomState: result.state,
@@ -92,8 +92,8 @@ export function HomePage() {
         openError instanceof ApiRequestError &&
         [401, 403, 404].includes(openError.status)
       ) {
-        removeHostRoom(room.code);
-        setError(t("hostAccessExpired"));
+        removeRoom(room.code);
+        setError(t("roomAccessExpired"));
       } else {
         setError(
           openError instanceof Error
@@ -265,7 +265,7 @@ export function HomePage() {
                 rooms={rooms}
                 openingCode={openingCode}
                 onOpen={(room) => void openSavedRoom(room)}
-                onRemove={removeHostRoom}
+                onRemove={removeRoom}
                 onCreate={() => {
                   setMode("create");
                   setError("");

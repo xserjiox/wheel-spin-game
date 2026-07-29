@@ -1,7 +1,8 @@
-import type { SavedHostRoom, SavedHostRoomStore } from "./types";
+import type { SavedRoom, SavedRoomStore } from "./types";
 
-export const SAVED_HOST_ROOM_LIMIT = 20;
-export const SAVED_HOST_ROOM_STORAGE_KEY = "wheel-spin-host-rooms";
+export const SAVED_ROOM_LIMIT = 20;
+export const SAVED_ROOM_STORAGE_KEY = "wheel-spin-rooms";
+export const LEGACY_SAVED_HOST_ROOM_STORAGE_KEY = "wheel-spin-host-rooms";
 
 function isIsoDate(value: unknown): value is string {
   return (
@@ -9,9 +10,11 @@ function isIsoDate(value: unknown): value is string {
   );
 }
 
-function isSavedHostRoom(value: unknown): value is SavedHostRoom {
+function hasValidRoomFields(
+  value: unknown,
+): value is Omit<SavedRoom, "role"> & { role?: unknown } {
   if (!value || typeof value !== "object") return false;
-  const room = value as Partial<SavedHostRoom>;
+  const room = value as Partial<SavedRoom>;
 
   return (
     typeof room.code === "string" &&
@@ -26,37 +29,65 @@ function isSavedHostRoom(value: unknown): value is SavedHostRoom {
   );
 }
 
-function writeSavedHostRooms(storage: Storage, rooms: SavedHostRoom[]): void {
+function isSavedRoom(value: unknown): value is SavedRoom {
+  return hasValidRoomFields(value) && (value.role === "HOST" || value.role === "GUEST");
+}
+
+function writeSavedRooms(storage: Storage, rooms: SavedRoom[]): void {
   try {
-    const value: SavedHostRoomStore = { version: 1, rooms };
-    storage.setItem(SAVED_HOST_ROOM_STORAGE_KEY, JSON.stringify(value));
+    const value: SavedRoomStore = { version: 2, rooms };
+    storage.setItem(SAVED_ROOM_STORAGE_KEY, JSON.stringify(value));
   } catch {
     // Saving this convenience list must never block room creation or navigation.
   }
 }
 
-export function readSavedHostRooms(
-  storage: Storage,
-  now = Date.now(),
-): SavedHostRoom[] {
+function migrateLegacyHostRooms(storage: Storage): SavedRoom[] {
   try {
-    const raw = storage.getItem(SAVED_HOST_ROOM_STORAGE_KEY);
+    const raw = storage.getItem(LEGACY_SAVED_HOST_ROOM_STORAGE_KEY);
     if (!raw) return [];
 
-    const parsed = JSON.parse(raw) as Partial<SavedHostRoomStore>;
+    const parsed = JSON.parse(raw) as { version?: unknown; rooms?: unknown };
     if (parsed.version !== 1 || !Array.isArray(parsed.rooms)) return [];
 
+    const rooms = parsed.rooms.filter(hasValidRoomFields).map((room) => ({
+      code: room.code,
+      title: room.title,
+      role: "HOST" as const,
+      createdAt: room.createdAt,
+      lastOpenedAt: room.lastOpenedAt,
+      expiresAt: room.expiresAt,
+    }));
+    writeSavedRooms(storage, rooms);
+    storage.removeItem(LEGACY_SAVED_HOST_ROOM_STORAGE_KEY);
+    return rooms;
+  } catch {
+    return [];
+  }
+}
+
+export function readSavedRooms(storage: Storage, now = Date.now()): SavedRoom[] {
+  try {
+    const raw = storage.getItem(SAVED_ROOM_STORAGE_KEY);
+    const parsed = raw
+      ? (JSON.parse(raw) as Partial<SavedRoomStore>)
+      : ({
+          version: 2,
+          rooms: migrateLegacyHostRooms(storage),
+        } satisfies SavedRoomStore);
+    if (parsed.version !== 2 || !Array.isArray(parsed.rooms)) return [];
+
     const rooms = parsed.rooms
-      .filter(isSavedHostRoom)
+      .filter(isSavedRoom)
       .filter((room) => Date.parse(room.expiresAt) > now)
       .sort(
         (first, second) =>
           Date.parse(second.lastOpenedAt) - Date.parse(first.lastOpenedAt),
       )
-      .slice(0, SAVED_HOST_ROOM_LIMIT);
+      .slice(0, SAVED_ROOM_LIMIT);
 
     if (rooms.length !== parsed.rooms.length) {
-      writeSavedHostRooms(storage, rooms);
+      writeSavedRooms(storage, rooms);
     }
 
     return rooms;
@@ -65,16 +96,22 @@ export function readSavedHostRooms(
   }
 }
 
-export function saveHostRoom(
+export function saveRoom(
   storage: Storage,
-  state: { code: string; title: string; expiresAt: string },
+  state: {
+    code: string;
+    title: string;
+    role: SavedRoom["role"];
+    expiresAt: string;
+  },
   now = new Date(),
-): SavedHostRoom[] {
-  const rooms = readSavedHostRooms(storage, now.getTime());
+): SavedRoom[] {
+  const rooms = readSavedRooms(storage, now.getTime());
   const existing = rooms.find((room) => room.code === state.code);
-  const savedRoom: SavedHostRoom = {
+  const savedRoom: SavedRoom = {
     code: state.code,
     title: state.title.trim(),
+    role: state.role,
     createdAt: existing?.createdAt ?? now.toISOString(),
     lastOpenedAt: now.toISOString(),
     expiresAt: state.expiresAt,
@@ -82,18 +119,18 @@ export function saveHostRoom(
   const nextRooms = [
     savedRoom,
     ...rooms.filter((room) => room.code !== state.code),
-  ].slice(0, SAVED_HOST_ROOM_LIMIT);
+  ].slice(0, SAVED_ROOM_LIMIT);
 
-  writeSavedHostRooms(storage, nextRooms);
+  writeSavedRooms(storage, nextRooms);
   return nextRooms;
 }
 
-export function removeSavedHostRoom(
+export function removeSavedRoom(
   storage: Storage,
   code: string,
   now = Date.now(),
-): SavedHostRoom[] {
-  const rooms = readSavedHostRooms(storage, now).filter((room) => room.code !== code);
-  writeSavedHostRooms(storage, rooms);
+): SavedRoom[] {
+  const rooms = readSavedRooms(storage, now).filter((room) => room.code !== code);
+  writeSavedRooms(storage, rooms);
   return rooms;
 }

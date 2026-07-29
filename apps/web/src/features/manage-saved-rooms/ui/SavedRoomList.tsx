@@ -1,4 +1,4 @@
-import type { SavedHostRoom } from "@/entities/saved-room";
+import type { SavedRoom } from "@/entities/saved-room";
 import { useI18n } from "@/shared/lib/i18n";
 
 export function SavedRoomList({
@@ -8,9 +8,9 @@ export function SavedRoomList({
   onRemove,
   onCreate,
 }: {
-  rooms: SavedHostRoom[];
+  rooms: SavedRoom[];
   openingCode: string | null;
-  onOpen: (room: SavedHostRoom) => void;
+  onOpen: (room: SavedRoom) => void;
   onRemove: (code: string) => void;
   onCreate: () => void;
 }) {
@@ -39,7 +39,12 @@ export function SavedRoomList({
               <article className="saved-room-card" key={room.code}>
                 <div className="saved-room-copy">
                   <strong>{room.title}</strong>
-                  <span>{room.code}</span>
+                  <div className="saved-room-meta">
+                    <span className="saved-room-code">{room.code}</span>
+                    <span className={`saved-room-role ${room.role.toLowerCase()}`}>
+                      {t(room.role === "HOST" ? "hostRole" : "guestRole")}
+                    </span>
+                  </div>
                   <small>
                     {t("lastOpened", {
                       date: new Date(room.lastOpenedAt).toLocaleString(localeTag, {

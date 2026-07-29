@@ -8,7 +8,7 @@ import {
   type RoomNavigationState,
   type RoomState,
 } from "@/entities/room";
-import { removeSavedHostRoom } from "@/entities/saved-room";
+import { removeSavedRoom } from "@/entities/saved-room";
 import { ApiRequestError } from "@/shared/api/http";
 import { LoadingScreen } from "@/shared/ui/loading-screen";
 import { UnavailableScreen } from "@/shared/ui/unavailable-screen";
@@ -56,7 +56,7 @@ export function RoomRoute() {
           restoreError instanceof ApiRequestError &&
           [401, 403, 404].includes(restoreError.status)
         ) {
-          removeSavedHostRoom(window.localStorage, code);
+          removeSavedRoom(window.localStorage, code);
         }
         try {
           const meta = await getRoomMeta(code);
