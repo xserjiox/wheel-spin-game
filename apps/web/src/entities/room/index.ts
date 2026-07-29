@@ -7,6 +7,7 @@ export type {
   RoomMeta,
   RoomNavigationState,
   RoomParticipant,
+  RoomProposal,
   RoomState,
 } from "./model/types";
 export { Wheel } from "./ui/Wheel";

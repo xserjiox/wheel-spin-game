@@ -24,6 +24,13 @@ export const proposalReviewSchema = z.object({
   proposalId: z.string().uuid(),
   decision: z.enum(["accept", "reject"]),
 });
+export const proposalUpdateSchema = z.object({
+  proposalId: z.string().uuid(),
+  label: cleanText(80),
+});
+export const proposalRemoveSchema = z.object({
+  proposalId: z.string().uuid(),
+});
 export const participantKickSchema = z.object({
   participantId: z.string().uuid(),
 });
@@ -51,6 +58,7 @@ export type PublicRoomState = {
   }>;
   options: Array<{ id: string; label: string; position: number }>;
   proposals: Array<{ id: string; label: string; createdAt: string }>;
+  myProposals: Array<{ id: string; label: string; createdAt: string }>;
   history: Array<{
     id: string;
     winnerLabel: string;

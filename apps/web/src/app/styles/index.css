@@ -1669,6 +1669,100 @@ input::placeholder {
   margin-top: 25px;
 }
 
+.my-proposals {
+  display: grid;
+  gap: 12px;
+}
+
+.my-proposals-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.my-proposals-heading h3 {
+  margin: 2px 0 0;
+  font-family: "Unbounded", sans-serif;
+  font-size: 15px;
+  letter-spacing: -0.03em;
+}
+
+.my-proposals-empty {
+  margin: 0;
+  padding: 17px 12px;
+  background: rgba(236, 232, 223, 0.48);
+  border: 1px dashed var(--line);
+  color: var(--muted);
+  font-size: 10px;
+  text-align: center;
+}
+
+.my-proposals-list {
+  display: grid;
+  max-height: 180px;
+  gap: 7px;
+  overflow-y: auto;
+  padding: 2px 4px 3px 2px;
+}
+
+.my-proposal-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  background: white;
+  border: 1px solid var(--line);
+}
+
+.my-proposal-card p {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.my-proposal-card > div,
+.my-proposal-edit > div {
+  display: flex;
+  gap: 6px;
+}
+
+.my-proposal-card button,
+.my-proposal-edit button {
+  min-height: 31px;
+  padding: 0 8px;
+  background: transparent;
+  border: 1px solid var(--ink);
+  cursor: pointer;
+  font-size: 8px;
+  font-weight: 800;
+}
+
+.my-proposal-card .my-proposal-delete {
+  border-color: #a34333;
+  color: #8a3021;
+}
+
+.my-proposal-edit {
+  display: grid;
+  gap: 7px;
+  padding: 9px;
+  background: white;
+  border: 1px solid var(--purple);
+}
+
+.my-proposal-edit input {
+  width: 100%;
+  min-height: 38px;
+  padding: 0 10px;
+  font-size: 10px;
+}
+
+.my-proposal-edit .my-proposal-save {
+  background: var(--acid);
+}
+
 .anonymous-note {
   display: flex;
   gap: 12px;

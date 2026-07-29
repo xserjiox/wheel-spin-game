@@ -15,7 +15,9 @@ import {
   optionSchema,
   participantKickSchema,
   passwordSchema,
+  proposalRemoveSchema,
   proposalReviewSchema,
+  proposalUpdateSchema,
   roomCodeSchema,
   spinSchema,
   titleSchema,
@@ -146,6 +148,28 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return this.mutate(client, async (participant) => {
       const { proposalId, decision } = proposalReviewSchema.parse(body);
       await this.rooms.reviewProposal(participant, proposalId, decision);
+    });
+  }
+
+  @SubscribeMessage("proposal.update")
+  async updateProposal(
+    @ConnectedSocket() client: RoomSocket,
+    @MessageBody() body: unknown,
+  ) {
+    return this.mutate(client, async (participant) => {
+      const { proposalId, label } = proposalUpdateSchema.parse(body);
+      await this.rooms.updateOwnProposal(participant, proposalId, label);
+    });
+  }
+
+  @SubscribeMessage("proposal.remove")
+  async removeProposal(
+    @ConnectedSocket() client: RoomSocket,
+    @MessageBody() body: unknown,
+  ) {
+    return this.mutate(client, async (participant) => {
+      const { proposalId } = proposalRemoveSchema.parse(body);
+      await this.rooms.removeOwnProposal(participant, proposalId);
     });
   }
 

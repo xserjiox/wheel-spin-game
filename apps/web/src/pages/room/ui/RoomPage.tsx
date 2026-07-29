@@ -1,5 +1,5 @@
 import { type FormEvent, useEffect, useMemo, useState } from "react";
-import { type RoomState, useRoom, Wheel } from "@/entities/room";
+import { type Ack, type RoomState, useRoom, Wheel } from "@/entities/room";
 import { saveHostRoom } from "@/entities/saved-room";
 import { LanguageSwitcher } from "@/features/change-language";
 import { SpinControls } from "@/features/control-spin";
@@ -7,6 +7,7 @@ import {
   ParticipantsPanel,
   RemovedFromRoomScreen,
 } from "@/features/manage-participants";
+import { MyProposals } from "@/features/manage-proposals";
 import { SaveWheelTemplate } from "@/features/manage-wheel-templates";
 import { ShareRoomButton } from "@/features/share-room";
 import { useI18n } from "@/shared/lib/i18n";
@@ -213,7 +214,12 @@ export function RoomPage({
             ) : (
               <GuestProposal
                 connected={connected}
+                proposals={state.myProposals}
                 submit={(label) => command("proposal.create", { label })}
+                update={(proposalId, label) =>
+                  command("proposal.update", { proposalId, label })
+                }
+                remove={(proposalId) => command("proposal.remove", { proposalId })}
               />
             ))}
 
@@ -360,10 +366,16 @@ function HostOptions({
 
 function GuestProposal({
   connected,
+  proposals,
   submit,
+  update,
+  remove,
 }: {
   connected: boolean;
-  submit: (label: string) => Promise<unknown>;
+  proposals: RoomState["myProposals"];
+  submit: (label: string) => Promise<Ack>;
+  update: (proposalId: string, label: string) => Promise<Ack>;
+  remove: (proposalId: string) => Promise<Ack>;
 }) {
   const { t } = useI18n();
   const [label, setLabel] = useState("");
@@ -372,7 +384,7 @@ function GuestProposal({
     event.preventDefault();
     if (!label.trim()) return;
     const result = await submit(label);
-    if ((result as { ok?: boolean }).ok) {
+    if (result.ok) {
       setLabel("");
       setSent(true);
       setTimeout(() => setSent(false), 2_000);
@@ -404,6 +416,13 @@ function GuestProposal({
           </span>
         </button>
       </form>
+      <div className="panel-divider" />
+      <MyProposals
+        proposals={proposals}
+        connected={connected}
+        onUpdate={update}
+        onRemove={remove}
+      />
       <div className="anonymous-note">
         <span aria-hidden="true">✦</span>
         <p>

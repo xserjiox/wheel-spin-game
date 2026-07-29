@@ -9,6 +9,8 @@ type Command =
   | "option.add"
   | "option.remove"
   | "proposal.create"
+  | "proposal.update"
+  | "proposal.remove"
   | "proposal.review"
   | "participant.kick"
   | "spin.start"

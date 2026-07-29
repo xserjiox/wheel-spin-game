@@ -192,7 +192,12 @@ export class RoomsService {
         proposals: {
           where: { status: ProposalStatus.PENDING },
           orderBy: { createdAt: "asc" },
-          select: { id: true, label: true, createdAt: true },
+          select: {
+            id: true,
+            participantId: true,
+            label: true,
+            createdAt: true,
+          },
         },
         spins: {
           orderBy: { createdAt: "desc" },
@@ -241,10 +246,21 @@ export class RoomsService {
       })),
       proposals:
         participant.role === ParticipantRole.HOST
-          ? room.proposals.map((proposal) => ({
-              ...proposal,
-              createdAt: proposal.createdAt.toISOString(),
+          ? room.proposals.map(({ id, label, createdAt }) => ({
+              id,
+              label,
+              createdAt: createdAt.toISOString(),
             }))
+          : [],
+      myProposals:
+        participant.role === ParticipantRole.GUEST
+          ? room.proposals
+              .filter((proposal) => proposal.participantId === participant.id)
+              .map(({ id, label, createdAt }) => ({
+                id,
+                label,
+                createdAt: createdAt.toISOString(),
+              }))
           : [],
       history: room.spins
         .filter((spin) => spin.id !== room.activeSpinId)
@@ -366,6 +382,56 @@ export class RoomsService {
     ]);
   }
 
+  async updateOwnProposal(
+    participant: SessionParticipant,
+    proposalId: string,
+    label: string,
+  ): Promise<void> {
+    await this.assertAcceptingProposals(participant.roomId);
+    await this.prisma.$transaction(async (tx) => {
+      const result = await tx.proposal.updateMany({
+        where: {
+          id: proposalId,
+          roomId: participant.roomId,
+          participantId: participant.id,
+          status: ProposalStatus.PENDING,
+        },
+        data: { label },
+      });
+      if (result.count !== 1) {
+        throw new BadRequestException("PROPOSAL_NOT_PENDING");
+      }
+      await tx.room.update({
+        where: { id: participant.roomId },
+        data: { version: { increment: 1 }, ...this.activityData() },
+      });
+    });
+  }
+
+  async removeOwnProposal(
+    participant: SessionParticipant,
+    proposalId: string,
+  ): Promise<void> {
+    await this.assertAcceptingProposals(participant.roomId);
+    await this.prisma.$transaction(async (tx) => {
+      const result = await tx.proposal.deleteMany({
+        where: {
+          id: proposalId,
+          roomId: participant.roomId,
+          participantId: participant.id,
+          status: ProposalStatus.PENDING,
+        },
+      });
+      if (result.count !== 1) {
+        throw new BadRequestException("PROPOSAL_NOT_PENDING");
+      }
+      await tx.room.update({
+        where: { id: participant.roomId },
+        data: { version: { increment: 1 }, ...this.activityData() },
+      });
+    });
+  }
+
   async reviewProposal(
     participant: SessionParticipant,
     proposalId: string,
@@ -374,14 +440,25 @@ export class RoomsService {
     this.assertHost(participant);
     await this.assertEditable(participant.roomId);
     await this.prisma.$transaction(async (tx) => {
-      const proposal = await tx.proposal.findFirst({
+      const claimed = await tx.proposal.updateMany({
         where: {
           id: proposalId,
           roomId: participant.roomId,
           status: ProposalStatus.PENDING,
         },
+        data: {
+          status:
+            decision === "accept" ? ProposalStatus.ACCEPTED : ProposalStatus.REJECTED,
+          reviewedAt: new Date(),
+        },
       });
-      if (!proposal) throw new NotFoundException("Предложение уже обработано");
+      if (claimed.count !== 1) {
+        throw new NotFoundException("PROPOSAL_NOT_PENDING");
+      }
+      const proposal = await tx.proposal.findUniqueOrThrow({
+        where: { id: proposalId },
+        select: { label: true },
+      });
       if (decision === "accept") {
         const count = await tx.option.count({ where: { roomId: participant.roomId } });
         if (count >= MAX_OPTIONS)
@@ -394,14 +471,6 @@ export class RoomsService {
           },
         });
       }
-      await tx.proposal.update({
-        where: { id: proposal.id },
-        data: {
-          status:
-            decision === "accept" ? ProposalStatus.ACCEPTED : ProposalStatus.REJECTED,
-          reviewedAt: new Date(),
-        },
-      });
       await tx.room.update({
         where: { id: participant.roomId },
         data: { version: { increment: 1 }, ...this.activityData() },

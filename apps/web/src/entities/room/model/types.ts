@@ -21,6 +21,12 @@ export type RoomParticipant = {
   online: boolean;
 };
 
+export type RoomProposal = {
+  id: string;
+  label: string;
+  createdAt: string;
+};
+
 export type RoomState = {
   code: string;
   title: string;
@@ -31,7 +37,8 @@ export type RoomState = {
   participantCount: number;
   participants: RoomParticipant[];
   options: Option[];
-  proposals: Array<{ id: string; label: string; createdAt: string }>;
+  proposals: RoomProposal[];
+  myProposals: RoomProposal[];
   history: Array<{ id: string; winnerLabel: string; createdAt: string }>;
   activeSpin: ActiveSpin | null;
   hasPassword: boolean;
