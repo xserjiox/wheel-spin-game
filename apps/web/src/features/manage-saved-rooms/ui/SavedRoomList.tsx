@@ -6,11 +6,13 @@ export function SavedRoomList({
   openingCode,
   onOpen,
   onRemove,
+  onCreate,
 }: {
   rooms: SavedHostRoom[];
   openingCode: string | null;
   onOpen: (room: SavedHostRoom) => void;
   onRemove: (code: string) => void;
+  onCreate: () => void;
 }) {
   const { localeTag, t } = useI18n();
 
@@ -23,7 +25,9 @@ export function SavedRoomList({
 
       {rooms.length === 0 ? (
         <div className="saved-rooms-empty">
-          <span aria-hidden="true">↗</span>
+          <button type="button" onClick={onCreate} aria-label={t("createRoom")}>
+            <span aria-hidden="true">↗</span>
+          </button>
           <strong>{t("noSavedRooms")}</strong>
           <p>{t("noSavedRoomsHint")}</p>
         </div>

@@ -266,6 +266,10 @@ export function HomePage() {
                 openingCode={openingCode}
                 onOpen={(room) => void openSavedRoom(room)}
                 onRemove={removeHostRoom}
+                onCreate={() => {
+                  setMode("create");
+                  setError("");
+                }}
               />
               {error && (
                 <p className="form-error saved-room-error" role="alert">

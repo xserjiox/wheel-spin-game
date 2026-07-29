@@ -33,10 +33,10 @@ export function SpinControls({
 
   return (
     <>
-      <div className="duration-row">
-        <div>
-          <p className="step-label">{t("spinLabel")}</p>
-          <h2>{t("time")}</h2>
+      <section className="duration-section">
+        <div className="duration-heading">
+          <h2>{t("spinDuration")}</h2>
+          <p>{t("durationDescription")}</p>
         </div>
         <div className="duration-controls">
           <div className="time-presets">
@@ -54,8 +54,11 @@ export function SpinControls({
               </button>
             ))}
           </div>
-          <label className="custom-duration">
-            <span>{t("customTime")}</span>
+          <label className={`custom-duration ${durationIsValid ? "" : "invalid"}`}>
+            <span className="custom-duration-copy">
+              <strong>{t("customTime")}</strong>
+              <small id={durationHintId}>{t("durationRange")}</small>
+            </span>
             <span className="custom-duration-input">
               <input
                 type="number"
@@ -73,14 +76,8 @@ export function SpinControls({
               <span>{t("secondsShort")}</span>
             </span>
           </label>
-          <small
-            id={durationHintId}
-            className={`duration-hint ${durationIsValid ? "" : "error"}`}
-          >
-            {t("durationRange")}
-          </small>
         </div>
-      </div>
+      </section>
 
       {isSpinning ? (
         <button
@@ -96,14 +93,17 @@ export function SpinControls({
         </button>
       ) : (
         <button
-          className="primary-button"
+          className="primary-button spin-start-button"
           type="button"
           disabled={!connected || !hasEnoughOptions || !durationIsValid}
           onClick={onSpin}
         >
           <span>{t("startWheel")}</span>
-          <span className="button-arrow" aria-hidden="true">
-            ↗
+          <span className="spin-button-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="M19 7v5h-5" />
+              <path d="M18.2 15.7A7.5 7.5 0 1 1 19 9" />
+            </svg>
           </span>
         </button>
       )}

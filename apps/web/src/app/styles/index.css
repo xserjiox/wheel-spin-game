@@ -708,16 +708,32 @@ input::placeholder {
   text-align: center;
 }
 
-.saved-rooms-empty > span {
+.saved-rooms-empty > button {
   display: grid;
   width: 44px;
   height: 44px;
   margin-bottom: 14px;
   place-items: center;
+  padding: 0;
   background: var(--acid);
   border: 1.5px solid var(--ink);
   border-radius: 50%;
+  color: var(--ink);
+  cursor: pointer;
   font-size: 20px;
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.saved-rooms-empty > button:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.saved-rooms-empty > button:focus-visible {
+  outline: 3px solid rgba(130, 111, 242, 0.78);
+  outline-offset: 3px;
 }
 
 .saved-rooms-empty strong {
@@ -1427,11 +1443,21 @@ input::placeholder {
   background: var(--line);
 }
 
-.duration-row {
+.duration-section {
   display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 20px;
-  align-items: end;
+  gap: 16px;
+}
+
+.duration-heading {
+  display: grid;
+  gap: 6px;
+}
+
+.duration-heading p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.45;
 }
 
 .time-presets {
@@ -1442,32 +1468,75 @@ input::placeholder {
 
 .duration-controls {
   display: grid;
-  gap: 8px;
+  gap: 10px;
 }
 
 .time-chip {
-  min-height: 38px;
-  padding: 0 7px;
-  background: transparent;
+  min-height: 44px;
+  padding: 0 8px;
+  background: white;
   border: 1px solid var(--line);
   cursor: pointer;
   font-size: 10px;
   font-weight: 800;
+  transition:
+    transform 140ms ease,
+    box-shadow 140ms ease,
+    background 140ms ease;
+}
+
+.time-chip:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: var(--ink);
 }
 
 .time-chip.active {
   background: var(--acid);
   border-color: var(--ink);
+  box-shadow: 2px 2px 0 var(--ink);
 }
 
 .custom-duration {
-  display: flex;
-  gap: 10px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
   align-items: center;
-  justify-content: space-between;
+  padding: 10px 11px 10px 13px;
+  background: rgba(236, 232, 223, 0.52);
+  border: 1px solid var(--line);
   color: var(--muted);
   font-size: 10px;
+}
+
+.custom-duration:focus-within {
+  border-color: var(--purple);
+  box-shadow: 0 0 0 2px rgba(130, 111, 242, 0.24);
+}
+
+.custom-duration.invalid {
+  border-color: #a34333;
+}
+
+.custom-duration-copy {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.custom-duration-copy strong {
+  color: var(--ink);
+  font-size: 10px;
   font-weight: 800;
+}
+
+.custom-duration-copy small {
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.35;
+}
+
+.custom-duration.invalid .custom-duration-copy small {
+  color: #a34333;
 }
 
 .custom-duration-input {
@@ -1475,12 +1544,7 @@ input::placeholder {
   grid-template-columns: 58px auto;
   align-items: center;
   background: white;
-  border: 1px solid var(--line);
-}
-
-.custom-duration-input:focus-within {
-  border-color: var(--purple);
-  box-shadow: 0 0 0 2px rgba(130, 111, 242, 0.24);
+  border: 1px solid var(--ink);
 }
 
 .custom-duration-input input {
@@ -1506,16 +1570,6 @@ input::placeholder {
   color: var(--muted);
   font-size: 9px;
   font-weight: 700;
-}
-
-.duration-hint {
-  color: var(--muted);
-  font-size: 9px;
-  text-align: right;
-}
-
-.duration-hint.error {
-  color: #a34333;
 }
 
 .panel-content > .primary-button,
@@ -1552,6 +1606,37 @@ input::placeholder {
   border-radius: 50%;
   color: var(--ink);
   font-size: 12px;
+}
+
+.panel-content > .spin-start-button {
+  margin-top: 18px;
+}
+
+.spin-button-icon {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  place-items: center;
+  background: var(--acid);
+  border-radius: 50%;
+  color: var(--ink);
+}
+
+.spin-button-icon svg {
+  width: 21px;
+  height: 21px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+  transition: transform 300ms ease;
+}
+
+.spin-start-button:hover:not(:disabled) .spin-button-icon svg,
+.spin-start-button:focus-visible .spin-button-icon svg {
+  transform: rotate(180deg);
 }
 
 .guest-proposal {
@@ -2062,9 +2147,8 @@ input::placeholder {
     padding: 24px 19px 26px;
   }
 
-  .duration-row {
-    grid-template-columns: 1fr;
-    gap: 10px;
+  .duration-heading p {
+    max-width: 280px;
   }
 
   .join-stage {

@@ -37,6 +37,7 @@ describe("SpinControls", () => {
   it("accepts a custom duration within the supported range", () => {
     render(<Harness />);
 
+    expect(screen.getByRole("heading", { name: "Spin duration" })).toBeTruthy();
     const input = screen.getByRole("spinbutton", { name: "Custom time" });
     fireEvent.change(input, { target: { value: "45" } });
 
