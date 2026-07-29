@@ -60,7 +60,7 @@ button {
 button:focus-visible,
 input:focus-visible,
 select:focus-visible {
-  outline: 3px solid rgba(130, 111, 242, 0.4);
+  outline: 3px solid rgba(130, 111, 242, 0.78);
   outline-offset: 3px;
 }
 
@@ -123,13 +123,28 @@ input:disabled {
 }
 
 .language-switcher {
+  position: relative;
   display: inline-flex;
+  align-items: center;
+}
+
+.language-switcher::after {
+  position: absolute;
+  right: 12px;
+  width: 6px;
+  height: 6px;
+  transform: translateY(-2px) rotate(45deg);
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  content: "";
+  pointer-events: none;
 }
 
 .language-switcher select {
-  min-width: 58px;
+  min-width: 62px;
   height: 36px;
-  padding: 0 9px;
+  padding: 0 28px 0 12px;
+  appearance: none;
   background: var(--panel);
   border: 1px solid var(--ink);
   border-radius: 999px;
@@ -527,6 +542,9 @@ input::placeholder {
 }
 
 .room-code-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   padding: 7px 11px;
   background: var(--acid);
   border: 1px solid var(--ink);
@@ -535,6 +553,11 @@ input::placeholder {
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.07em;
+}
+
+.room-code-pill strong {
+  font-weight: 900;
+  letter-spacing: 0.04em;
 }
 
 .join-stage {
@@ -655,7 +678,11 @@ input::placeholder {
 }
 
 .share-button {
+  display: inline-flex;
   min-height: 38px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
   padding: 0 14px;
   background: var(--ink);
   border: 1px solid var(--ink);
@@ -665,9 +692,19 @@ input::placeholder {
   font-weight: 800;
 }
 
-.share-button span {
-  margin-right: 5px;
+.share-icon {
+  display: inline-flex;
   color: var(--acid);
+}
+
+.share-icon svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
 }
 
 .toast {
@@ -713,6 +750,7 @@ input::placeholder {
   display: grid;
   justify-items: center;
   min-width: 0;
+  overflow-x: clip;
 }
 
 .section-heading {
@@ -735,10 +773,16 @@ input::placeholder {
   font-size: 13px;
 }
 
-.inline-title-form input {
+.inline-title-form {
+  position: relative;
   width: min(100%, 620px);
+  margin: 0 auto;
+}
+
+.inline-title-form input {
+  width: 100%;
   min-height: auto;
-  padding: 0;
+  padding: 0 42px;
   background: transparent;
   border: 0;
   border-bottom: 2px dashed transparent;
@@ -754,6 +798,20 @@ input::placeholder {
 .inline-title-form input:focus {
   border-bottom-color: var(--line);
   outline: none;
+}
+
+.title-edit-hint {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  color: var(--muted);
+  font-size: 18px;
+  pointer-events: none;
+}
+
+.inline-title-form:focus-within .title-edit-hint {
+  color: var(--purple);
 }
 
 .wheel-stage {
@@ -1383,7 +1441,7 @@ input::placeholder {
   }
 }
 
-@media (max-width: 920px) {
+@media (max-width: 1020px) {
   :root {
     --wheel-size: min(78vw, 560px);
   }
@@ -1418,10 +1476,13 @@ input::placeholder {
 
   .room-topbar {
     grid-template-columns: 1fr auto;
+    row-gap: 8px;
   }
 
   .room-summary {
-    display: none;
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-content: center;
   }
 
   .room-workspace {
@@ -1480,9 +1541,13 @@ input::placeholder {
   }
 
   .language-switcher select {
-    min-width: 50px;
+    min-width: 58px;
     height: 32px;
-    padding: 0 6px;
+    padding: 0 25px 0 10px;
+  }
+
+  .language-switcher::after {
+    right: 10px;
   }
 
   .landing-grid {
@@ -1534,12 +1599,15 @@ input::placeholder {
   .share-button {
     min-width: 42px;
     padding: 0 10px;
-    font-size: 0;
   }
 
-  .share-button span {
-    margin: 0;
-    font-size: 18px;
+  .share-label {
+    display: none;
+  }
+
+  .share-icon svg {
+    width: 18px;
+    height: 18px;
   }
 
   .room-workspace {

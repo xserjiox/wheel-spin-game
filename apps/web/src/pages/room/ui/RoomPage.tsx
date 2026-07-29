@@ -52,8 +52,15 @@ export function RoomPage({
         <Brand onClick={onExit} />
         <div className="room-summary">
           <span className={`connection-dot ${connected ? "online" : ""}`} />
-          <span>{t("participants", { count: state.participantCount })}</span>
-          <span className="room-code-pill">{state.code}</span>
+          <span className="participant-count">
+            {t(state.participantCount === 1 ? "participant" : "participants", {
+              count: state.participantCount,
+            })}
+          </span>
+          <span className="room-code-pill">
+            <span>{t("room")}</span>
+            <strong>{state.code}</strong>
+          </span>
         </div>
         <div className="room-actions">
           <LanguageSwitcher />
@@ -99,6 +106,9 @@ export function RoomPage({
                     }
                   }}
                 />
+                <span className="title-edit-hint" aria-hidden="true">
+                  ✎
+                </span>
               </form>
             ) : (
               <h1>{state.title}</h1>

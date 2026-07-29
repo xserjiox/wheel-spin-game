@@ -1,3 +1,4 @@
+import { BadRequestException } from "@nestjs/common";
 import { describe, expect, it } from "vitest";
 import {
   createRoomSchema,
@@ -9,6 +10,7 @@ import {
 } from "../src/modules/rooms/domain/name-policy";
 import { calculateFinalRotation } from "../src/modules/rooms/domain/wheel-engine";
 import { roomCookieName } from "../src/shared/config/room.config";
+import { parseRequest } from "../src/shared/http/parse-request";
 import { SessionService } from "../src/shared/security/session.service";
 
 describe("MVP room rules", () => {
@@ -47,6 +49,13 @@ describe("MVP room rules", () => {
     expect(() =>
       spinSchema.parse({ requestId: crypto.randomUUID(), durationMs: 999 }),
     ).toThrow();
+    expect(() =>
+      parseRequest(createRoomSchema, {
+        hostName: "Маша",
+        title: "x".repeat(61),
+        password: "",
+      }),
+    ).toThrow(BadRequestException);
   });
 
   it("hashes tokens and reads only the requested room cookie", () => {

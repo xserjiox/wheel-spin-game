@@ -11,6 +11,7 @@ import {
 } from "@nestjs/common";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { roomCookieName } from "../../../../shared/config/room.config";
+import { parseRequest } from "../../../../shared/http/parse-request";
 import { RoomsService } from "../../application/rooms.service";
 import {
   createRoomSchema,
@@ -28,7 +29,7 @@ export class RoomsController {
 
   @Post()
   async create(@Body() body: unknown, @Res({ passthrough: true }) reply: FastifyReply) {
-    const input = createRoomSchema.parse(body);
+    const input = parseRequest(createRoomSchema, body);
     const result = await this.rooms.create(input);
     this.setSessionCookie(reply, result.code, result.token);
     return { code: result.code, state: result.state };
@@ -36,13 +37,13 @@ export class RoomsController {
 
   @Get(":code/meta")
   async meta(@Param("code") rawCode: string) {
-    const code = roomCodeSchema.parse(rawCode);
+    const code = parseRequest(roomCodeSchema, rawCode);
     return this.rooms.meta(code);
   }
 
   @Get(":code/state")
   async state(@Param("code") rawCode: string, @Req() request: FastifyRequest) {
-    const code = roomCodeSchema.parse(rawCode);
+    const code = parseRequest(roomCodeSchema, rawCode);
     const token = request.cookies[roomCookieName(code)] ?? null;
     const participant = await this.rooms.authenticate(code, token);
     return { state: await this.rooms.getState(code, participant) };
@@ -56,8 +57,8 @@ export class RoomsController {
     @Ip() ip: string,
     @Res({ passthrough: true }) reply: FastifyReply,
   ) {
-    const code = roomCodeSchema.parse(rawCode);
-    const input = joinRoomSchema.parse(body);
+    const code = parseRequest(roomCodeSchema, rawCode);
+    const input = parseRequest(joinRoomSchema, body);
     const limitKey = `${ip}:${code}`;
     this.limiter.assertAllowed(limitKey);
     try {

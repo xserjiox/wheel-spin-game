@@ -28,6 +28,8 @@ export function Wheel({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const handledSpin = useRef<string | null>(null);
+  const beginTimer = useRef<number | null>(null);
+  const finishTimer = useRef<number | null>(null);
   const [rotation, setRotation] = useState(0);
   const [transition, setTransition] = useState("none");
   const [winner, setWinner] = useState("");
@@ -37,16 +39,21 @@ export function Wheel({
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const draw = () => drawWheel(canvas, visibleOptions, emptyLabel);
+    const draw = (layoutWidth = canvas.clientWidth) =>
+      drawWheel(canvas, visibleOptions, emptyLabel, layoutWidth);
     draw();
-    const observer = new ResizeObserver(draw);
+    const observer = new ResizeObserver(([entry]) => {
+      draw(entry?.contentRect.width);
+    });
     observer.observe(canvas);
-    document.fonts?.ready.then(draw);
+    document.fonts?.ready.then(() => draw());
     return () => observer.disconnect();
   }, [emptyLabel, visibleOptions]);
 
   useEffect(() => {
     if (!activeSpin || handledSpin.current === activeSpin.id) return;
+    if (beginTimer.current !== null) clearTimeout(beginTimer.current);
+    if (finishTimer.current !== null) clearTimeout(finishTimer.current);
     handledSpin.current = activeSpin.id;
     setWinner("");
     const startAt = new Date(activeSpin.startedAt).getTime();
@@ -54,21 +61,26 @@ export function Wheel({
     const beginIn = Math.max(0, startAt - Date.now());
     const remaining = Math.max(0, endAt - Math.max(Date.now(), startAt));
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    let finishTimer = 0;
-    const beginTimer = window.setTimeout(() => {
+    beginTimer.current = window.setTimeout(() => {
       setTransition(
         reduced ? "none" : `transform ${remaining}ms cubic-bezier(0.12, 0.72, 0.08, 1)`,
       );
       requestAnimationFrame(() => setRotation(activeSpin.finalRotation));
-      finishTimer = window.setTimeout(() => {
+      finishTimer.current = window.setTimeout(() => {
         setWinner(activeSpin.winnerLabel);
+        finishTimer.current = null;
       }, remaining + 40);
+      beginTimer.current = null;
     }, beginIn);
-    return () => {
-      clearTimeout(beginTimer);
-      clearTimeout(finishTimer);
-    };
   }, [activeSpin?.id]);
+
+  useEffect(
+    () => () => {
+      if (beginTimer.current !== null) clearTimeout(beginTimer.current);
+      if (finishTimer.current !== null) clearTimeout(finishTimer.current);
+    },
+    [],
+  );
 
   return (
     <>
@@ -128,12 +140,15 @@ function drawWheel(
   canvas: HTMLCanvasElement,
   options: Option[],
   emptyLabel: string,
+  layoutWidth: number,
 ): void {
-  const rect = canvas.getBoundingClientRect();
-  const size = Math.max(260, Math.round(rect.width || 570));
+  const size = Math.max(260, Math.round(layoutWidth || canvas.clientWidth || 570));
   const ratio = Math.min(window.devicePixelRatio || 1, 2);
-  canvas.width = size * ratio;
-  canvas.height = size * ratio;
+  const pixelSize = Math.round(size * ratio);
+  if (canvas.width !== pixelSize || canvas.height !== pixelSize) {
+    canvas.width = pixelSize;
+    canvas.height = pixelSize;
+  }
   const context = canvas.getContext("2d");
   if (!context) return;
   context.setTransform(ratio, 0, 0, ratio, 0, 0);
@@ -169,6 +184,9 @@ function drawWheel(
     context.stroke();
 
     const angle = -Math.PI / 2 + (index + 0.5) * arc;
+    const normalizedAngle = (angle + Math.PI * 2) % (Math.PI * 2);
+    const flipLabel =
+      normalizedAngle > Math.PI / 2 && normalizedAngle < (Math.PI * 3) / 2;
     const fontSize = Math.max(8, Math.min(15, size * 0.035, arc * radius * 0.19));
     const maxLength = options.length > 12 ? 12 : 20;
     const label =
@@ -177,12 +195,12 @@ function drawWheel(
         : option.label;
     context.save();
     context.translate(center, center);
-    context.rotate(angle);
-    context.textAlign = "right";
+    context.rotate(angle + (flipLabel ? Math.PI : 0));
+    context.textAlign = flipLabel ? "left" : "right";
     context.textBaseline = "middle";
     context.fillStyle = "#1d211b";
     context.font = `800 ${fontSize}px Manrope, sans-serif`;
-    context.fillText(label, radius * 0.83, 0, radius * 0.6);
+    context.fillText(label, (flipLabel ? -1 : 1) * radius * 0.83, 0, radius * 0.6);
     context.restore();
   });
 }
