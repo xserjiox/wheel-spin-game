@@ -1579,6 +1579,13 @@ input::placeholder {
 
   .room-topbar {
     grid-template-columns: auto 1fr;
+    column-gap: 6px;
+  }
+
+  .room-topbar .brand {
+    font-size: 13px;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
   }
 
   .room-actions {
