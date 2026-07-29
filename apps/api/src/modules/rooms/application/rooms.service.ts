@@ -182,6 +182,7 @@ export class RoomsService {
   async getState(
     code: string,
     participant: SessionParticipant,
+    onlineParticipantIds: ReadonlySet<string> = new Set(),
   ): Promise<PublicRoomState> {
     await this.finalizeSpinIfNeeded(code);
     const room = await this.prisma.room.findUnique({
@@ -207,7 +208,10 @@ export class RoomsService {
             finalRotation: true,
           },
         },
-        _count: { select: { participants: true } },
+        participants: {
+          orderBy: { connectedAt: "asc" },
+          select: { id: true, displayName: true, role: true },
+        },
       },
     });
     if (!room) throw new NotFoundException("Комната не найдена");
@@ -225,7 +229,11 @@ export class RoomsService {
       version: room.version,
       role: participant.role,
       displayName: participant.displayName,
-      participantCount: room._count.participants,
+      participantCount: room.participants.length,
+      participants: room.participants.map((roomParticipant) => ({
+        ...roomParticipant,
+        online: onlineParticipantIds.has(roomParticipant.id),
+      })),
       options: room.options.map(({ id, label, position }) => ({
         id,
         label,
@@ -337,7 +345,7 @@ export class RoomsService {
     if (participant.role === ParticipantRole.HOST) {
       throw new BadRequestException("Host может добавить слот напрямую");
     }
-    await this.assertEditable(participant.roomId);
+    await this.assertAcceptingProposals(participant.roomId);
     const pending = await this.prisma.proposal.count({
       where: {
         participantId: participant.id,
@@ -399,6 +407,31 @@ export class RoomsService {
         data: { version: { increment: 1 }, ...this.activityData() },
       });
     });
+  }
+
+  async kickParticipant(
+    participant: SessionParticipant,
+    targetParticipantId: string,
+  ): Promise<void> {
+    this.assertHost(participant);
+    const target = await this.prisma.participant.findFirst({
+      where: { id: targetParticipantId, roomId: participant.roomId },
+      select: { id: true, role: true },
+    });
+    if (!target) {
+      throw new NotFoundException("PARTICIPANT_NOT_FOUND");
+    }
+    if (target.role === ParticipantRole.HOST) {
+      throw new BadRequestException("CANNOT_REMOVE_HOST");
+    }
+
+    await this.prisma.$transaction([
+      this.prisma.participant.delete({ where: { id: target.id } }),
+      this.prisma.room.update({
+        where: { id: participant.roomId },
+        data: { version: { increment: 1 }, ...this.activityData() },
+      }),
+    ]);
   }
 
   async spin(
@@ -559,6 +592,16 @@ export class RoomsService {
     });
     if (!room || room.status !== RoomStatus.LOBBY) {
       throw new BadRequestException("Дождитесь окончания вращения");
+    }
+  }
+
+  private async assertAcceptingProposals(roomId: string): Promise<void> {
+    const room = await this.prisma.room.findUnique({
+      where: { id: roomId },
+      select: { status: true },
+    });
+    if (!room || room.status === RoomStatus.CLOSED) {
+      throw new BadRequestException("Комната не найдена или уже закрыта");
     }
   }
 

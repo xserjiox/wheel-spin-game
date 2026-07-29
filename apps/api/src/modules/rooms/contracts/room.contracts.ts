@@ -24,6 +24,9 @@ export const proposalReviewSchema = z.object({
   proposalId: z.string().uuid(),
   decision: z.enum(["accept", "reject"]),
 });
+export const participantKickSchema = z.object({
+  participantId: z.string().uuid(),
+});
 export const spinSchema = z.object({
   requestId: z.string().uuid(),
   durationMs: z.number().int().min(5_000).max(120_000),
@@ -40,6 +43,12 @@ export type PublicRoomState = {
   role: "HOST" | "GUEST";
   displayName: string;
   participantCount: number;
+  participants: Array<{
+    id: string;
+    displayName: string;
+    role: "HOST" | "GUEST";
+    online: boolean;
+  }>;
   options: Array<{ id: string; label: string; position: number }>;
   proposals: Array<{ id: string; label: string; createdAt: string }>;
   history: Array<{

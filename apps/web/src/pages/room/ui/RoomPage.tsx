@@ -3,12 +3,16 @@ import { type RoomState, useRoom, Wheel } from "@/entities/room";
 import { saveHostRoom } from "@/entities/saved-room";
 import { LanguageSwitcher } from "@/features/change-language";
 import { SpinControls } from "@/features/control-spin";
+import {
+  ParticipantsPanel,
+  RemovedFromRoomScreen,
+} from "@/features/manage-participants";
 import { SaveWheelTemplate } from "@/features/manage-wheel-templates";
 import { ShareRoomButton } from "@/features/share-room";
 import { useI18n } from "@/shared/lib/i18n";
 import { Brand } from "@/shared/ui/brand";
 
-type Tab = "options" | "proposals" | "history" | "settings";
+type Tab = "options" | "proposals" | "participants" | "history" | "settings";
 
 export function RoomPage({
   code,
@@ -20,10 +24,8 @@ export function RoomPage({
   onExit: () => void;
 }) {
   const { t } = useI18n();
-  const { state, connected, error, clearError, canceledSpinId, command } = useRoom(
-    code,
-    initialState,
-  );
+  const { state, connected, error, clearError, canceledSpinId, wasKicked, command } =
+    useRoom(code, initialState);
   const [tab, setTab] = useState<Tab>("options");
   const [duration, setDuration] = useState("20");
   const [title, setTitle] = useState(state.title);
@@ -48,6 +50,10 @@ export function RoomPage({
     if (isSpinning) return t("wheelSpinning");
     return isHost ? t("ready") : t("waitingHost");
   }, [connected, isHost, isSpinning, t]);
+
+  if (wasKicked) {
+    return <RemovedFromRoomScreen onHome={onExit} />;
+  }
 
   const run = async () => {
     const durationSeconds = Number(duration);
@@ -175,6 +181,12 @@ export function RoomPage({
                 {state.proposals.length > 0 && <i>{state.proposals.length}</i>}
               </TabButton>
             )}
+            <TabButton
+              active={tab === "participants"}
+              onClick={() => setTab("participants")}
+            >
+              {t("people")}
+            </TabButton>
             <TabButton active={tab === "history"} onClick={() => setTab("history")}>
               {t("history")}
             </TabButton>
@@ -200,7 +212,7 @@ export function RoomPage({
               />
             ) : (
               <GuestProposal
-                disabled={isSpinning}
+                connected={connected}
                 submit={(label) => command("proposal.create", { label })}
               />
             ))}
@@ -212,6 +224,15 @@ export function RoomPage({
               review={(proposalId, decision) =>
                 command("proposal.review", { proposalId, decision })
               }
+            />
+          )}
+
+          {tab === "participants" && (
+            <ParticipantsPanel
+              participants={state.participants}
+              isHost={isHost}
+              connected={connected}
+              onKick={(participantId) => command("participant.kick", { participantId })}
             />
           )}
 
@@ -338,10 +359,10 @@ function HostOptions({
 }
 
 function GuestProposal({
-  disabled,
+  connected,
   submit,
 }: {
-  disabled: boolean;
+  connected: boolean;
   submit: (label: string) => Promise<unknown>;
 }) {
   const { t } = useI18n();
@@ -370,13 +391,13 @@ function GuestProposal({
             onChange={(event) => setLabel(event.target.value)}
             maxLength={80}
             placeholder={t("proposalExample")}
-            disabled={disabled}
+            disabled={!connected}
             required
           />
         </label>
-        <button className="primary-button" disabled={disabled}>
+        <button className="primary-button" disabled={!connected}>
           <span>
-            {sent ? t("sent") : disabled ? t("waitFinish") : t("proposeSlot")}
+            {sent ? t("sent") : connected ? t("proposeSlot") : t("reconnecting")}
           </span>
           <span className="button-arrow" aria-hidden="true">
             ↗

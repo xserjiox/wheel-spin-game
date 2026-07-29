@@ -3,6 +3,7 @@ import {
   ConnectedSocket,
   MessageBody,
   OnGatewayConnection,
+  OnGatewayDisconnect,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -12,6 +13,7 @@ import type { Server, Socket } from "socket.io";
 import {
   optionRemoveSchema,
   optionSchema,
+  participantKickSchema,
   passwordSchema,
   proposalReviewSchema,
   roomCodeSchema,
@@ -39,7 +41,7 @@ type RoomSocket = Socket<any, any, any, ClientData>;
   transports: ["websocket"],
   cors: { origin: false },
 })
-export class RoomsGateway implements OnGatewayConnection {
+export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   private server: Server;
 
@@ -54,6 +56,17 @@ export class RoomsGateway implements OnGatewayConnection {
     client.emit("connection.ready", { connected: true });
   }
 
+  handleDisconnect(client: RoomSocket): void {
+    const code = client.data.code;
+    if (!code) return;
+
+    setTimeout(() => {
+      void this.broadcastState(code).catch((error) => {
+        this.logger.error("Не удалось обновить статусы участников", error);
+      });
+    }, 5_000);
+  }
+
   @SubscribeMessage("room.join")
   async join(@ConnectedSocket() client: RoomSocket, @MessageBody() body: unknown) {
     return this.safe(async () => {
@@ -66,7 +79,10 @@ export class RoomsGateway implements OnGatewayConnection {
       client.data.code = code;
       client.data.participant = participant;
       await client.join(this.channel(code));
-      return { state: await this.rooms.getState(code, participant) };
+      const onlineParticipantIds = await this.getOnlineParticipantIds(code);
+      const state = await this.rooms.getState(code, participant, onlineParticipantIds);
+      await this.broadcastState(code);
+      return { state };
     });
   }
 
@@ -133,6 +149,35 @@ export class RoomsGateway implements OnGatewayConnection {
     });
   }
 
+  @SubscribeMessage("participant.kick")
+  async kickParticipant(
+    @ConnectedSocket() client: RoomSocket,
+    @MessageBody() body: unknown,
+  ) {
+    return this.safe(async () => {
+      const participant = this.requireParticipant(client);
+      const { participantId } = participantKickSchema.parse(body);
+      await this.rooms.kickParticipant(participant, participantId);
+
+      const sockets = await this.server
+        .in(this.channel(client.data.code!))
+        .fetchSockets();
+      sockets
+        .filter(
+          (socket) =>
+            (socket.data.participant as ClientData["participant"])?.id ===
+            participantId,
+        )
+        .forEach((socket) => {
+          socket.emit("participant.kicked");
+          socket.disconnect(true);
+        });
+
+      await this.broadcastState(client.data.code!);
+      return {};
+    });
+  }
+
   @SubscribeMessage("spin.start")
   async spin(@ConnectedSocket() client: RoomSocket, @MessageBody() body: unknown) {
     return this.safe(async () => {
@@ -191,13 +236,31 @@ export class RoomsGateway implements OnGatewayConnection {
 
   private async broadcastState(code: string): Promise<void> {
     const sockets = await this.server.in(this.channel(code)).fetchSockets();
+    const onlineParticipantIds = new Set(
+      sockets
+        .map((socket) => (socket.data.participant as ClientData["participant"])?.id)
+        .filter((participantId): participantId is string => Boolean(participantId)),
+    );
     await Promise.all(
       sockets.map(async (socket) => {
         const participant = socket.data.participant as ClientData["participant"];
         if (!participant) return;
-        const state = await this.rooms.getState(code, participant);
+        const state = await this.rooms.getState(
+          code,
+          participant,
+          onlineParticipantIds,
+        );
         socket.emit("room.state", state);
       }),
+    );
+  }
+
+  private async getOnlineParticipantIds(code: string): Promise<Set<string>> {
+    const sockets = await this.server.in(this.channel(code)).fetchSockets();
+    return new Set(
+      sockets
+        .map((socket) => (socket.data.participant as ClientData["participant"])?.id)
+        .filter((participantId): participantId is string => Boolean(participantId)),
     );
   }
 

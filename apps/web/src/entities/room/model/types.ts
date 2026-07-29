@@ -14,6 +14,13 @@ export type ActiveSpin = {
   finalRotation: number;
 };
 
+export type RoomParticipant = {
+  id: string;
+  displayName: string;
+  role: "HOST" | "GUEST";
+  online: boolean;
+};
+
 export type RoomState = {
   code: string;
   title: string;
@@ -22,6 +29,7 @@ export type RoomState = {
   role: "HOST" | "GUEST";
   displayName: string;
   participantCount: number;
+  participants: RoomParticipant[];
   options: Option[];
   proposals: Array<{ id: string; label: string; createdAt: string }>;
   history: Array<{ id: string; winnerLabel: string; createdAt: string }>;

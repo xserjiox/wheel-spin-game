@@ -10,6 +10,7 @@ type Command =
   | "option.remove"
   | "proposal.create"
   | "proposal.review"
+  | "participant.kick"
   | "spin.start"
   | "spin.cancel";
 
@@ -19,6 +20,7 @@ export function useRoom(code: string, initialState: RoomState) {
   const [connected, setConnected] = useState(false);
   const [error, setError] = useState("");
   const [canceledSpinId, setCanceledSpinId] = useState<string | null>(null);
+  const [wasKicked, setWasKicked] = useState(false);
   const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
@@ -44,13 +46,22 @@ export function useRoom(code: string, initialState: RoomState) {
       });
     };
     socket.on("connect", enter);
-    socket.on("disconnect", () => setConnected(false));
+    socket.on("disconnect", (reason) => {
+      setConnected(false);
+      if (reason === "io server disconnect") {
+        setWasKicked(true);
+      }
+    });
     socket.on("room.state", (nextState: RoomState) => {
       setState(nextState);
       setError("");
     });
     socket.on("spin.canceled", ({ spinId }: { spinId: string }) => {
       setCanceledSpinId(spinId);
+    });
+    socket.on("participant.kicked", () => {
+      setWasKicked(true);
+      setConnected(false);
     });
     return () => {
       socket.disconnect();
@@ -83,6 +94,7 @@ export function useRoom(code: string, initialState: RoomState) {
     error: error ? translateError(error, t) : "",
     clearError: () => setError(""),
     canceledSpinId,
+    wasKicked,
     command,
   };
 }
