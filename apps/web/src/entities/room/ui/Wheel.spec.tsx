@@ -41,6 +41,7 @@ function mockCanvas(): void {
 describe("Wheel", () => {
   beforeEach(() => {
     mockCanvas();
+    vi.stubGlobal("PointerEvent", MouseEvent);
     Object.defineProperty(window, "matchMedia", {
       configurable: true,
       value: vi.fn().mockReturnValue({
@@ -156,6 +157,43 @@ describe("Wheel", () => {
     );
 
     expect(screen.getByRole("status", { name: "RECONNECTING" })).toBeTruthy();
+  });
+
+  it("shows the complete option label when a wheel segment is hovered", () => {
+    const longLabel =
+      "A complete option name that is intentionally longer than its wheel label";
+    const { container } = render(
+      <I18nProvider>
+        <Wheel
+          options={[{ ...options[0], label: longLabel }, options[1]]}
+          activeSpin={null}
+          canSpin
+          isHost
+          connected
+          onSpin={() => {}}
+        />
+      </I18nProvider>,
+    );
+    const stage = container.querySelector(".wheel-stage");
+    const canvas = container.querySelector("canvas");
+    vi.spyOn(stage as HTMLElement, "getBoundingClientRect").mockReturnValue({
+      left: 0,
+      top: 0,
+      right: 347,
+      bottom: 347,
+      width: 347,
+      height: 347,
+      x: 0,
+      y: 0,
+      toJSON: () => ({}),
+    });
+
+    fireEvent.pointerMove(canvas as HTMLCanvasElement, {
+      clientX: 327,
+      clientY: 173.5,
+    });
+
+    expect(screen.getByRole("tooltip").textContent).toBe(longLabel);
   });
 
   it("replaces the host button with an opaque status while unavailable", () => {

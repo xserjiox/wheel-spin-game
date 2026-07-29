@@ -1,4 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import {
+  type PointerEvent as ReactPointerEvent,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useI18n } from "@/shared/lib/i18n";
 import { Confetti } from "@/shared/ui/confetti";
 import type { ActiveSpin, Option } from "../model/types";
@@ -12,6 +17,12 @@ const COLORS = [
   "#ef8eae",
   "#d7ff44",
 ];
+
+type OptionTooltip = {
+  label: string;
+  left: number;
+  top: number;
+};
 
 export function Wheel({
   options,
@@ -32,6 +43,7 @@ export function Wheel({
 }) {
   const { t } = useI18n();
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -42,6 +54,7 @@ export function Wheel({
   const [rotation, setRotation] = useState(0);
   const [transition, setTransition] = useState("none");
   const [winner, setWinner] = useState("");
+  const [optionTooltip, setOptionTooltip] = useState<OptionTooltip | null>(null);
   const visibleOptions = activeSpin?.optionsSnapshot ?? options;
   const emptyLabel = t("addOptions");
   const centerStatusLabel = !connected
@@ -65,6 +78,56 @@ export function Wheel({
     document.fonts?.ready.then(() => draw());
     return () => observer.disconnect();
   }, [emptyLabel, visibleOptions]);
+
+  const showOptionTooltip = (event: ReactPointerEvent<HTMLCanvasElement>) => {
+    const stage = stageRef.current;
+    if (!stage || !visibleOptions.length || activeSpin) {
+      setOptionTooltip(null);
+      return;
+    }
+    if (!Number.isFinite(event.clientX) || !Number.isFinite(event.clientY)) {
+      setOptionTooltip(null);
+      return;
+    }
+
+    const bounds = stage.getBoundingClientRect();
+    const centerX = bounds.left + bounds.width / 2;
+    const centerY = bounds.top + bounds.height / 2;
+    const x = event.clientX - centerX;
+    const y = event.clientY - centerY;
+    const radius = Math.min(bounds.width, bounds.height) / 2;
+    if (Math.hypot(x, y) > radius) {
+      setOptionTooltip(null);
+      return;
+    }
+
+    const renderedRotation =
+      (readRenderedRotation(wrapRef.current, rotation) * Math.PI) / 180;
+    const unrotatedAngle = Math.atan2(y, x) - renderedRotation;
+    const angleFromTop =
+      (((unrotatedAngle + Math.PI / 2) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+    const optionIndex = Math.min(
+      visibleOptions.length - 1,
+      Math.floor(angleFromTop / ((Math.PI * 2) / visibleOptions.length)),
+    );
+    const hoveredOption = visibleOptions[optionIndex];
+    if (!hoveredOption) {
+      setOptionTooltip(null);
+      return;
+    }
+    const tooltipHalfWidth = Math.min(120, bounds.width / 2 - 12);
+    const localX = event.clientX - bounds.left;
+    const localY = event.clientY - bounds.top;
+
+    setOptionTooltip({
+      label: hoveredOption.label,
+      left: Math.max(
+        tooltipHalfWidth,
+        Math.min(bounds.width - tooltipHalfWidth, localX),
+      ),
+      top: Math.max(64, Math.min(bounds.height - 12, localY - 12)),
+    });
+  };
 
   useEffect(() => {
     if (!activeSpin) return;
@@ -167,15 +230,29 @@ export function Wheel({
 
   return (
     <>
-      <div className="wheel-stage">
+      <div className="wheel-stage" ref={stageRef}>
         <div className="pointer" aria-hidden="true" />
         <div
           ref={wrapRef}
           className="wheel-wrap"
           style={{ transform: `rotate(${rotation}deg)`, transition }}
         >
-          <canvas ref={canvasRef} aria-label={t("wheelAria")} />
+          <canvas
+            ref={canvasRef}
+            aria-label={t("wheelAria")}
+            onPointerMove={showOptionTooltip}
+            onPointerLeave={() => setOptionTooltip(null)}
+          />
         </div>
+        {optionTooltip && (
+          <div
+            className="wheel-option-tooltip"
+            role="tooltip"
+            style={{ left: optionTooltip.left, top: optionTooltip.top }}
+          >
+            {optionTooltip.label}
+          </div>
+        )}
         {centerStatusLabel ? (
           <div
             className={`spin-center wheel-center-status ${activeSpin ? "spinning" : ""} ${!connected ? "reconnecting" : ""}`}
