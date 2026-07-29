@@ -1730,12 +1730,12 @@ input::placeholder {
 
 .my-proposal-card button,
 .my-proposal-edit button {
-  min-height: 31px;
-  padding: 0 8px;
+  min-height: 34px;
+  padding: 0 10px;
   background: transparent;
   border: 1px solid var(--ink);
   cursor: pointer;
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 800;
 }
 
@@ -1749,7 +1749,7 @@ input::placeholder {
   gap: 7px;
   padding: 9px;
   background: white;
-  border: 1px solid var(--purple);
+  border: 1px solid var(--line);
 }
 
 .my-proposal-edit input {
@@ -1757,6 +1757,12 @@ input::placeholder {
   min-height: 38px;
   padding: 0 10px;
   font-size: 10px;
+}
+
+.my-proposal-edit input:focus-visible {
+  border-color: var(--purple);
+  outline: none;
+  box-shadow: inset 0 0 0 1px var(--purple);
 }
 
 .my-proposal-edit .my-proposal-save {

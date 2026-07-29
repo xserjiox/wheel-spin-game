@@ -35,6 +35,7 @@ describe("MyProposals", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Edit" }));
     const input = screen.getByRole("textbox", { name: "Edit Order pizza" });
+    expect(input.getAttribute("maxlength")).toBe("80");
     fireEvent.change(input, { target: { value: "Order sushi" } });
     fireEvent.click(screen.getByRole("button", { name: "Save idea" }));
 

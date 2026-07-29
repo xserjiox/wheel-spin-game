@@ -2,6 +2,8 @@ import { BadRequestException } from "@nestjs/common";
 import { describe, expect, it } from "vitest";
 import {
   createRoomSchema,
+  optionSchema,
+  proposalUpdateSchema,
   spinSchema,
 } from "../src/modules/rooms/contracts/room.contracts";
 import {
@@ -63,6 +65,17 @@ describe("MVP room rules", () => {
         password: "",
       }),
     ).toThrow(BadRequestException);
+  });
+
+  it("limits new and edited proposals to 80 characters", () => {
+    expect(optionSchema.safeParse({ label: "x".repeat(80) }).success).toBe(true);
+    expect(optionSchema.safeParse({ label: "x".repeat(81) }).success).toBe(false);
+    expect(
+      proposalUpdateSchema.safeParse({
+        proposalId: crypto.randomUUID(),
+        label: "x".repeat(81),
+      }).success,
+    ).toBe(false);
   });
 
   it("hashes tokens and reads only the requested room cookie", () => {
