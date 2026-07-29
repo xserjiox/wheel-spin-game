@@ -27,6 +27,9 @@ export function Wheel({
   const { t } = useI18n();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
   const handledSpin = useRef<string | null>(null);
   const beginTimer = useRef<number | null>(null);
   const finishTimer = useRef<number | null>(null);
@@ -82,6 +85,60 @@ export function Wheel({
     [],
   );
 
+  useEffect(() => {
+    if (!winner) return;
+
+    const modal = modalRef.current;
+    const previousBodyOverflow = document.body.style.overflow;
+    previousFocusRef.current =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    document.body.style.overflow = "hidden";
+
+    const focusFrame = window.requestAnimationFrame(() =>
+      closeButtonRef.current?.focus(),
+    );
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setWinner("");
+        return;
+      }
+
+      if (event.key !== "Tab" || !modal) return;
+
+      const focusableElements = Array.from(
+        modal.querySelectorAll<HTMLElement>(
+          'button:not([disabled]):not([tabindex="-1"]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ),
+      );
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements.at(-1);
+      if (!firstElement || !lastElement) return;
+
+      if (event.shiftKey && document.activeElement === firstElement) {
+        event.preventDefault();
+        lastElement.focus();
+      } else if (
+        !event.shiftKey &&
+        (document.activeElement === lastElement ||
+          !modal.contains(document.activeElement))
+      ) {
+        event.preventDefault();
+        firstElement.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.cancelAnimationFrame(focusFrame);
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = previousBodyOverflow;
+      previousFocusRef.current?.focus();
+      previousFocusRef.current = null;
+    };
+  }, [winner]);
+
   return (
     <>
       <div className="wheel-stage">
@@ -105,6 +162,7 @@ export function Wheel({
       </div>
       {winner && (
         <div
+          ref={modalRef}
           className="result-modal"
           role="dialog"
           aria-modal="true"
@@ -112,12 +170,19 @@ export function Wheel({
         >
           <button
             className="modal-backdrop"
-            aria-label={t("closeResult")}
+            aria-hidden="true"
+            tabIndex={-1}
             onClick={() => setWinner("")}
           />
           <Confetti />
           <div className="result-card">
-            <button className="modal-close" type="button" onClick={() => setWinner("")}>
+            <button
+              ref={closeButtonRef}
+              className="modal-close"
+              type="button"
+              aria-label={t("closeResult")}
+              onClick={() => setWinner("")}
+            >
               ×
             </button>
             <p className="eyebrow">{t("wheelPicked")}</p>

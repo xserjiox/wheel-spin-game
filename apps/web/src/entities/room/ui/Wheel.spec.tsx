@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { act, cleanup, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { I18nProvider } from "@/shared/lib/i18n";
 import type { ActiveSpin, Option } from "../model/types";
@@ -131,5 +131,42 @@ describe("Wheel", () => {
 
     expect(screen.getByRole("dialog", { name: "Winner" })).toBeTruthy();
     expect(screen.getByText("Sushi", { exact: true })).toBeTruthy();
+  });
+
+  it("moves focus into the result dialog and closes it with Escape", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-07-29T00:00:00.000Z"));
+    const activeSpin: ActiveSpin = {
+      id: "spin-2",
+      optionsSnapshot: options,
+      winnerIndex: 0,
+      winnerLabel: "Pizza",
+      startedAt: "2026-07-29T00:00:00.000Z",
+      durationMs: 100,
+      finalRotation: 1080,
+    };
+
+    render(
+      <I18nProvider>
+        <Wheel
+          options={options}
+          activeSpin={activeSpin}
+          canSpin={false}
+          onSpin={() => {}}
+        />
+      </I18nProvider>,
+    );
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(200);
+    });
+
+    const closeButton = screen.getByRole("button", { name: "Close result" });
+    expect(document.activeElement).toBe(closeButton);
+
+    fireEvent.keyDown(document, { key: "Escape" });
+
+    expect(screen.queryByRole("dialog", { name: "Winner" })).toBeNull();
+    expect(document.body.style.overflow).toBe("");
   });
 });

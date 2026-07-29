@@ -22,8 +22,8 @@ type Particle = {
 };
 
 export function Confetti({
-  durationMs = 2_600,
-  particleCount = 110,
+  durationMs = 4_000,
+  particleCount = 130,
 }: {
   durationMs?: number;
   particleCount?: number;
