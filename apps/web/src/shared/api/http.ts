@@ -1,3 +1,13 @@
+export class ApiRequestError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
+    super(message);
+    this.name = "ApiRequestError";
+  }
+}
+
 export async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, {
     ...init,
@@ -17,7 +27,7 @@ export async function apiRequest<T>(url: string, init?: RequestInit): Promise<T>
           ? data.message[0]
           : data.message
         : undefined;
-    throw new Error(message || "REQUEST_FAILED");
+    throw new ApiRequestError(message || "REQUEST_FAILED", response.status);
   }
 
   return data as T;

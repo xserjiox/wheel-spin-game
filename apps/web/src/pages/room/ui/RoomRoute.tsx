@@ -8,6 +8,8 @@ import {
   type RoomNavigationState,
   type RoomState,
 } from "@/entities/room";
+import { removeSavedHostRoom } from "@/entities/saved-room";
+import { ApiRequestError } from "@/shared/api/http";
 import { LoadingScreen } from "@/shared/ui/loading-screen";
 import { UnavailableScreen } from "@/shared/ui/unavailable-screen";
 import { JoinRoomPage } from "./JoinRoomPage";
@@ -49,7 +51,13 @@ export function RoomRoute() {
       try {
         const restored = await restoreRoom(code);
         if (!cancelled) setView({ kind: "room", state: restored.state });
-      } catch {
+      } catch (restoreError) {
+        if (
+          restoreError instanceof ApiRequestError &&
+          [401, 403, 404].includes(restoreError.status)
+        ) {
+          removeSavedHostRoom(window.localStorage, code);
+        }
         try {
           const meta = await getRoomMeta(code);
           if (!cancelled) setView({ kind: "join", meta });

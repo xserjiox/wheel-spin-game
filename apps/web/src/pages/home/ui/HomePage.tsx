@@ -1,8 +1,11 @@
 import { type FormEvent, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createRoom, type RoomNavigationState } from "@/entities/room";
+import { createRoom, restoreRoom, type RoomNavigationState } from "@/entities/room";
+import { useSavedHostRooms, type SavedHostRoom } from "@/entities/saved-room";
 import { LanguageSwitcher } from "@/features/change-language";
+import { SavedRoomList } from "@/features/manage-saved-rooms";
 import { WheelTemplatePicker } from "@/features/manage-wheel-templates";
+import { ApiRequestError } from "@/shared/api/http";
 import { translateError, useI18n } from "@/shared/lib/i18n";
 import { roomPath } from "@/shared/lib/router";
 import { Brand } from "@/shared/ui/brand";
@@ -19,13 +22,15 @@ export function HomePage() {
   const { defaultRoomOptions, t } = useI18n();
   const localizedDefaultTitle = t("defaultTitle");
   const previousDefaultTitle = useRef(localizedDefaultTitle);
-  const [mode, setMode] = useState<"create" | "join">("create");
+  const { rooms, save: saveHostRoom, remove: removeHostRoom } = useSavedHostRooms();
+  const [mode, setMode] = useState<"create" | "join" | "rooms">("create");
   const [hostName, setHostName] = useState("");
   const [title, setTitle] = useState(localizedDefaultTitle);
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
   const [templateOptions, setTemplateOptions] = useState<string[] | null>(null);
   const [busy, setBusy] = useState(false);
+  const [openingCode, setOpeningCode] = useState<string | null>(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -47,6 +52,7 @@ export function HomePage() {
         password,
         options: templateOptions ?? defaultRoomOptions,
       } satisfies CreateInput);
+      saveHostRoom(result.state);
       navigate(roomPath(result.code), {
         state: {
           initialRoomState: result.state,
@@ -59,6 +65,43 @@ export function HomePage() {
           : t("createFailed"),
       );
       setBusy(false);
+    }
+  };
+
+  const openSavedRoom = async (room: SavedHostRoom) => {
+    setOpeningCode(room.code);
+    setError("");
+
+    try {
+      const result = await restoreRoom(room.code);
+      if (result.state.role !== "HOST") {
+        removeHostRoom(room.code);
+        setError(t("hostAccessExpired"));
+        setOpeningCode(null);
+        return;
+      }
+
+      saveHostRoom(result.state);
+      navigate(roomPath(room.code), {
+        state: {
+          initialRoomState: result.state,
+        } satisfies RoomNavigationState,
+      });
+    } catch (openError) {
+      if (
+        openError instanceof ApiRequestError &&
+        [401, 403, 404].includes(openError.status)
+      ) {
+        removeHostRoom(room.code);
+        setError(t("hostAccessExpired"));
+      } else {
+        setError(
+          openError instanceof Error
+            ? translateError(openError.message, t)
+            : t("requestFailed"),
+        );
+      }
+      setOpeningCode(null);
     }
   };
 
@@ -112,6 +155,17 @@ export function HomePage() {
               }}
             >
               {t("join")}
+            </button>
+            <button
+              className={mode === "rooms" ? "active" : ""}
+              type="button"
+              onClick={() => {
+                setMode("rooms");
+                setError("");
+              }}
+            >
+              {t("myRooms")}
+              {rooms.length > 0 && <span className="mode-count">{rooms.length}</span>}
             </button>
           </div>
 
@@ -172,7 +226,7 @@ export function HomePage() {
                 </span>
               </button>
             </form>
-          ) : (
+          ) : mode === "join" ? (
             <form
               className="entry-form join-short"
               onSubmit={(event) => {
@@ -205,6 +259,20 @@ export function HomePage() {
               </button>
               <p className="form-hint">{t("inviteHint")}</p>
             </form>
+          ) : (
+            <>
+              <SavedRoomList
+                rooms={rooms}
+                openingCode={openingCode}
+                onOpen={(room) => void openSavedRoom(room)}
+                onRemove={removeHostRoom}
+              />
+              {error && (
+                <p className="form-error saved-room-error" role="alert">
+                  {error}
+                </p>
+              )}
+            </>
           )}
         </section>
       </section>

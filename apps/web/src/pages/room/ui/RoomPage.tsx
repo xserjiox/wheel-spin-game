@@ -1,5 +1,6 @@
 import { type FormEvent, useEffect, useMemo, useState } from "react";
 import { type RoomState, useRoom, Wheel } from "@/entities/room";
+import { saveHostRoom } from "@/entities/saved-room";
 import { LanguageSwitcher } from "@/features/change-language";
 import { SpinControls } from "@/features/control-spin";
 import { SaveWheelTemplate } from "@/features/manage-wheel-templates";
@@ -31,6 +32,11 @@ export function RoomPage({
   const isSpinning = state.status === "SPINNING";
 
   useEffect(() => setTitle(state.title), [state.title]);
+  useEffect(() => {
+    if (state.role === "HOST") {
+      saveHostRoom(window.localStorage, state);
+    }
+  }, [state.code, state.expiresAt, state.role, state.title]);
   useEffect(() => {
     if (!notice) return;
     const timer = setTimeout(() => setNotice(""), 2_500);
