@@ -158,6 +158,51 @@ describe("Wheel", () => {
     expect(screen.getByRole("status", { name: "RECONNECTING" })).toBeTruthy();
   });
 
+  it("replaces the host button with an opaque status while unavailable", () => {
+    const activeSpin: ActiveSpin = {
+      id: "host-spin",
+      optionsSnapshot: options,
+      winnerIndex: 0,
+      winnerLabel: "Pizza",
+      startedAt: new Date(Date.now() + 10_000).toISOString(),
+      durationMs: 100,
+      finalRotation: 1080,
+    };
+    const view = render(
+      <I18nProvider>
+        <Wheel
+          options={options}
+          activeSpin={activeSpin}
+          canSpin={false}
+          isHost
+          connected
+          onSpin={() => {}}
+        />
+      </I18nProvider>,
+    );
+
+    expect(screen.getByRole("status", { name: "SPINNING" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Start spin" })).toBeNull();
+
+    view.rerender(
+      <I18nProvider>
+        <Wheel
+          options={options}
+          activeSpin={null}
+          canSpin={false}
+          isHost
+          connected
+          onSpin={() => {}}
+        />
+      </I18nProvider>,
+    );
+
+    expect(
+      (screen.getByRole("button", { name: "Start spin" }) as HTMLButtonElement)
+        .disabled,
+    ).toBe(true);
+  });
+
   it("shows the result after the server clears the active spin", async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-07-29T00:00:00.000Z"));
