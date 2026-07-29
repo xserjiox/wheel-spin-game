@@ -1,5 +1,6 @@
 import {
   type PointerEvent as ReactPointerEvent,
+  useCallback,
   useEffect,
   useRef,
   useState,
@@ -49,8 +50,12 @@ export function Wheel({
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
   const handledSpin = useRef<string | null>(null);
+  const revealedSpin = useRef<string | null>(null);
+  const currentSpin = useRef<ActiveSpin | null>(null);
   const beginTimer = useRef<number | null>(null);
   const finishTimer = useRef<number | null>(null);
+  const animationFrame = useRef<number | null>(null);
+  const syncCurrentSpin = useRef<() => void>(() => {});
   const [rotation, setRotation] = useState(0);
   const [transition, setTransition] = useState("none");
   const [winner, setWinner] = useState("");
@@ -58,7 +63,7 @@ export function Wheel({
   const visibleOptions = activeSpin?.optionsSnapshot ?? options;
   const emptyLabel = t("addOptions");
   const centerStatusLabel = !connected
-    ? t("reconnectingCenter")
+    ? t("loadingCenter")
     : activeSpin
       ? t("spinningCenter")
       : isHost
@@ -129,50 +134,115 @@ export function Wheel({
     });
   };
 
-  useEffect(() => {
-    if (!activeSpin) return;
-    if (handledSpin.current === activeSpin.id) return;
+  const clearSpinSchedule = useCallback(() => {
     if (beginTimer.current !== null) clearTimeout(beginTimer.current);
     if (finishTimer.current !== null) clearTimeout(finishTimer.current);
-    handledSpin.current = activeSpin.id;
-    setWinner("");
-    const startAt = new Date(activeSpin.startedAt).getTime();
-    const endAt = startAt + activeSpin.durationMs;
-    const beginIn = Math.max(0, startAt - Date.now());
-    const remaining = Math.max(0, endAt - Math.max(Date.now(), startAt));
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    beginTimer.current = window.setTimeout(() => {
+    if (animationFrame.current !== null) {
+      cancelAnimationFrame(animationFrame.current);
+    }
+    beginTimer.current = null;
+    finishTimer.current = null;
+    animationFrame.current = null;
+  }, []);
+
+  const revealSpinResult = useCallback(
+    (spin: ActiveSpin) => {
+      clearSpinSchedule();
+      setTransition("none");
+      setRotation(spin.finalRotation);
+      if (revealedSpin.current === spin.id) return;
+      revealedSpin.current = spin.id;
+      setWinner(spin.winnerLabel);
+    },
+    [clearSpinSchedule],
+  );
+
+  const synchronizeSpin = useCallback(
+    (spin: ActiveSpin) => {
+      clearSpinSchedule();
+      const startAt = new Date(spin.startedAt).getTime();
+      const endAt = startAt + spin.durationMs;
+      const now = Date.now();
+
+      if (now < startAt) {
+        beginTimer.current = window.setTimeout(
+          () => syncCurrentSpin.current(),
+          startAt - now,
+        );
+        return;
+      }
+
+      const remaining = endAt - now;
+      if (remaining <= 0) {
+        revealSpinResult(spin);
+        return;
+      }
+
+      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       setTransition(
         reduced ? "none" : `transform ${remaining}ms cubic-bezier(0.12, 0.72, 0.08, 1)`,
       );
-      requestAnimationFrame(() => setRotation(activeSpin.finalRotation));
-      finishTimer.current = window.setTimeout(() => {
-        setWinner(activeSpin.winnerLabel);
-        finishTimer.current = null;
-      }, remaining + 40);
-      beginTimer.current = null;
-    }, beginIn);
-  }, [activeSpin?.id]);
+      animationFrame.current = window.requestAnimationFrame(() => {
+        animationFrame.current = null;
+        const latestSpin = currentSpin.current;
+        if (!latestSpin || latestSpin.id !== spin.id) return;
+
+        const frameRemaining = endAt - Date.now();
+        if (frameRemaining <= 0) {
+          revealSpinResult(latestSpin);
+          return;
+        }
+
+        setTransition(
+          reduced
+            ? "none"
+            : `transform ${frameRemaining}ms cubic-bezier(0.12, 0.72, 0.08, 1)`,
+        );
+        setRotation(latestSpin.finalRotation);
+        finishTimer.current = window.setTimeout(() => {
+          const finishedSpin = currentSpin.current;
+          if (finishedSpin?.id === spin.id) revealSpinResult(finishedSpin);
+        }, frameRemaining + 40);
+      });
+    },
+    [clearSpinSchedule, revealSpinResult],
+  );
+
+  syncCurrentSpin.current = () => {
+    const spin = currentSpin.current;
+    if (spin) synchronizeSpin(spin);
+  };
+
+  useEffect(() => {
+    if (!activeSpin) return;
+    if (handledSpin.current === activeSpin.id) return;
+    clearSpinSchedule();
+    currentSpin.current = activeSpin;
+    handledSpin.current = activeSpin.id;
+    setWinner("");
+    synchronizeSpin(activeSpin);
+  }, [activeSpin, clearSpinSchedule, synchronizeSpin]);
 
   useEffect(() => {
     if (!canceledSpinId || handledSpin.current !== canceledSpinId) return;
-    if (beginTimer.current !== null) clearTimeout(beginTimer.current);
-    if (finishTimer.current !== null) clearTimeout(finishTimer.current);
-    beginTimer.current = null;
-    finishTimer.current = null;
+    clearSpinSchedule();
+    currentSpin.current = null;
     handledSpin.current = null;
     setWinner("");
     setRotation((current) => readRenderedRotation(wrapRef.current, current));
     setTransition("none");
-  }, [canceledSpinId]);
+  }, [canceledSpinId, clearSpinSchedule]);
 
-  useEffect(
-    () => () => {
-      if (beginTimer.current !== null) clearTimeout(beginTimer.current);
-      if (finishTimer.current !== null) clearTimeout(finishTimer.current);
-    },
-    [],
-  );
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") syncCurrentSpin.current();
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      clearSpinSchedule();
+    };
+  }, [clearSpinSchedule]);
 
   useEffect(() => {
     if (!winner) return;

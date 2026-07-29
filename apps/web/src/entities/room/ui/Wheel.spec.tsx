@@ -156,7 +156,7 @@ describe("Wheel", () => {
       </I18nProvider>,
     );
 
-    expect(screen.getByRole("status", { name: "RECONNECTING" })).toBeTruthy();
+    expect(screen.getByRole("status", { name: "LOADING" })).toBeTruthy();
   });
 
   it("shows the complete option label when a wheel segment is hovered", () => {
@@ -287,6 +287,96 @@ describe("Wheel", () => {
 
     expect(screen.getByRole("dialog", { name: "Winner" })).toBeTruthy();
     expect(screen.getByText("Sushi", { exact: true })).toBeTruthy();
+  });
+
+  it("skips a stale animation when a hidden tab returns after the spin", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-07-29T00:00:00.000Z"));
+    let delayedFrame: FrameRequestCallback | null = null;
+    vi.spyOn(window, "requestAnimationFrame").mockImplementation((callback) => {
+      delayedFrame = callback;
+      return 17;
+    });
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      value: "hidden",
+    });
+
+    const { container } = render(
+      <I18nProvider>
+        <Wheel
+          options={options}
+          activeSpin={{
+            id: "background-spin",
+            optionsSnapshot: options,
+            winnerIndex: 1,
+            winnerLabel: "Sushi",
+            startedAt: "2026-07-29T00:00:00.000Z",
+            durationMs: 1_000,
+            finalRotation: 1440,
+          }}
+          canSpin={false}
+          isHost={false}
+          connected
+          onSpin={() => {}}
+        />
+      </I18nProvider>,
+    );
+
+    expect(delayedFrame).not.toBeNull();
+    await act(async () => {
+      vi.setSystemTime(new Date("2026-07-29T00:00:02.000Z"));
+      Object.defineProperty(document, "visibilityState", {
+        configurable: true,
+        value: "visible",
+      });
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+
+    const wheel = container.querySelector(".wheel-wrap") as HTMLElement;
+    expect(wheel.style.transition).toBe("none");
+    expect(wheel.style.transform).toBe("rotate(1440deg)");
+    expect(screen.getByRole("dialog", { name: "Winner" })).toBeTruthy();
+    expect(screen.getByText("Sushi", { exact: true })).toBeTruthy();
+  });
+
+  it("does not replay a completed spin after its result was dismissed", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-07-29T00:00:02.000Z"));
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      value: "visible",
+    });
+
+    render(
+      <I18nProvider>
+        <Wheel
+          options={options}
+          activeSpin={{
+            id: "already-finished-spin",
+            optionsSnapshot: options,
+            winnerIndex: 0,
+            winnerLabel: "Pizza",
+            startedAt: "2026-07-29T00:00:00.000Z",
+            durationMs: 1_000,
+            finalRotation: 1080,
+          }}
+          canSpin={false}
+          isHost={false}
+          connected
+          onSpin={() => {}}
+        />
+      </I18nProvider>,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Close result" }));
+    expect(screen.queryByRole("dialog", { name: "Winner" })).toBeNull();
+
+    await act(async () => {
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+
+    expect(screen.queryByRole("dialog", { name: "Winner" })).toBeNull();
   });
 
   it("moves focus into the result dialog and closes it with Escape", async () => {

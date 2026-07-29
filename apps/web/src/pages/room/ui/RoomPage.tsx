@@ -12,6 +12,7 @@ import { SaveWheelTemplate } from "@/features/manage-wheel-templates";
 import { ShareRoomButton } from "@/features/share-room";
 import { useI18n } from "@/shared/lib/i18n";
 import { Brand } from "@/shared/ui/brand";
+import { EditableRoomTitle } from "./EditableRoomTitle";
 
 type Tab = "options" | "proposals" | "participants" | "history" | "settings";
 
@@ -29,12 +30,10 @@ export function RoomPage({
     useRoom(code, initialState);
   const [tab, setTab] = useState<Tab>("options");
   const [duration, setDuration] = useState("20");
-  const [title, setTitle] = useState(state.title);
   const [notice, setNotice] = useState("");
   const isHost = state.role === "HOST";
   const isSpinning = state.status === "SPINNING";
 
-  useEffect(() => setTitle(state.title), [state.title]);
   useEffect(() => {
     if (state.role === "HOST") {
       saveHostRoom(window.localStorage, state);
@@ -117,28 +116,12 @@ export function RoomPage({
           <div className="section-heading room-heading">
             <p className="eyebrow">{isHost ? t("hostControls") : t("sharedWheel")}</p>
             {isHost ? (
-              <form
-                className="inline-title-form"
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  void command("room.updateTitle", { title });
-                }}
-              >
-                <input
-                  aria-label={t("titleLabel")}
-                  value={title}
-                  maxLength={60}
-                  onChange={(event) => setTitle(event.target.value)}
-                  onBlur={() => {
-                    if (title.trim() && title !== state.title) {
-                      void command("room.updateTitle", { title });
-                    }
-                  }}
-                />
-                <span className="title-edit-hint" aria-hidden="true">
-                  ✎
-                </span>
-              </form>
+              <EditableRoomTitle
+                value={state.title}
+                label={t("titleLabel")}
+                editLabel={t("editTitle")}
+                onSave={(title) => command("room.updateTitle", { title })}
+              />
             ) : (
               <h1>{state.title}</h1>
             )}

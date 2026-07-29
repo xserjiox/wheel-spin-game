@@ -1069,12 +1069,66 @@ input::placeholder {
   text-align: center;
 }
 
+.room-heading {
+  width: min(100%, 700px);
+}
+
 .section-heading h1 {
   margin: 0;
   font-family: "Unbounded", sans-serif;
   font-size: clamp(32px, 4vw, 52px);
   line-height: 1.12;
   letter-spacing: -0.045em;
+}
+
+.room-heading > h1 {
+  width: min(100%, 620px);
+  margin-inline: auto;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+.editable-room-title {
+  position: relative;
+  width: min(calc(100% - 48px), 620px);
+  margin: 0 auto;
+}
+
+.editable-room-title h1 {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+.title-edit-button {
+  position: absolute;
+  top: clamp(2px, 0.8vw, 8px);
+  left: calc(100% + 8px);
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.title-edit-button:hover {
+  color: var(--ink);
+  border-color: var(--line);
+}
+
+.title-edit-button:focus-visible {
+  color: var(--ink);
+  background: var(--lime);
+  border-color: var(--ink);
+  outline: 2px solid var(--purple);
+  outline-offset: 2px;
 }
 
 .section-heading > p:last-child {
@@ -1085,14 +1139,18 @@ input::placeholder {
 
 .inline-title-form {
   position: relative;
-  width: min(100%, 620px);
+  width: min(calc(100% - 48px), 620px);
   margin: 0 auto;
 }
 
-.inline-title-form input {
+.inline-title-form textarea {
+  display: block;
+  box-sizing: content-box;
   width: 100%;
-  min-height: auto;
-  padding: 0 42px;
+  min-height: 1.15em;
+  padding: 0;
+  overflow: hidden;
+  resize: none;
   background: transparent;
   border: 0;
   border-bottom: 2px dashed transparent;
@@ -1102,26 +1160,13 @@ input::placeholder {
   line-height: 1.15;
   letter-spacing: -0.045em;
   text-align: center;
+  overflow-wrap: anywhere;
 }
 
-.inline-title-form input:hover,
-.inline-title-form input:focus {
+.inline-title-form textarea:hover,
+.inline-title-form textarea:focus {
   border-bottom-color: var(--line);
   outline: none;
-}
-
-.title-edit-hint {
-  position: absolute;
-  top: 50%;
-  right: 12px;
-  transform: translateY(-50%);
-  color: var(--muted);
-  font-size: 18px;
-  pointer-events: none;
-}
-
-.inline-title-form:focus-within .title-edit-hint {
-  color: var(--purple);
 }
 
 .wheel-stage {
@@ -1250,6 +1295,7 @@ input::placeholder {
   font-size: 8px;
   line-height: 1.25;
   text-align: center;
+  white-space: nowrap;
 }
 
 .wheel-center-status.spinning .wheel-center-icon {
@@ -2485,7 +2531,7 @@ input::placeholder {
   }
 
   .section-heading h1,
-  .inline-title-form input {
+  .inline-title-form textarea {
     font-size: 31px;
   }
 
