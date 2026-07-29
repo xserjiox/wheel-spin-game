@@ -1,0 +1,2 @@
+ALTER TABLE "Participant"
+ADD COLUMN "canSpin" BOOLEAN NOT NULL DEFAULT false;

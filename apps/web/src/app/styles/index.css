@@ -2078,6 +2078,10 @@ input::placeholder {
   letter-spacing: 0.06em;
 }
 
+.participant-role.spinner {
+  background: rgba(130, 111, 242, 0.16);
+}
+
 .participant-presence {
   display: inline-flex;
   gap: 6px;
@@ -2101,6 +2105,34 @@ input::placeholder {
 .participant-presence.online i {
   background: #68c95e;
   box-shadow: 0 0 0 3px rgba(104, 201, 94, 0.15);
+}
+
+.participant-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.participant-spin-permission {
+  min-height: 34px;
+  padding: 0 9px;
+  background: rgba(130, 111, 242, 0.1);
+  border: 1px solid var(--ink);
+  color: var(--ink);
+  cursor: pointer;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.participant-spin-permission:hover:not(:disabled),
+.participant-spin-permission.active {
+  background: rgba(130, 111, 242, 0.22);
+}
+
+.participant-spin-permission:disabled,
+.participant-remove:disabled {
+  cursor: wait;
+  opacity: 0.55;
 }
 
 .participant-remove {
@@ -2600,7 +2632,7 @@ input::placeholder {
   }
 
   .participant-card {
-    grid-template-columns: 36px minmax(0, 1fr) auto;
+    grid-template-columns: 36px minmax(0, 1fr);
     gap: 8px;
     padding: 8px;
   }
@@ -2610,8 +2642,18 @@ input::placeholder {
     height: 36px;
   }
 
+  .participant-actions {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .participant-spin-permission {
+    flex: 1;
+    min-height: 44px;
+  }
+
   .participant-remove {
-    min-width: 44px;
+    min-width: 82px;
     min-height: 44px;
     padding: 0 7px;
   }

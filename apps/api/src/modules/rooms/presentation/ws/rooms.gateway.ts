@@ -14,6 +14,7 @@ import {
   optionRemoveSchema,
   optionSchema,
   participantKickSchema,
+  participantSpinPermissionSchema,
   passwordSchema,
   proposalRemoveSchema,
   proposalReviewSchema,
@@ -199,6 +200,17 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       await this.broadcastState(client.data.code!);
       return {};
+    });
+  }
+
+  @SubscribeMessage("participant.spinPermission")
+  async setSpinPermission(
+    @ConnectedSocket() client: RoomSocket,
+    @MessageBody() body: unknown,
+  ) {
+    return this.mutate(client, async (participant) => {
+      const { participantId, canSpin } = participantSpinPermissionSchema.parse(body);
+      await this.rooms.setSpinPermission(participant, participantId, canSpin);
     });
   }
 

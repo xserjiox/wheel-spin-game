@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   createRoomSchema,
   optionSchema,
+  participantSpinPermissionSchema,
   proposalUpdateSchema,
   spinSchema,
 } from "../src/modules/rooms/contracts/room.contracts";
@@ -74,6 +75,23 @@ describe("MVP room rules", () => {
       proposalUpdateSchema.safeParse({
         proposalId: crypto.randomUUID(),
         label: "x".repeat(81),
+      }).success,
+    ).toBe(false);
+  });
+
+  it("validates spin permission updates", () => {
+    const participantId = crypto.randomUUID();
+
+    expect(
+      participantSpinPermissionSchema.parse({
+        participantId,
+        canSpin: true,
+      }),
+    ).toEqual({ participantId, canSpin: true });
+    expect(
+      participantSpinPermissionSchema.safeParse({
+        participantId,
+        canSpin: "yes",
       }).success,
     ).toBe(false);
   });

@@ -18,6 +18,7 @@ export type RoomParticipant = {
   id: string;
   displayName: string;
   role: "HOST" | "GUEST";
+  canSpin: boolean;
   online: boolean;
 };
 
@@ -33,6 +34,7 @@ export type RoomState = {
   status: "LOBBY" | "SPINNING" | "CLOSED";
   version: number;
   role: "HOST" | "GUEST";
+  canSpin: boolean;
   displayName: string;
   participantCount: number;
   participants: RoomParticipant[];

@@ -51,6 +51,7 @@ model Participant {
   displayName  String
   normalizedName String
   role         ParticipantRole
+  canSpin      Boolean         @default(false)
   sessionHash  String          @unique
   connectedAt  DateTime        @default(now())
   lastSeenAt   DateTime        @default(now())

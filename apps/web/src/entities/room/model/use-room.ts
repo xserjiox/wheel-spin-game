@@ -13,6 +13,7 @@ type Command =
   | "proposal.remove"
   | "proposal.review"
   | "participant.kick"
+  | "participant.spinPermission"
   | "spin.start"
   | "spin.cancel";
 

@@ -117,7 +117,7 @@ describe("Wheel", () => {
       </I18nProvider>,
     );
 
-    expect(screen.getByRole("status", { name: "HOST SPINS" })).toBeTruthy();
+    expect(screen.getByRole("status", { name: "LEADER SPINS" })).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Start spin" })).toBeNull();
 
     view.rerender(
@@ -157,6 +157,28 @@ describe("Wheel", () => {
     );
 
     expect(screen.getByRole("status", { name: "LOADING" })).toBeTruthy();
+  });
+
+  it("lets an authorized guest start the wheel", () => {
+    const onSpin = vi.fn();
+
+    render(
+      <I18nProvider>
+        <Wheel
+          options={options}
+          activeSpin={null}
+          canSpin
+          canControlSpin
+          isHost={false}
+          connected
+          onSpin={onSpin}
+        />
+      </I18nProvider>,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Start spin" }));
+
+    expect(onSpin).toHaveBeenCalledOnce();
   });
 
   it("shows the complete option label when a wheel segment is hovered", () => {

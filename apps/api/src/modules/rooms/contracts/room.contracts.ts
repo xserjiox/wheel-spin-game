@@ -34,6 +34,10 @@ export const proposalRemoveSchema = z.object({
 export const participantKickSchema = z.object({
   participantId: z.string().uuid(),
 });
+export const participantSpinPermissionSchema = z.object({
+  participantId: z.string().uuid(),
+  canSpin: z.boolean(),
+});
 export const spinSchema = z.object({
   requestId: z.string().uuid(),
   durationMs: z.number().int().min(5_000).max(120_000),
@@ -48,12 +52,14 @@ export type PublicRoomState = {
   status: "LOBBY" | "SPINNING" | "CLOSED";
   version: number;
   role: "HOST" | "GUEST";
+  canSpin: boolean;
   displayName: string;
   participantCount: number;
   participants: Array<{
     id: string;
     displayName: string;
     role: "HOST" | "GUEST";
+    canSpin: boolean;
     online: boolean;
   }>;
   options: Array<{ id: string; label: string; position: number }>;

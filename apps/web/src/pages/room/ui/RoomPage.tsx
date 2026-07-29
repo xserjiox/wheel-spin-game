@@ -46,8 +46,8 @@ export function RoomPage({
   const statusText = useMemo(() => {
     if (!connected) return t("reconnecting");
     if (isSpinning) return t("wheelSpinning");
-    return isHost ? t("ready") : t("waitingHost");
-  }, [connected, isHost, isSpinning, t]);
+    return state.canSpin ? t("ready") : t("waitingHost");
+  }, [connected, isSpinning, state.canSpin, t]);
 
   if (wasKicked) {
     return <RemovedFromRoomScreen onHome={onExit} />;
@@ -92,7 +92,9 @@ export function RoomPage({
           <LanguageSwitcher />
           <span className="identity-pill">
             {state.displayName}
-            {isHost && <b>HOST</b>}
+            {(isHost || state.canSpin) && (
+              <b>{isHost ? t("hostBadge") : t("spinnerBadge")}</b>
+            )}
           </span>
           <ShareRoomButton
             code={state.code}
@@ -130,7 +132,10 @@ export function RoomPage({
             options={state.options}
             activeSpin={state.activeSpin}
             canceledSpinId={canceledSpinId}
-            canSpin={isHost && connected && !isSpinning && state.options.length >= 2}
+            canSpin={
+              state.canSpin && connected && !isSpinning && state.options.length >= 2
+            }
+            canControlSpin={state.canSpin}
             isHost={isHost}
             connected={connected}
             onSpin={run}
@@ -222,6 +227,12 @@ export function RoomPage({
               isHost={isHost}
               connected={connected}
               onKick={(participantId) => command("participant.kick", { participantId })}
+              onSetSpinPermission={(participantId, canSpin) =>
+                command("participant.spinPermission", {
+                  participantId,
+                  canSpin,
+                })
+              }
             />
           )}
 

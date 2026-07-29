@@ -31,6 +31,7 @@ export function Wheel({
   canceledSpinId,
   canSpin,
   isHost,
+  canControlSpin = isHost,
   connected,
   onSpin,
 }: {
@@ -38,6 +39,7 @@ export function Wheel({
   activeSpin: ActiveSpin | null;
   canceledSpinId?: string | null;
   canSpin: boolean;
+  canControlSpin?: boolean;
   isHost: boolean;
   connected: boolean;
   onSpin: () => void;
@@ -66,7 +68,7 @@ export function Wheel({
     ? t("loadingCenter")
     : activeSpin
       ? t("spinningCenter")
-      : isHost
+      : canControlSpin
         ? null
         : t("hostSpins");
 

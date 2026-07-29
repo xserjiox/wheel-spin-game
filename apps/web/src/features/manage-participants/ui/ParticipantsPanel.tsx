@@ -7,15 +7,18 @@ export function ParticipantsPanel({
   isHost,
   connected,
   onKick,
+  onSetSpinPermission,
 }: {
   participants: RoomParticipant[];
   isHost: boolean;
   connected: boolean;
   onKick: (participantId: string) => Promise<unknown>;
+  onSetSpinPermission: (participantId: string, canSpin: boolean) => Promise<unknown>;
 }) {
   const { t } = useI18n();
   const [target, setTarget] = useState<RoomParticipant | null>(null);
   const [removing, setRemoving] = useState(false);
+  const [updatingPermissionId, setUpdatingPermissionId] = useState<string | null>(null);
   const onlineCount = participants.filter((participant) => participant.online).length;
 
   const removeParticipant = async () => {
@@ -25,6 +28,15 @@ export function ParticipantsPanel({
     setRemoving(false);
     setTarget(null);
     if (!result.ok) return;
+  };
+
+  const updateSpinPermission = async (participant: RoomParticipant) => {
+    setUpdatingPermissionId(participant.id);
+    try {
+      await onSetSpinPermission(participant.id, !participant.canSpin);
+    } finally {
+      setUpdatingPermissionId(null);
+    }
   };
 
   return (
@@ -55,6 +67,9 @@ export function ParticipantsPanel({
                   {participant.role === "HOST" && (
                     <b className="participant-role">{t("hostBadge")}</b>
                   )}
+                  {participant.role === "GUEST" && participant.canSpin && (
+                    <b className="participant-role spinner">{t("spinnerBadge")}</b>
+                  )}
                 </span>
                 <span
                   className={`participant-presence ${
@@ -66,17 +81,33 @@ export function ParticipantsPanel({
                 </span>
               </span>
               {isHost && participant.role === "GUEST" && (
-                <button
-                  className="participant-remove"
-                  type="button"
-                  disabled={!connected}
-                  onClick={() => setTarget(participant)}
-                  aria-label={t("removeParticipantNamed", {
-                    name: participant.displayName,
-                  })}
-                >
-                  {t("removeParticipant")}
-                </button>
+                <span className="participant-actions">
+                  <button
+                    className={`participant-spin-permission ${
+                      participant.canSpin ? "active" : ""
+                    }`}
+                    type="button"
+                    disabled={!connected || updatingPermissionId !== null}
+                    onClick={() => void updateSpinPermission(participant)}
+                    aria-label={t(
+                      participant.canSpin ? "revokeSpinNamed" : "grantSpinNamed",
+                      { name: participant.displayName },
+                    )}
+                  >
+                    {t(participant.canSpin ? "revokeSpin" : "grantSpin")}
+                  </button>
+                  <button
+                    className="participant-remove"
+                    type="button"
+                    disabled={!connected || updatingPermissionId !== null}
+                    onClick={() => setTarget(participant)}
+                    aria-label={t("removeParticipantNamed", {
+                      name: participant.displayName,
+                    })}
+                  >
+                    {t("removeParticipant")}
+                  </button>
+                </span>
               )}
             </article>
           ))}

@@ -215,11 +215,14 @@ export class RoomsService {
         },
         participants: {
           orderBy: { connectedAt: "asc" },
-          select: { id: true, displayName: true, role: true },
+          select: { id: true, displayName: true, role: true, canSpin: true },
         },
       },
     });
     if (!room) throw new NotFoundException("Комната не найдена");
+    const currentParticipant = room.participants.find(
+      (roomParticipant) => roomParticipant.id === participant.id,
+    );
 
     const activeRecord =
       room.status === RoomStatus.SPINNING && room.activeSpinId
@@ -233,10 +236,15 @@ export class RoomsService {
       status: room.status,
       version: room.version,
       role: participant.role,
+      canSpin:
+        participant.role === ParticipantRole.HOST ||
+        Boolean(currentParticipant?.canSpin),
       displayName: participant.displayName,
       participantCount: room.participants.length,
       participants: room.participants.map((roomParticipant) => ({
         ...roomParticipant,
+        canSpin:
+          roomParticipant.role === ParticipantRole.HOST || roomParticipant.canSpin,
         online: onlineParticipantIds.has(roomParticipant.id),
       })),
       options: room.options.map(({ id, label, position }) => ({
@@ -503,12 +511,41 @@ export class RoomsService {
     ]);
   }
 
+  async setSpinPermission(
+    participant: SessionParticipant,
+    targetParticipantId: string,
+    canSpin: boolean,
+  ): Promise<void> {
+    this.assertHost(participant);
+    const target = await this.prisma.participant.findFirst({
+      where: { id: targetParticipantId, roomId: participant.roomId },
+      select: { id: true, role: true },
+    });
+    if (!target) {
+      throw new NotFoundException("PARTICIPANT_NOT_FOUND");
+    }
+    if (target.role === ParticipantRole.HOST) {
+      throw new BadRequestException("CANNOT_CHANGE_HOST_SPIN_PERMISSION");
+    }
+
+    await this.prisma.$transaction([
+      this.prisma.participant.update({
+        where: { id: target.id },
+        data: { canSpin },
+      }),
+      this.prisma.room.update({
+        where: { id: participant.roomId },
+        data: { version: { increment: 1 }, ...this.activityData() },
+      }),
+    ]);
+  }
+
   async spin(
     participant: SessionParticipant,
     requestId: string,
     durationMs: number,
   ): Promise<PublicRoomState["activeSpin"]> {
-    this.assertHost(participant);
+    await this.assertCanSpin(participant);
     const existing = await this.prisma.spin.findUnique({
       where: { roomId_requestId: { roomId: participant.roomId, requestId } },
     });
@@ -651,6 +688,17 @@ export class RoomsService {
   private assertHost(participant: SessionParticipant): void {
     if (participant.role !== ParticipantRole.HOST) {
       throw new ForbiddenException("Это действие доступно только host");
+    }
+  }
+
+  private async assertCanSpin(participant: SessionParticipant): Promise<void> {
+    if (participant.role === ParticipantRole.HOST) return;
+    const currentParticipant = await this.prisma.participant.findFirst({
+      where: { id: participant.id, roomId: participant.roomId },
+      select: { canSpin: true },
+    });
+    if (!currentParticipant?.canSpin) {
+      throw new ForbiddenException("SPIN_PERMISSION_REQUIRED");
     }
   }
 
