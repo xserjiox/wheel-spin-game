@@ -14,6 +14,12 @@ export function LanguageSwitcher() {
   return (
     <label className="language-switcher">
       <span className="sr-only">{t("language")}</span>
+      <span className="language-switcher-control" aria-hidden="true">
+        <span>{localeLabels[locale]}</span>
+        <svg viewBox="0 0 12 8">
+          <path d="m1 1 5 5 5-5" />
+        </svg>
+      </span>
       <select
         value={locale}
         aria-label={t("language")}
