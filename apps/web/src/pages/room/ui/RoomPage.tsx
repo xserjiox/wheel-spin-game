@@ -1,6 +1,7 @@
 import { type FormEvent, useEffect, useMemo, useState } from "react";
 import { type RoomState, useRoom, Wheel } from "@/entities/room";
 import { LanguageSwitcher } from "@/features/change-language";
+import { SpinControls } from "@/features/control-spin";
 import { SaveWheelTemplate } from "@/features/manage-wheel-templates";
 import { ShareRoomButton } from "@/features/share-room";
 import { useI18n } from "@/shared/lib/i18n";
@@ -18,9 +19,12 @@ export function RoomPage({
   onExit: () => void;
 }) {
   const { t } = useI18n();
-  const { state, connected, error, clearError, command } = useRoom(code, initialState);
+  const { state, connected, error, clearError, canceledSpinId, command } = useRoom(
+    code,
+    initialState,
+  );
   const [tab, setTab] = useState<Tab>("options");
-  const [duration, setDuration] = useState(20);
+  const [duration, setDuration] = useState("20");
   const [title, setTitle] = useState(state.title);
   const [notice, setNotice] = useState("");
   const isHost = state.role === "HOST";
@@ -40,10 +44,22 @@ export function RoomPage({
   }, [connected, isHost, isSpinning, t]);
 
   const run = async () => {
+    const durationSeconds = Number(duration);
+    if (
+      !Number.isInteger(durationSeconds) ||
+      durationSeconds < 5 ||
+      durationSeconds > 120
+    ) {
+      return;
+    }
     await command("spin.start", {
       requestId: crypto.randomUUID(),
-      durationMs: duration * 1_000,
+      durationMs: durationSeconds * 1_000,
     });
+  };
+
+  const cancelSpin = async () => {
+    await command("spin.cancel", {});
   };
 
   return (
@@ -119,6 +135,7 @@ export function RoomPage({
           <Wheel
             options={state.options}
             activeSpin={state.activeSpin}
+            canceledSpinId={canceledSpinId}
             canSpin={isHost && connected && !isSpinning && state.options.length >= 2}
             onSpin={run}
           />
@@ -167,11 +184,13 @@ export function RoomPage({
               <HostOptions
                 state={state}
                 disabled={isSpinning}
+                connected={connected}
                 duration={duration}
                 setDuration={setDuration}
                 add={(label) => command("option.add", { label })}
                 remove={(optionId) => command("option.remove", { optionId })}
                 spin={run}
+                cancelSpin={cancelSpin}
               />
             ) : (
               <GuestProposal
@@ -224,19 +243,23 @@ function TabButton({
 function HostOptions({
   state,
   disabled,
+  connected,
   duration,
   setDuration,
   add,
   remove,
   spin,
+  cancelSpin,
 }: {
   state: RoomState;
   disabled: boolean;
-  duration: number;
-  setDuration: (duration: number) => void;
+  connected: boolean;
+  duration: string;
+  setDuration: (duration: string) => void;
   add: (label: string) => Promise<unknown>;
   remove: (id: string) => Promise<unknown>;
   spin: () => Promise<void>;
+  cancelSpin: () => Promise<void>;
 }) {
   const { localeTag, t } = useI18n();
   const [label, setLabel] = useState("");
@@ -295,36 +318,15 @@ function HostOptions({
           : t("addTwo")}
       </p>
       <div className="panel-divider" />
-      <div className="duration-row">
-        <div>
-          <p className="step-label">{t("spinLabel")}</p>
-          <h2>{t("time")}</h2>
-        </div>
-        <div className="time-presets">
-          {[10, 20, 30].map((value) => (
-            <button
-              key={value}
-              className={duration === value ? "time-chip active" : "time-chip"}
-              type="button"
-              onClick={() => setDuration(value)}
-              disabled={disabled}
-            >
-              {t("seconds", { value })}
-            </button>
-          ))}
-        </div>
-      </div>
-      <button
-        className="primary-button"
-        type="button"
-        disabled={disabled || state.options.length < 2}
-        onClick={() => void spin()}
-      >
-        <span>{disabled ? t("spinningAction") : t("startWheel")}</span>
-        <span className="button-arrow" aria-hidden="true">
-          ↗
-        </span>
-      </button>
+      <SpinControls
+        duration={duration}
+        isSpinning={disabled}
+        connected={connected}
+        hasEnoughOptions={state.options.length >= 2}
+        setDuration={setDuration}
+        onSpin={() => void spin()}
+        onCancel={() => void cancelSpin()}
+      />
     </section>
   );
 }

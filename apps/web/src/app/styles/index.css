@@ -348,15 +348,102 @@ input:disabled {
   font-weight: 700;
 }
 
-.template-picker select {
+.field-label-row {
+  display: inline-flex;
+  gap: 6px;
+  align-items: baseline;
+  justify-content: flex-start;
+}
+
+.template-picker > .field-label-row {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.template-picker-control {
+  position: relative;
+}
+
+.template-picker-trigger {
+  display: flex;
   width: 100%;
-  min-height: 48px;
-  padding: 0 40px 0 14px;
+  min-height: 52px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 17px;
   background: white;
   border: 1.5px solid var(--ink);
-  border-radius: 0;
   color: var(--ink);
   cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: left;
+}
+
+.template-picker-trigger:focus-visible {
+  outline: 3px solid rgba(130, 111, 242, 0.78);
+  outline-offset: 3px;
+}
+
+.template-picker-chevron {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+  transition: transform 160ms ease;
+}
+
+.template-picker-chevron.open {
+  transform: rotate(180deg);
+}
+
+.template-picker-options {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 7px);
+  right: 0;
+  left: 0;
+  display: grid;
+  max-height: 240px;
+  overflow-y: auto;
+  padding: 6px;
+  background: var(--panel);
+  border: 1.5px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+
+.template-picker-option {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 10px;
+  min-height: 46px;
+  align-items: center;
+  padding: 9px 11px;
+  background: transparent;
+  border: 0;
+  color: var(--ink);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 750;
+  text-align: left;
+}
+
+.template-picker-option:hover,
+.template-picker-option:focus-visible,
+.template-picker-option[aria-selected="true"] {
+  background: rgba(215, 255, 68, 0.5);
+  outline: none;
+}
+
+.template-picker-option small {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
 }
 
 .template-picker > p {
@@ -461,7 +548,9 @@ input::placeholder {
   background: var(--acid);
   border-radius: 50%;
   color: var(--ink);
-  font-size: 18px;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1;
 }
 
 .join-short {
@@ -1058,6 +1147,16 @@ input::placeholder {
   margin-bottom: 13px;
 }
 
+.add-form:focus-within {
+  outline: 3px solid rgba(130, 111, 242, 0.78);
+  outline-offset: 3px;
+}
+
+.add-form input:focus-visible,
+.add-form .add-button:focus-visible {
+  outline: none;
+}
+
 .add-button {
   display: grid;
   place-items: center;
@@ -1173,6 +1272,11 @@ input::placeholder {
   gap: 6px;
 }
 
+.duration-controls {
+  display: grid;
+  gap: 8px;
+}
+
 .time-chip {
   min-height: 38px;
   padding: 0 7px;
@@ -1188,9 +1292,98 @@ input::placeholder {
   border-color: var(--ink);
 }
 
+.custom-duration {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.custom-duration-input {
+  display: grid;
+  grid-template-columns: 58px auto;
+  align-items: center;
+  background: white;
+  border: 1px solid var(--line);
+}
+
+.custom-duration-input:focus-within {
+  border-color: var(--purple);
+  box-shadow: 0 0 0 2px rgba(130, 111, 242, 0.24);
+}
+
+.custom-duration-input input {
+  width: 58px;
+  min-height: 34px;
+  padding: 0 7px;
+  border: 0;
+  font-size: 11px;
+  font-weight: 800;
+  text-align: right;
+}
+
+.custom-duration-input input:focus-visible {
+  outline: none;
+}
+
+.custom-duration-input input[aria-invalid="true"] {
+  color: #a34333;
+}
+
+.custom-duration-input > span {
+  padding-right: 8px;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.duration-hint {
+  color: var(--muted);
+  font-size: 9px;
+  text-align: right;
+}
+
+.duration-hint.error {
+  color: #a34333;
+}
+
 .panel-content > .primary-button,
-.proposal-form .primary-button {
+.proposal-form .primary-button,
+.panel-content > .cancel-spin-button {
   margin-top: 23px;
+}
+
+.cancel-spin-button {
+  display: flex;
+  width: 100%;
+  min-height: 56px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px 0 20px;
+  background: rgba(255, 121, 87, 0.12);
+  border: 1.5px solid #a34333;
+  color: #8a3021;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.cancel-spin-button:hover:not(:disabled) {
+  background: rgba(255, 121, 87, 0.22);
+}
+
+.cancel-spin-symbol {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  background: var(--orange);
+  border-radius: 50%;
+  color: var(--ink);
+  font-size: 12px;
 }
 
 .guest-proposal {

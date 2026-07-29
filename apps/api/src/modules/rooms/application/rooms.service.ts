@@ -499,6 +499,38 @@ export class RoomsService {
     return result.count === 1;
   }
 
+  async cancelSpin(participant: SessionParticipant): Promise<string> {
+    this.assertHost(participant);
+    return this.prisma.$transaction(async (tx) => {
+      const room = await tx.room.findUnique({
+        where: { id: participant.roomId },
+        select: { status: true, activeSpinId: true },
+      });
+      if (room?.status !== RoomStatus.SPINNING || !room.activeSpinId) {
+        throw new BadRequestException("Нет активного вращения");
+      }
+
+      const canceled = await tx.room.updateMany({
+        where: {
+          id: participant.roomId,
+          status: RoomStatus.SPINNING,
+          activeSpinId: room.activeSpinId,
+        },
+        data: {
+          status: RoomStatus.LOBBY,
+          activeSpinId: null,
+          version: { increment: 1 },
+          ...this.activityData(),
+        },
+      });
+      if (canceled.count !== 1) {
+        throw new BadRequestException("Вращение уже завершилось");
+      }
+      await tx.spin.deleteMany({ where: { id: room.activeSpinId } });
+      return room.activeSpinId;
+    });
+  }
+
   private async finalizeSpinIfNeeded(code: string): Promise<void> {
     const room = await this.prisma.room.findUnique({
       where: { code },

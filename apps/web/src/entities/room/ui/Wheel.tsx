@@ -16,11 +16,13 @@ const COLORS = [
 export function Wheel({
   options,
   activeSpin,
+  canceledSpinId,
   canSpin,
   onSpin,
 }: {
   options: Option[];
   activeSpin: ActiveSpin | null;
+  canceledSpinId?: string | null;
   canSpin: boolean;
   onSpin: () => void;
 }) {
@@ -54,7 +56,8 @@ export function Wheel({
   }, [emptyLabel, visibleOptions]);
 
   useEffect(() => {
-    if (!activeSpin || handledSpin.current === activeSpin.id) return;
+    if (!activeSpin) return;
+    if (handledSpin.current === activeSpin.id) return;
     if (beginTimer.current !== null) clearTimeout(beginTimer.current);
     if (finishTimer.current !== null) clearTimeout(finishTimer.current);
     handledSpin.current = activeSpin.id;
@@ -76,6 +79,18 @@ export function Wheel({
       beginTimer.current = null;
     }, beginIn);
   }, [activeSpin?.id]);
+
+  useEffect(() => {
+    if (!canceledSpinId || handledSpin.current !== canceledSpinId) return;
+    if (beginTimer.current !== null) clearTimeout(beginTimer.current);
+    if (finishTimer.current !== null) clearTimeout(finishTimer.current);
+    beginTimer.current = null;
+    finishTimer.current = null;
+    handledSpin.current = null;
+    setWinner("");
+    setRotation((current) => readRenderedRotation(wrapRef.current, current));
+    setTransition("none");
+  }, [canceledSpinId]);
 
   useEffect(
     () => () => {
@@ -199,6 +214,18 @@ export function Wheel({
       )}
     </>
   );
+}
+
+function readRenderedRotation(element: HTMLElement | null, fallback: number): number {
+  if (!element) return fallback % 360;
+  const transform = window.getComputedStyle(element).transform;
+  const match = transform.match(/^matrix(?:3d)?\(([^)]+)\)$/);
+  if (!match) return fallback % 360;
+  const values = match[1].split(",").map(Number);
+  const a = values[0];
+  const b = values[1];
+  if (!Number.isFinite(a) || !Number.isFinite(b)) return fallback % 360;
+  return (Math.atan2(b, a) * 180) / Math.PI;
 }
 
 function drawWheel(

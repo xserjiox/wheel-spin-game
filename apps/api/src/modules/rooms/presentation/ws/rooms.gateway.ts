@@ -157,6 +157,17 @@ export class RoomsGateway implements OnGatewayConnection {
     });
   }
 
+  @SubscribeMessage("spin.cancel")
+  async cancelSpin(@ConnectedSocket() client: RoomSocket) {
+    return this.safe(async () => {
+      const participant = this.requireParticipant(client);
+      const spinId = await this.rooms.cancelSpin(participant);
+      this.server.to(this.channel(client.data.code!)).emit("spin.canceled", { spinId });
+      await this.broadcastState(client.data.code!);
+      return {};
+    });
+  }
+
   private async mutate(
     client: RoomSocket,
     action: (participant: NonNullable<ClientData["participant"]>) => Promise<void>,

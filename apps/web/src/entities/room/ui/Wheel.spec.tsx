@@ -113,6 +113,7 @@ describe("Wheel", () => {
         <Wheel
           options={options}
           activeSpin={activeSpin}
+          canceledSpinId={null}
           canSpin={false}
           onSpin={() => {}}
         />
@@ -168,5 +169,50 @@ describe("Wheel", () => {
 
     expect(screen.queryByRole("dialog", { name: "Winner" })).toBeNull();
     expect(document.body.style.overflow).toBe("");
+  });
+
+  it("does not show a winner after an active spin is canceled", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-07-29T00:00:00.000Z"));
+    const activeSpin: ActiveSpin = {
+      id: "spin-canceled",
+      optionsSnapshot: options,
+      winnerIndex: 0,
+      winnerLabel: "Pizza",
+      startedAt: "2026-07-29T00:00:00.000Z",
+      durationMs: 10_000,
+      finalRotation: 2160,
+    };
+
+    const view = render(
+      <I18nProvider>
+        <Wheel
+          options={options}
+          activeSpin={activeSpin}
+          canSpin={false}
+          onSpin={() => {}}
+        />
+      </I18nProvider>,
+    );
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1_000);
+    });
+    view.rerender(
+      <I18nProvider>
+        <Wheel
+          options={options}
+          activeSpin={null}
+          canceledSpinId="spin-canceled"
+          canSpin
+          onSpin={() => {}}
+        />
+      </I18nProvider>,
+    );
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(12_000);
+    });
+
+    expect(screen.queryByRole("dialog", { name: "Winner" })).toBeNull();
   });
 });

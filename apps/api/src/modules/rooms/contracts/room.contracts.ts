@@ -26,7 +26,7 @@ export const proposalReviewSchema = z.object({
 });
 export const spinSchema = z.object({
   requestId: z.string().uuid(),
-  durationMs: z.number().int().min(1_000).max(300_000),
+  durationMs: z.number().int().min(5_000).max(120_000),
 });
 
 export type CreateRoomInput = z.infer<typeof createRoomSchema>;

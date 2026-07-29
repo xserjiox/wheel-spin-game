@@ -105,8 +105,12 @@ const en = {
   spinLabel: "SPIN",
   time: "Time",
   seconds: "{value} sec",
+  secondsShort: "sec",
+  customTime: "Custom time",
+  durationRange: "From 5 to 120 seconds",
   spinningAction: "Wheel is spinning…",
   startWheel: "Start wheel",
+  stopSpin: "Stop & cancel",
   anonymousProposal: "ANONYMOUS SUGGESTION",
   addIdea: "Add your idea",
   privacyIntro: "The host sees only the text and never who sent it.",
@@ -161,6 +165,7 @@ const en = {
   errorNeedTwoSlots: "Add at least two slots",
   errorHostOnly: "Only the host can perform this action",
   errorWaitSpin: "Wait until the spin ends",
+  errorNoActiveSpin: "There is no active spin",
 } as const;
 
 type TranslationKey = keyof typeof en;
@@ -263,8 +268,12 @@ const ru: Dictionary = {
   spinLabel: "ВРАЩЕНИЕ",
   time: "Время",
   seconds: "{value} сек",
+  secondsShort: "сек",
+  customTime: "Своё время",
+  durationRange: "От 5 до 120 секунд",
   spinningAction: "Колесо вращается…",
   startWheel: "Запустить колесо",
+  stopSpin: "Остановить и отменить",
   anonymousProposal: "АНОНИМНОЕ ПРЕДЛОЖЕНИЕ",
   addIdea: "Добавьте свою идею",
   privacyIntro: "Host увидит только текст и не узнает, кто его отправил.",
@@ -319,6 +328,7 @@ const ru: Dictionary = {
   errorNeedTwoSlots: "Добавьте хотя бы два слота",
   errorHostOnly: "Это действие доступно только host",
   errorWaitSpin: "Дождитесь окончания вращения",
+  errorNoActiveSpin: "Нет активного вращения",
 };
 
 const uk: Dictionary = {
@@ -417,8 +427,12 @@ const uk: Dictionary = {
   spinLabel: "ОБЕРТАННЯ",
   time: "Час",
   seconds: "{value} с",
+  secondsShort: "с",
+  customTime: "Свій час",
+  durationRange: "Від 5 до 120 секунд",
   spinningAction: "Колесо обертається…",
   startWheel: "Запустити колесо",
+  stopSpin: "Зупинити й скасувати",
   anonymousProposal: "АНОНІМНА ПРОПОЗИЦІЯ",
   addIdea: "Додайте свою ідею",
   privacyIntro: "Ведучий побачить лише текст і не дізнається, хто його надіслав.",
@@ -473,6 +487,7 @@ const uk: Dictionary = {
   errorNeedTwoSlots: "Додайте щонайменше два слоти",
   errorHostOnly: "Ця дія доступна лише ведучому",
   errorWaitSpin: "Дочекайтеся завершення обертання",
+  errorNoActiveSpin: "Немає активного обертання",
 };
 
 const de: Dictionary = {
@@ -571,8 +586,12 @@ const de: Dictionary = {
   spinLabel: "DREHUNG",
   time: "Zeit",
   seconds: "{value} Sek.",
+  secondsShort: "Sek.",
+  customTime: "Eigene Zeit",
+  durationRange: "Zwischen 5 und 120 Sekunden",
   spinningAction: "Das Rad dreht sich…",
   startWheel: "Rad starten",
+  stopSpin: "Stoppen und abbrechen",
   anonymousProposal: "ANONYMER VORSCHLAG",
   addIdea: "Füge deine Idee hinzu",
   privacyIntro: "Der Host sieht nur den Text und erfährt nie, wer ihn gesendet hat.",
@@ -627,6 +646,7 @@ const de: Dictionary = {
   errorNeedTwoSlots: "Füge mindestens zwei Felder hinzu",
   errorHostOnly: "Nur der Host kann diese Aktion ausführen",
   errorWaitSpin: "Warte, bis die Drehung beendet ist",
+  errorNoActiveSpin: "Es gibt keine aktive Drehung",
 };
 
 const zh: Dictionary = {
@@ -725,8 +745,12 @@ const zh: Dictionary = {
   spinLabel: "转动",
   time: "时长",
   seconds: "{value} 秒",
+  secondsShort: "秒",
+  customTime: "自定义时长",
+  durationRange: "5 到 120 秒",
   spinningAction: "转盘正在转动…",
   startWheel: "开始转动",
+  stopSpin: "停止并取消",
   anonymousProposal: "匿名建议",
   addIdea: "添加你的想法",
   privacyIntro: "房主只能看到文字，不会知道是谁发送的。",
@@ -780,6 +804,7 @@ const zh: Dictionary = {
   errorNeedTwoSlots: "请至少添加两个选项",
   errorHostOnly: "只有房主可以执行此操作",
   errorWaitSpin: "请等待转动结束",
+  errorNoActiveSpin: "当前没有正在进行的转动",
 };
 
 const dictionaries: Record<Locale, Dictionary> = { en, ru, uk, de, zh };
@@ -891,6 +916,8 @@ const errorKeys: Record<string, TranslationKey> = {
   "Добавьте хотя бы два слота": "errorNeedTwoSlots",
   "Это действие доступно только host": "errorHostOnly",
   "Дождитесь окончания вращения": "errorWaitSpin",
+  "Нет активного вращения": "errorNoActiveSpin",
+  "Вращение уже завершилось": "errorNoActiveSpin",
 };
 
 // Error localization uses the same typed dictionary as the provider.

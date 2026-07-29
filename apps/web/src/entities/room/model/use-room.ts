@@ -10,13 +10,15 @@ type Command =
   | "option.remove"
   | "proposal.create"
   | "proposal.review"
-  | "spin.start";
+  | "spin.start"
+  | "spin.cancel";
 
 export function useRoom(code: string, initialState: RoomState) {
   const { t } = useI18n();
   const [state, setState] = useState(initialState);
   const [connected, setConnected] = useState(false);
   const [error, setError] = useState("");
+  const [canceledSpinId, setCanceledSpinId] = useState<string | null>(null);
   const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
@@ -46,6 +48,9 @@ export function useRoom(code: string, initialState: RoomState) {
     socket.on("room.state", (nextState: RoomState) => {
       setState(nextState);
       setError("");
+    });
+    socket.on("spin.canceled", ({ spinId }: { spinId: string }) => {
+      setCanceledSpinId(spinId);
     });
     return () => {
       socket.disconnect();
@@ -77,6 +82,7 @@ export function useRoom(code: string, initialState: RoomState) {
     connected,
     error: error ? translateError(error, t) : "",
     clearError: () => setError(""),
+    canceledSpinId,
     command,
   };
 }

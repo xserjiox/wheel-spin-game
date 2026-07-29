@@ -49,6 +49,13 @@ describe("MVP room rules", () => {
     expect(() =>
       spinSchema.parse({ requestId: crypto.randomUUID(), durationMs: 999 }),
     ).toThrow();
+    expect(
+      spinSchema.parse({ requestId: crypto.randomUUID(), durationMs: 45_000 })
+        .durationMs,
+    ).toBe(45_000);
+    expect(() =>
+      spinSchema.parse({ requestId: crypto.randomUUID(), durationMs: 120_001 }),
+    ).toThrow();
     expect(() =>
       parseRequest(createRoomSchema, {
         hostName: "Маша",

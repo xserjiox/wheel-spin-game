@@ -36,10 +36,11 @@ describe("wheel template flow", () => {
     );
 
     const picker = screen.getByRole("combobox", { name: /Saved slots/ });
+    fireEvent.click(picker);
     const savedOption = screen.getByRole("option", {
-      name: "Friday lunch · 2 slots",
-    }) as HTMLOptionElement;
-    fireEvent.change(picker, { target: { value: savedOption.value } });
+      name: "Friday lunch 2 slots",
+    });
+    fireEvent.click(savedOption);
     expect(onTemplateChange).toHaveBeenLastCalledWith(
       expect.objectContaining({
         name: "Friday lunch",
@@ -52,10 +53,12 @@ describe("wheel template flow", () => {
       target: { value: "Dinner" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Save name" }));
-    expect(screen.getByRole("option", { name: "Dinner · 2 slots" })).toBeTruthy();
+    fireEvent.click(picker);
+    expect(screen.getByRole("option", { name: "Dinner 2 slots" })).toBeTruthy();
 
     vi.spyOn(window, "confirm").mockReturnValue(true);
     fireEvent.click(screen.getByRole("button", { name: "Delete" }));
-    expect(screen.queryByRole("option", { name: "Dinner · 2 slots" })).toBeNull();
+    fireEvent.click(picker);
+    expect(screen.queryByRole("option", { name: "Dinner 2 slots" })).toBeNull();
   });
 });

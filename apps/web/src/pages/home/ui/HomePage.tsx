@@ -147,7 +147,10 @@ export function HomePage() {
                 }
               />
               <label>
-                {t("password")} <span className="optional">{t("optional")}</span>
+                <span className="field-label-row">
+                  <span>{t("password")}</span>
+                  <span className="optional">{t("optional")}</span>
+                </span>
                 <input
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
