@@ -10,6 +10,7 @@ import {
 } from "@/entities/room";
 import { removeSavedRoom } from "@/entities/saved-room";
 import { ApiRequestError } from "@/shared/api/http";
+import { trackAnalyticsEvent } from "@/shared/lib/analytics";
 import { LoadingScreen } from "@/shared/ui/loading-screen";
 import { UnavailableScreen } from "@/shared/ui/unavailable-screen";
 import { JoinRoomPage } from "./JoinRoomPage";
@@ -91,6 +92,7 @@ export function RoomRoute() {
         onBack={goHome}
         onJoin={async (input) => {
           const result = await joinRoom(code, input);
+          trackAnalyticsEvent("room_join");
           setView({ kind: "room", state: result.state });
         }}
       />

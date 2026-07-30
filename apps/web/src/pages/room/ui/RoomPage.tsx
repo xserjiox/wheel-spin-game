@@ -8,6 +8,7 @@ import {
   useRoom,
   Wheel,
 } from "@/entities/room";
+import { trackAnalyticsEvent } from "@/shared/lib/analytics";
 import { readSavedRooms, removeSavedRoom, saveRoom } from "@/entities/saved-room";
 import { LanguageSwitcher } from "@/features/change-language";
 import { SpinControls } from "@/features/control-spin";
@@ -78,10 +79,11 @@ export function RoomPage({
     ) {
       return;
     }
-    await command("spin.start", {
+    const result = await command("spin.start", {
       requestId: crypto.randomUUID(),
       durationMs: durationSeconds * 1_000,
     });
+    if (result.ok) trackAnalyticsEvent("spin_start");
   };
 
   const cancelSpin = async () => {
@@ -114,7 +116,10 @@ export function RoomPage({
           </span>
           <ShareRoomButton
             code={state.code}
-            onCopied={() => setNotice(t("copied"))}
+            onCopied={() => {
+              trackAnalyticsEvent("share_room");
+              setNotice(t("copied"));
+            }}
             onCopyError={() => setNotice(t("copyFailed"))}
           />
         </div>

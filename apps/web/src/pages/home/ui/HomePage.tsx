@@ -7,6 +7,7 @@ import { LanguageSwitcher } from "@/features/change-language";
 import { SavedRoomList } from "@/features/manage-saved-rooms";
 import { WheelTemplatePicker } from "@/features/manage-wheel-templates";
 import { ApiRequestError } from "@/shared/api/http";
+import { trackAnalyticsEvent } from "@/shared/lib/analytics";
 import {
   homePathForLocale,
   LOCALE_STORAGE_KEY,
@@ -73,6 +74,7 @@ export function HomePage() {
         password,
         options: templateOptions ?? defaultRoomOptions,
       } satisfies CreateInput);
+      trackAnalyticsEvent("room_create");
       navigate(roomPath(result.code), {
         state: {
           initialRoomState: result.state,

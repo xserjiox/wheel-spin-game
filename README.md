@@ -122,7 +122,32 @@ with ESLint, Prettier, TypeScript, or test failures.
      `https://gatherwheel.com`
    - `VITE_LEGAL_CONTROLLER_NAME` with the public name of the service operator
    - `VITE_PRIVACY_EMAIL` with the public privacy contact
+   - `VITE_GA_MEASUREMENT_ID=G-3G5H8H6FD6` for the production Google Analytics
+     4 web data stream
 4. Create a public domain only for the application service.
+
+Before enabling analytics in production, complete this Google Analytics Admin
+checklist so the property matches the code and legal notices:
+
+1. In **Data streams → Web stream**, confirm the production URL and turn
+   **Enhanced measurement off**. GatherWheel sends its own privacy-normalized
+   page views; automatic history page views can duplicate them and expose a room
+   URL.
+2. In **Data settings → Data retention**, select **2 months** and turn
+   **Reset user data on new activity** off.
+3. Keep Google Signals, ads personalization, granular ads data collection,
+   User-ID, Google Ads links, and all optional account data-sharing settings off.
+4. In **Account details**, verify the Google Ads Data Processing Terms and add
+   the legal entity, primary contact, DPO, and EEA representative details where
+   applicable.
+5. Configure internal-traffic and unwanted-referral filters if needed, then use
+   Realtime/DebugView to confirm there is one normalized `page_view` per route
+   and the four parameter-free events `room_create`, `room_join`, `spin_start`,
+   and `share_room`.
+
+GatherWheel uses Basic Consent Mode: the Google tag is not loaded until a
+visitor allows analytics, advertising consent remains denied, and analytics
+cookies are capped at 180 days without renewal on return visits.
 
 `railway.json` configures the Dockerfile build, Prisma migration before startup,
 the healthcheck, and one replica in EU West. The Redis adapter already supports

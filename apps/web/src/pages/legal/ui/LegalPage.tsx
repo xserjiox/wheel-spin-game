@@ -36,9 +36,9 @@ export function LegalPage({ kind }: { kind: "privacy" | "cookies" }) {
           </small>
         </header>
 
-        {legalConfig.isConfigured && (
-          <section>
-            <h2>{content.controllerTitle}</h2>
+        <section>
+          <h2>{content.controllerTitle}</h2>
+          {legalConfig.isConfigured ? (
             <p>
               {legalConfig.controllerName}
               <br />
@@ -47,8 +47,10 @@ export function LegalPage({ kind }: { kind: "privacy" | "cookies" }) {
                 {legalConfig.privacyEmail}
               </a>
             </p>
-          </section>
-        )}
+          ) : (
+            <p>{content.controllerFallback}</p>
+          )}
+        </section>
 
         {content.sections.map((section) => (
           <section key={section.title}>
@@ -63,6 +65,17 @@ export function LegalPage({ kind }: { kind: "privacy" | "cookies" }) {
             {section.paragraphs?.map((paragraph) => (
               <p key={paragraph}>{paragraph}</p>
             ))}
+            {section.links && (
+              <ul className="legal-links">
+                {section.links.map((link) => (
+                  <li key={link.href}>
+                    <a href={link.href} rel="noreferrer" target="_blank">
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
           </section>
         ))}
       </article>
