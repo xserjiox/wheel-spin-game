@@ -7,11 +7,12 @@ import {
   useMemo,
   useState,
 } from "react";
-import type { Locale } from "./locale";
+import { homePathForLocale, localeFromHomePath, type Locale } from "./locale";
 
 const en = {
-  metaTitle: "Wheel Spin — a shared wheel for friends",
-  metaDescription: "Create a room, invite friends, and spin one shared wheel.",
+  metaTitle: "Shared Online Wheel for Groups | Wheel Spin",
+  metaDescription:
+    "Create a shared room, invite friends or teammates, and spin one synchronized random wheel together.",
   language: "Language",
   tagline: "A fair choice for your group",
   landingEyebrow: "SHARED WHEEL OF FORTUNE",
@@ -22,6 +23,31 @@ const en = {
   featureGuests: "✦ Up to 50 guests",
   featureAnonymous: "✦ Anonymous ideas",
   featureResult: "✦ One shared result",
+  howItWorks: "How the shared wheel works",
+  howItWorksCopy:
+    "Start a room in seconds. Everyone joins from their own device and sees the same wheel and result.",
+  stepInviteTitle: "Invite your group",
+  stepInviteCopy:
+    "Send one room link to friends, teammates, or classmates. No account is required.",
+  stepSpinTitle: "Spin together",
+  stepSpinCopy:
+    "The host or an assigned leader starts the wheel, and every participant sees the synchronized result.",
+  whySharedTitle: "More than a single-player wheel spinner",
+  whySharedCopy:
+    "Guests can suggest ideas anonymously while the host keeps control of the final list. Optional passwords keep private decisions inside your group.",
+  useCasesTitle: "Built for group decisions",
+  useCasesCopy:
+    "Choose where to eat, pick a game, assign a task, select a classroom activity, or settle the next team discussion fairly.",
+  faqTitle: "Frequently asked questions",
+  faqFreeQuestion: "Is Wheel Spin free?",
+  faqFreeAnswer:
+    "Yes. You can create and join shared wheels without an account or payment.",
+  faqAccountQuestion: "Does everyone need an account?",
+  faqAccountAnswer:
+    "No. Participants join with a room link, enter a display name, and can start immediately.",
+  faqLifetimeQuestion: "How long does a room stay available?",
+  faqLifetimeAnswer:
+    "A room expires after seven days without activity. Saved room shortcuts remain only in your browser.",
   create: "Create",
   join: "Join",
   myRooms: "My rooms",
@@ -224,8 +250,9 @@ type TranslationKey = keyof typeof en;
 type Dictionary = Record<TranslationKey, string>;
 
 const ru: Dictionary = {
-  metaTitle: "Wheel Spin — колесо для компании",
-  metaDescription: "Создайте комнату, пригласите друзей и крутите одно общее колесо.",
+  metaTitle: "Общее онлайн-колесо для компании | Wheel Spin",
+  metaDescription:
+    "Создайте общую комнату, пригласите друзей или команду и вместе крутите одно синхронное колесо случайного выбора.",
   language: "Язык",
   tagline: "Честный выбор для вашей компании",
   landingEyebrow: "ОБЩЕЕ КОЛЕСО ФОРТУНЫ",
@@ -236,6 +263,31 @@ const ru: Dictionary = {
   featureGuests: "✦ До 50 гостей",
   featureAnonymous: "✦ Анонимные идеи",
   featureResult: "✦ Один результат",
+  howItWorks: "Как работает общее колесо",
+  howItWorksCopy:
+    "Создайте комнату за несколько секунд. Каждый участник подключается со своего устройства и видит одно колесо и общий результат.",
+  stepInviteTitle: "Пригласите компанию",
+  stepInviteCopy:
+    "Отправьте одну ссылку друзьям, коллегам или ученикам. Регистрироваться не нужно.",
+  stepSpinTitle: "Крутите вместе",
+  stepSpinCopy:
+    "Хост или назначенный ведущий запускает колесо, а все участники одновременно видят результат.",
+  whySharedTitle: "Больше, чем обычное колесо фортуны",
+  whySharedCopy:
+    "Гости могут анонимно предлагать варианты, а хост управляет итоговым списком. Для приватных решений комнату можно защитить паролем.",
+  useCasesTitle: "Для совместных решений",
+  useCasesCopy:
+    "Выберите, где поесть, во что играть, кому достанется задача, какое упражнение провести на уроке или какую тему обсудить команде.",
+  faqTitle: "Частые вопросы",
+  faqFreeQuestion: "Wheel Spin бесплатный?",
+  faqFreeAnswer:
+    "Да. Создавать общие колёса и присоединяться к ним можно без аккаунта и оплаты.",
+  faqAccountQuestion: "Каждому участнику нужен аккаунт?",
+  faqAccountAnswer:
+    "Нет. Достаточно открыть ссылку на комнату, указать отображаемое имя и присоединиться.",
+  faqLifetimeQuestion: "Как долго доступна комната?",
+  faqLifetimeAnswer:
+    "Комната удаляется после семи дней без активности. Список сохранённых комнат хранится только в вашем браузере.",
   create: "Создать",
   join: "Войти",
   myRooms: "Мои комнаты",
@@ -434,8 +486,9 @@ const ru: Dictionary = {
 };
 
 const uk: Dictionary = {
-  metaTitle: "Wheel Spin — колесо для компанії",
-  metaDescription: "Створіть кімнату, запросіть друзів і крутіть одне спільне колесо.",
+  metaTitle: "Спільне онлайн-колесо для компанії | Wheel Spin",
+  metaDescription:
+    "Створіть спільну кімнату, запросіть друзів або команду та разом крутіть одне синхронне колесо випадкового вибору.",
   language: "Мова",
   tagline: "Чесний вибір для вашої компанії",
   landingEyebrow: "СПІЛЬНЕ КОЛЕСО ФОРТУНИ",
@@ -446,6 +499,31 @@ const uk: Dictionary = {
   featureGuests: "✦ До 50 гостей",
   featureAnonymous: "✦ Анонімні ідеї",
   featureResult: "✦ Один результат",
+  howItWorks: "Як працює спільне колесо",
+  howItWorksCopy:
+    "Створіть кімнату за кілька секунд. Кожен учасник приєднується зі свого пристрою та бачить одне колесо і спільний результат.",
+  stepInviteTitle: "Запросіть компанію",
+  stepInviteCopy:
+    "Надішліть одне посилання друзям, колегам або учням. Реєстрація не потрібна.",
+  stepSpinTitle: "Крутіть разом",
+  stepSpinCopy:
+    "Хост або призначений ведучий запускає колесо, а всі учасники одночасно бачать результат.",
+  whySharedTitle: "Більше, ніж звичайне колесо фортуни",
+  whySharedCopy:
+    "Гості можуть анонімно пропонувати варіанти, а хост керує підсумковим списком. Для приватних рішень кімнату можна захистити паролем.",
+  useCasesTitle: "Для спільних рішень",
+  useCasesCopy:
+    "Оберіть, де поїсти, у що грати, кому дати завдання, яку вправу провести на уроці або яку тему обговорити команді.",
+  faqTitle: "Поширені запитання",
+  faqFreeQuestion: "Wheel Spin безкоштовний?",
+  faqFreeAnswer:
+    "Так. Створювати спільні колеса та приєднуватися до них можна без облікового запису й оплати.",
+  faqAccountQuestion: "Кожному учаснику потрібен обліковий запис?",
+  faqAccountAnswer:
+    "Ні. Достатньо відкрити посилання на кімнату, вказати ім’я та приєднатися.",
+  faqLifetimeQuestion: "Як довго доступна кімната?",
+  faqLifetimeAnswer:
+    "Кімната видаляється після семи днів без активності. Список збережених кімнат зберігається лише у вашому браузері.",
   create: "Створити",
   join: "Увійти",
   myRooms: "Мої кімнати",
@@ -643,8 +721,9 @@ const uk: Dictionary = {
 };
 
 const de: Dictionary = {
-  metaTitle: "Wheel Spin — das gemeinsame Glücksrad",
-  metaDescription: "Erstelle einen Raum, lade Freunde ein und dreht gemeinsam ein Rad.",
+  metaTitle: "Gemeinsames Online-Glücksrad für Gruppen | Wheel Spin",
+  metaDescription:
+    "Erstelle einen gemeinsamen Raum, lade Freunde oder dein Team ein und dreht zusammen ein synchrones Zufallsrad.",
   language: "Sprache",
   tagline: "Eine faire Wahl für eure Gruppe",
   landingEyebrow: "GEMEINSAMES GLÜCKSRAD",
@@ -655,6 +734,31 @@ const de: Dictionary = {
   featureGuests: "✦ Bis zu 50 Gäste",
   featureAnonymous: "✦ Anonyme Ideen",
   featureResult: "✦ Ein gemeinsames Ergebnis",
+  howItWorks: "So funktioniert das gemeinsame Rad",
+  howItWorksCopy:
+    "Erstelle in wenigen Sekunden einen Raum. Alle treten mit ihrem eigenen Gerät bei und sehen dasselbe Rad und Ergebnis.",
+  stepInviteTitle: "Lade deine Gruppe ein",
+  stepInviteCopy:
+    "Sende einen Raumlink an Freunde, Kollegen oder Schüler. Ein Konto ist nicht erforderlich.",
+  stepSpinTitle: "Dreht gemeinsam",
+  stepSpinCopy:
+    "Der Host oder eine zugewiesene Leitung startet das Rad, und alle Teilnehmer sehen das synchronisierte Ergebnis.",
+  whySharedTitle: "Mehr als ein Glücksrad für eine Person",
+  whySharedCopy:
+    "Gäste können Ideen anonym vorschlagen, während der Host die endgültige Liste kontrolliert. Ein optionales Passwort schützt private Entscheidungen.",
+  useCasesTitle: "Für Entscheidungen in der Gruppe",
+  useCasesCopy:
+    "Wählt ein Restaurant oder Spiel, verteilt eine Aufgabe, bestimmt eine Aktivität im Unterricht oder entscheidet fair über das nächste Teamthema.",
+  faqTitle: "Häufig gestellte Fragen",
+  faqFreeQuestion: "Ist Wheel Spin kostenlos?",
+  faqFreeAnswer:
+    "Ja. Gemeinsame Räder können ohne Konto oder Bezahlung erstellt und genutzt werden.",
+  faqAccountQuestion: "Brauchen alle Teilnehmer ein Konto?",
+  faqAccountAnswer:
+    "Nein. Sie öffnen den Raumlink, geben einen Anzeigenamen ein und können sofort teilnehmen.",
+  faqLifetimeQuestion: "Wie lange bleibt ein Raum verfügbar?",
+  faqLifetimeAnswer:
+    "Ein Raum läuft nach sieben Tagen ohne Aktivität ab. Gespeicherte Raumverknüpfungen bleiben nur in deinem Browser.",
   create: "Erstellen",
   join: "Beitreten",
   myRooms: "Meine Räume",
@@ -853,8 +957,9 @@ const de: Dictionary = {
 };
 
 const zh: Dictionary = {
-  metaTitle: "Wheel Spin — 好友共享转盘",
-  metaDescription: "创建房间，邀请好友，共同转动一个幸运转盘。",
+  metaTitle: "多人共享在线随机转盘 | Wheel Spin",
+  metaDescription:
+    "创建共享房间，邀请好友或团队成员，并一起转动同一个实时同步的随机转盘。",
   language: "语言",
   tagline: "为你的朋友们公平选择",
   landingEyebrow: "共享幸运转盘",
@@ -865,6 +970,27 @@ const zh: Dictionary = {
   featureGuests: "✦ 最多 50 位参与者",
   featureAnonymous: "✦ 匿名建议",
   featureResult: "✦ 共享同一结果",
+  howItWorks: "共享转盘如何使用",
+  howItWorksCopy:
+    "几秒钟即可创建房间。每位参与者都能用自己的设备加入，并看到同一个转盘和结果。",
+  stepInviteTitle: "邀请你的团队",
+  stepInviteCopy: "将一个房间链接发送给好友、同事或同学，无需注册账号。",
+  stepSpinTitle: "一起转动",
+  stepSpinCopy: "房主或指定主持人启动转盘，所有参与者会同时看到同步结果。",
+  whySharedTitle: "不只是单人幸运转盘",
+  whySharedCopy:
+    "参与者可以匿名提交建议，房主则保留最终列表的控制权。还可以使用密码保护私密决定。",
+  useCasesTitle: "适合共同做决定",
+  useCasesCopy:
+    "可以用来选择餐厅或游戏、分配任务、挑选课堂活动，或公平决定团队的下一个讨论主题。",
+  faqTitle: "常见问题",
+  faqFreeQuestion: "Wheel Spin 免费吗？",
+  faqFreeAnswer: "免费。创建和加入共享转盘都不需要账号或付费。",
+  faqAccountQuestion: "每位参与者都需要账号吗？",
+  faqAccountAnswer: "不需要。打开房间链接、输入显示名称后即可立即加入。",
+  faqLifetimeQuestion: "房间会保留多久？",
+  faqLifetimeAnswer:
+    "房间在连续七天没有活动后过期。已保存的房间快捷方式只保存在你的浏览器中。",
   create: "创建",
   join: "加入",
   myRooms: "我的房间",
@@ -1060,6 +1186,18 @@ const zh: Dictionary = {
 
 const dictionaries: Record<Locale, Dictionary> = { en, ru, uk, de, zh };
 
+// Build-time pre-rendering uses the same localized metadata as the provider.
+// eslint-disable-next-line react-refresh/only-export-components
+export function getLocaleSeoMeta(locale: Locale): {
+  title: string;
+  description: string;
+} {
+  return {
+    title: dictionaries[locale].metaTitle,
+    description: dictionaries[locale].metaDescription,
+  };
+}
+
 const localeTags: Record<Locale, string> = {
   en: "en-US",
   ru: "ru-RU",
@@ -1092,14 +1230,32 @@ type I18nValue = {
 const I18nContext = createContext<I18nValue | null>(null);
 const STORAGE_KEY = "wheel-spin-locale";
 
-function initialLocale(): Locale {
+function detectInitialLocale(preferredLocale?: Locale): Locale {
+  if (preferredLocale) return preferredLocale;
+  if (typeof window === "undefined") return "en";
+
+  const pathLocale = localeFromHomePath(window.location.pathname);
+  if (pathLocale) return pathLocale;
+
   const stored = window.localStorage.getItem(STORAGE_KEY);
   if (stored && stored in dictionaries) return stored as Locale;
   return "en";
 }
 
-export function I18nProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>(initialLocale);
+function setMetaContent(selector: string, content: string): void {
+  document.querySelector(selector)?.setAttribute("content", content);
+}
+
+export function I18nProvider({
+  children,
+  initialLocale,
+}: {
+  children: ReactNode;
+  initialLocale?: Locale;
+}) {
+  const [locale, setLocaleState] = useState<Locale>(() =>
+    detectInitialLocale(initialLocale),
+  );
   const t = useCallback<Translate>(
     (key, variables) => {
       let value = dictionaries[locale][key];
@@ -1113,16 +1269,49 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   const setLocale = useCallback((nextLocale: Locale) => {
     window.localStorage.setItem(STORAGE_KEY, nextLocale);
+
+    if (localeFromHomePath(window.location.pathname)) {
+      const nextPath = homePathForLocale(nextLocale);
+      if (window.location.pathname !== nextPath) {
+        window.history.pushState(null, "", nextPath);
+        window.dispatchEvent(new PopStateEvent("popstate"));
+      }
+    }
+
     setLocaleState(nextLocale);
+  }, []);
+
+  useEffect(() => {
+    const syncLocaleFromPath = () => {
+      const pathLocale = localeFromHomePath(window.location.pathname);
+      if (pathLocale) setLocaleState(pathLocale);
+    };
+
+    window.addEventListener("popstate", syncLocaleFromPath);
+    return () => window.removeEventListener("popstate", syncLocaleFromPath);
   }, []);
 
   useEffect(() => {
     document.documentElement.lang =
       locale === "uk" ? "uk" : locale === "zh" ? "zh-CN" : locale;
     document.title = t("metaTitle");
-    document
-      .querySelector('meta[name="description"]')
-      ?.setAttribute("content", t("metaDescription"));
+    setMetaContent('meta[name="description"]', t("metaDescription"));
+    setMetaContent('meta[property="og:title"]', t("metaTitle"));
+    setMetaContent('meta[property="og:description"]', t("metaDescription"));
+    setMetaContent('meta[name="twitter:title"]', t("metaTitle"));
+    setMetaContent('meta[name="twitter:description"]', t("metaDescription"));
+
+    const homeLocale = localeFromHomePath(window.location.pathname);
+    if (homeLocale) {
+      const canonicalUrl = new URL(
+        homePathForLocale(homeLocale),
+        window.location.origin,
+      ).href;
+      document
+        .querySelector('link[rel="canonical"]')
+        ?.setAttribute("href", canonicalUrl);
+      setMetaContent('meta[property="og:url"]', canonicalUrl);
+    }
   }, [locale, t]);
 
   const value = useMemo<I18nValue>(

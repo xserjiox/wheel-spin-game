@@ -8,9 +8,13 @@ import { LanguageSwitcher } from "./LanguageSwitcher";
 describe("LanguageSwitcher", () => {
   beforeEach(() => {
     window.localStorage.clear();
+    window.history.replaceState(null, "", "/");
   });
 
-  afterEach(cleanup);
+  afterEach(() => {
+    cleanup();
+    window.history.replaceState(null, "", "/");
+  });
 
   it("keeps the native selector accessible and updates the visible locale", () => {
     const { container } = render(
@@ -24,5 +28,6 @@ describe("LanguageSwitcher", () => {
     expect(visibleLocale?.textContent).toBe("EN");
     fireEvent.change(select, { target: { value: "de" } });
     expect(visibleLocale?.textContent).toBe("DE");
+    expect(window.location.pathname).toBe("/de/");
   });
 });

@@ -45,7 +45,8 @@ PostgreSQL and Redis remain accessible only through Railway's private network.
 The frontend follows Feature-Sliced Design:
 
 - `app` — application initialization, routing, and global styles
-- `pages` — route components for `/`, `/r/:code`, and the fallback page
+- `pages` — route components for localized home pages, `/r/:code`, and the
+  fallback page
 - `features` — user actions that are not tied to a single page
 - `entities` — room model, API, realtime state, and UI
 - `shared` — HTTP client, i18n, router helpers, and reusable UI
@@ -112,12 +113,19 @@ with ESLint, Prettier, TypeScript, or test failures.
    - `DATABASE_URL` referencing the PostgreSQL service
    - `REDIS_URL` referencing the Redis service
    - `COOKIE_SECURE=true`
+   - `PUBLIC_URL` with the canonical public origin, for example
+     `https://wheel.example.com`
 4. Create a public domain only for the application service.
 
 `railway.json` configures the Dockerfile build, Prisma migration before startup,
 the healthcheck, and one replica in EU West. The Redis adapter already supports
 multiple replicas, while spin initiation is protected by an atomic room-status
 update in PostgreSQL.
+
+The production build pre-renders the indexable home pages at `/`, `/ru/`,
+`/uk/`, `/de/`, and `/zh/`. Temporary room, API, Socket.IO, and health URLs are
+served with `X-Robots-Tag: noindex, nofollow`. The application also exposes
+`/robots.txt` and a localized `/sitemap.xml`.
 
 ## Project structure
 

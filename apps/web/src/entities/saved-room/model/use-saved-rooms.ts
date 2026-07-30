@@ -8,11 +8,11 @@ import {
 import type { SavedRoom } from "./types";
 
 export function useSavedRooms() {
-  const [rooms, setRooms] = useState<SavedRoom[]>(() =>
-    readSavedRooms(window.localStorage),
-  );
+  const [rooms, setRooms] = useState<SavedRoom[]>([]);
 
   useEffect(() => {
+    setRooms(readSavedRooms(window.localStorage));
+
     const syncRooms = (event: StorageEvent) => {
       if (event.key === SAVED_ROOM_STORAGE_KEY) {
         setRooms(readSavedRooms(window.localStorage));

@@ -6,7 +6,13 @@ import { LanguageSwitcher } from "@/features/change-language";
 import { SavedRoomList } from "@/features/manage-saved-rooms";
 import { WheelTemplatePicker } from "@/features/manage-wheel-templates";
 import { ApiRequestError } from "@/shared/api/http";
-import { translateError, useI18n } from "@/shared/lib/i18n";
+import {
+  homePathForLocale,
+  type Locale,
+  SUPPORTED_LOCALES,
+  translateError,
+  useI18n,
+} from "@/shared/lib/i18n";
 import { roomPath } from "@/shared/lib/router";
 import { Brand } from "@/shared/ui/brand";
 
@@ -17,9 +23,17 @@ type CreateInput = {
   options: string[];
 };
 
+const localeLabels: Record<Locale, string> = {
+  en: "English",
+  ru: "Русский",
+  uk: "Українська",
+  de: "Deutsch",
+  zh: "中文",
+};
+
 export function HomePage() {
   const navigate = useNavigate();
-  const { defaultRoomOptions, t } = useI18n();
+  const { defaultRoomOptions, locale, t } = useI18n();
   const localizedDefaultTitle = t("defaultTitle");
   const previousDefaultTitle = useRef(localizedDefaultTitle);
   const { rooms, save: saveRoom, remove: removeRoom } = useSavedRooms();
@@ -280,6 +294,77 @@ export function HomePage() {
           )}
         </section>
       </section>
+
+      <section className="seo-overview" aria-labelledby="how-it-works-title">
+        <header className="seo-section-heading">
+          <p className="eyebrow">{t("landingEyebrow")}</p>
+          <h2 id="how-it-works-title">{t("howItWorks")}</h2>
+          <p>{t("howItWorksCopy")}</p>
+        </header>
+
+        <div className="seo-step-grid">
+          <article>
+            <span aria-hidden="true">01</span>
+            <h3>{t("createRoom")}</h3>
+            <p>{t("lead")}</p>
+          </article>
+          <article>
+            <span aria-hidden="true">02</span>
+            <h3>{t("stepInviteTitle")}</h3>
+            <p>{t("stepInviteCopy")}</p>
+          </article>
+          <article>
+            <span aria-hidden="true">03</span>
+            <h3>{t("stepSpinTitle")}</h3>
+            <p>{t("stepSpinCopy")}</p>
+          </article>
+        </div>
+
+        <div className="seo-benefit-grid">
+          <article>
+            <h2>{t("whySharedTitle")}</h2>
+            <p>{t("whySharedCopy")}</p>
+          </article>
+          <article>
+            <h2>{t("useCasesTitle")}</h2>
+            <p>{t("useCasesCopy")}</p>
+          </article>
+        </div>
+      </section>
+
+      <section className="seo-faq" aria-labelledby="faq-title">
+        <h2 id="faq-title">{t("faqTitle")}</h2>
+        <div className="seo-faq-list">
+          <details>
+            <summary>{t("faqFreeQuestion")}</summary>
+            <p>{t("faqFreeAnswer")}</p>
+          </details>
+          <details>
+            <summary>{t("faqAccountQuestion")}</summary>
+            <p>{t("faqAccountAnswer")}</p>
+          </details>
+          <details>
+            <summary>{t("faqLifetimeQuestion")}</summary>
+            <p>{t("faqLifetimeAnswer")}</p>
+          </details>
+        </div>
+      </section>
+
+      <footer className="landing-footer">
+        <span>© {new Date().getFullYear()} Wheel Spin</span>
+        <nav aria-label={t("language")}>
+          {SUPPORTED_LOCALES.map((option) => (
+            <a
+              key={option}
+              href={homePathForLocale(option)}
+              hrefLang={option === "zh" ? "zh-CN" : option}
+              aria-current={option === locale ? "page" : undefined}
+            >
+              {localeLabels[option]}
+            </a>
+          ))}
+        </nav>
+      </footer>
     </main>
   );
 }
