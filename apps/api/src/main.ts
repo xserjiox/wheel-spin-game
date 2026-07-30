@@ -10,7 +10,10 @@ import { RedisIoAdapter } from "./shared/realtime/redis-io.adapter";
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
-    new FastifyAdapter({ trustProxy: true }),
+    new FastifyAdapter({
+      routerOptions: { ignoreTrailingSlash: true },
+      trustProxy: true,
+    }),
   );
   await app.register(fastifyCookie);
   await app.register(fastifyStatic, {

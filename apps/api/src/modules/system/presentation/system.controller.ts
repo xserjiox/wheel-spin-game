@@ -74,12 +74,12 @@ export class SystemController {
     return this.sendPage("index.html", request, reply);
   }
 
-  @Get(["en", "en/"])
+  @Get("en")
   english(@Res() reply: FastifyReply) {
     return this.redirectToCanonicalPath(reply, "/");
   }
 
-  @Get(["ru", "ru/"])
+  @Get("ru")
   russian(@Req() request: FastifyRequest, @Res() reply: FastifyReply) {
     if (!request.url.split("?")[0].endsWith("/")) {
       return this.redirectToCanonicalPath(reply, "/ru/");
@@ -87,7 +87,7 @@ export class SystemController {
     return this.sendPage("index.ru.html", request, reply);
   }
 
-  @Get(["uk", "uk/"])
+  @Get("uk")
   ukrainian(@Req() request: FastifyRequest, @Res() reply: FastifyReply) {
     if (!request.url.split("?")[0].endsWith("/")) {
       return this.redirectToCanonicalPath(reply, "/uk/");
@@ -95,7 +95,7 @@ export class SystemController {
     return this.sendPage("index.uk.html", request, reply);
   }
 
-  @Get(["de", "de/"])
+  @Get("de")
   german(@Req() request: FastifyRequest, @Res() reply: FastifyReply) {
     if (!request.url.split("?")[0].endsWith("/")) {
       return this.redirectToCanonicalPath(reply, "/de/");
@@ -103,7 +103,7 @@ export class SystemController {
     return this.sendPage("index.de.html", request, reply);
   }
 
-  @Get(["zh", "zh/"])
+  @Get("zh")
   chinese(@Req() request: FastifyRequest, @Res() reply: FastifyReply) {
     if (!request.url.split("?")[0].endsWith("/")) {
       return this.redirectToCanonicalPath(reply, "/zh/");
