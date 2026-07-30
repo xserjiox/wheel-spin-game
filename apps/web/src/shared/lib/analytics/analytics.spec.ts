@@ -5,6 +5,7 @@ import { analyticsPageTitle, normalizeAnalyticsPath } from "./analytics";
 
 type TestAnalyticsWindow = Window & {
   dataLayer?: unknown[];
+  gtag?: (...args: unknown[]) => void;
   "ga-disable-G-TEST123"?: boolean;
 };
 
@@ -32,6 +33,7 @@ describe("analytics consent application", () => {
     vi.unstubAllEnvs();
     document.getElementById("gatherwheel-google-analytics")?.remove();
     delete testWindow.dataLayer;
+    delete testWindow.gtag;
     delete testWindow["ga-disable-G-TEST123"];
   });
 
@@ -48,9 +50,40 @@ describe("analytics consent application", () => {
     expect(
       document.getElementById("gatherwheel-google-analytics")?.getAttribute("src"),
     ).toBe("https://www.googletagmanager.com/gtag/js?id=G-TEST123");
-    expect(testAnalyticsWindow()["ga-disable-G-TEST123"]).toBe(false);
+    expect(testAnalyticsWindow()["ga-disable-G-TEST123"]).toBeUndefined();
+    expect(testAnalyticsWindow().gtag).toBeTypeOf("function");
 
     applyAnalyticsConsent(false);
     expect(testAnalyticsWindow()["ga-disable-G-TEST123"]).toBe(true);
+  });
+
+  it("queues Google tag commands in the official arguments format", async () => {
+    vi.stubEnv("VITE_GA_MEASUREMENT_ID", "G-TEST123");
+    vi.resetModules();
+    const { applyAnalyticsConsent, trackAnalyticsEvent, trackAnalyticsPageView } =
+      await import("./analytics");
+
+    applyAnalyticsConsent(true);
+    trackAnalyticsPageView("/privacy");
+    trackAnalyticsEvent("share_room");
+
+    const commands = (testAnalyticsWindow().dataLayer ?? []).map((command) =>
+      Array.from(command as ArrayLike<unknown>),
+    );
+
+    expect(commands).toContainEqual([
+      "config",
+      "G-TEST123",
+      expect.not.objectContaining({ cookie_domain: expect.anything() }),
+    ]);
+    expect(commands).toContainEqual([
+      "event",
+      "page_view",
+      expect.objectContaining({
+        page_path: "/privacy",
+        send_to: "G-TEST123",
+      }),
+    ]);
+    expect(commands).toContainEqual(["event", "share_room", { send_to: "G-TEST123" }]);
   });
 });

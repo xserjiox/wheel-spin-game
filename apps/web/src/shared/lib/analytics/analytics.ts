@@ -3,7 +3,7 @@ import { analyticsConfig } from "@/shared/config/analytics";
 type GtagArguments = [command: string, ...parameters: unknown[]];
 type AnalyticsWindow = Window &
   typeof globalThis & {
-    dataLayer?: GtagArguments[];
+    dataLayer?: unknown[];
     gtag?: (...args: GtagArguments) => void;
     [key: `ga-disable-${string}`]: boolean | undefined;
   };
@@ -12,19 +12,30 @@ const SCRIPT_ID = "gatherwheel-google-analytics";
 const GA_COOKIE_MAX_AGE_SECONDS = 180 * 24 * 60 * 60;
 
 let analyticsEnabled = false;
+let consentDefaultsQueued = false;
 let lastPageKey = "";
 
 function analyticsWindow(): AnalyticsWindow {
   return window as AnalyticsWindow;
 }
 
-function gtag(...args: GtagArguments): void {
+function gtag(..._args: GtagArguments): void {
   const target = analyticsWindow();
   target.dataLayer = target.dataLayer ?? [];
-  target.dataLayer.push(args);
+  // Google tag's documented queue format requires the function's Arguments object.
+  // eslint-disable-next-line prefer-rest-params
+  target.dataLayer.push(arguments);
+}
+
+function initializeGoogleTag(): void {
+  const target = analyticsWindow();
+  target.dataLayer = target.dataLayer ?? [];
+  target.gtag = target.gtag ?? gtag;
 }
 
 function queueDefaultDeniedConsent(): void {
+  if (consentDefaultsQueued) return;
+  initializeGoogleTag();
   gtag("consent", "default", {
     analytics_storage: "denied",
     ad_storage: "denied",
@@ -32,6 +43,7 @@ function queueDefaultDeniedConsent(): void {
     ad_personalization: "denied",
   });
   gtag("set", "ads_data_redaction", true);
+  consentDefaultsQueued = true;
 }
 
 function loadGoogleTag(): void {
@@ -91,9 +103,9 @@ export function applyAnalyticsConsent(granted: boolean): void {
 
   const target = analyticsWindow();
   queueDefaultDeniedConsent();
-  target[`ga-disable-${measurementId}`] = !granted;
 
   if (!granted) {
+    target[`ga-disable-${measurementId}`] = true;
     analyticsEnabled = false;
     lastPageKey = "";
     gtag("consent", "update", {
@@ -106,6 +118,7 @@ export function applyAnalyticsConsent(granted: boolean): void {
     return;
   }
 
+  delete target[`ga-disable-${measurementId}`];
   gtag("consent", "update", {
     analytics_storage: "granted",
     ad_storage: "denied",
@@ -122,7 +135,6 @@ export function applyAnalyticsConsent(granted: boolean): void {
       allow_ad_personalization_signals: false,
       cookie_expires: GA_COOKIE_MAX_AGE_SECONDS,
       cookie_update: false,
-      cookie_domain: "none",
     });
     loadGoogleTag();
   }
@@ -142,12 +154,14 @@ export function trackAnalyticsPageView(pathname: string): void {
     page_path: pagePath,
     page_title: analyticsPageTitle(pagePath),
     page_referrer: sanitizedReferrer(),
+    send_to: measurementId,
   });
 }
 
 export function trackAnalyticsEvent(
   eventName: "room_create" | "room_join" | "share_room" | "spin_start",
 ): void {
-  if (!analyticsEnabled || !analyticsConfig.measurementId) return;
-  gtag("event", eventName);
+  const { measurementId } = analyticsConfig;
+  if (!analyticsEnabled || !measurementId) return;
+  gtag("event", eventName, { send_to: measurementId });
 }
