@@ -27,7 +27,13 @@ describe("spin permission", () => {
   it("lets the host independently grant and revoke permission", async () => {
     const participantUpdate = vi.fn().mockReturnValue({ operation: "participant" });
     const roomUpdate = vi.fn().mockReturnValue({ operation: "room" });
-    const prisma = {
+    const transaction = {
+      $queryRaw: vi.fn().mockResolvedValue([
+        {
+          status: "LOBBY",
+          expiresAt: new Date("2099-01-01T00:00:00.000Z"),
+        },
+      ]),
       participant: {
         findFirst: vi.fn().mockResolvedValue({
           id: guest.id,
@@ -36,7 +42,17 @@ describe("spin permission", () => {
         update: participantUpdate,
       },
       room: { update: roomUpdate },
-      $transaction: vi.fn().mockResolvedValue([]),
+    };
+    const prisma = {
+      room: {
+        findUnique: vi.fn().mockResolvedValue({
+          status: "LOBBY",
+          expiresAt: new Date("2099-01-01T00:00:00.000Z"),
+        }),
+      },
+      $transaction: vi.fn((operation: (client: typeof transaction) => Promise<void>) =>
+        operation(transaction),
+      ),
     } as unknown as PrismaService;
     const service = new RoomsService(prisma, new SessionService());
 
@@ -64,6 +80,12 @@ describe("spin permission", () => {
   it("lets a permitted guest start a spin", async () => {
     const startedAt = new Date("2026-07-29T10:00:00.000Z");
     const prisma = {
+      room: {
+        findUnique: vi.fn().mockResolvedValue({
+          status: "LOBBY",
+          expiresAt: new Date("2099-01-01T00:00:00.000Z"),
+        }),
+      },
       participant: {
         findFirst: vi.fn().mockResolvedValue({ canSpin: true }),
       },
@@ -96,6 +118,12 @@ describe("spin permission", () => {
   it("rejects a guest immediately after permission is revoked", async () => {
     const spinFindUnique = vi.fn();
     const prisma = {
+      room: {
+        findUnique: vi.fn().mockResolvedValue({
+          status: "LOBBY",
+          expiresAt: new Date("2099-01-01T00:00:00.000Z"),
+        }),
+      },
       participant: {
         findFirst: vi.fn().mockResolvedValue({ canSpin: false }),
       },

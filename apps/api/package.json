@@ -11,7 +11,9 @@
     "typecheck": "tsc --noEmit",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
-    "db:deploy": "prisma migrate deploy"
+    "db:deploy": "prisma migrate deploy",
+    "db:cleanup-expired": "node dist/jobs/cleanup-expired-rooms.js",
+    "db:cleanup-storage": "node dist/jobs/cleanup-storage.js"
   },
   "dependencies": {
     "@fastify/cookie": "^11.0.2",

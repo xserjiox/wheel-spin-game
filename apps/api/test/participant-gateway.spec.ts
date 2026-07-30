@@ -2,6 +2,7 @@ import { ParticipantRole } from "@prisma/client";
 import { describe, expect, it, vi } from "vitest";
 import { RoomsGateway } from "../src/modules/rooms/presentation/ws/rooms.gateway";
 import type { RoomsService } from "../src/modules/rooms/application/rooms.service";
+import type { JoinLimiterService } from "../src/modules/rooms/infrastructure/join-limiter.service";
 import { SessionService } from "../src/shared/security/session.service";
 
 const hostId = "a4cd0eba-24be-4b1a-af94-6b43ff48ce62";
@@ -19,9 +20,12 @@ describe("participant gateway", () => {
   it("disconnects every socket of a kicked guest and updates the room", async () => {
     const rooms = {
       kickParticipant: vi.fn().mockResolvedValue(undefined),
-      getState: vi.fn().mockResolvedValue({ code: "Room1234" }),
+      getStates: vi.fn().mockResolvedValue(new Map([[hostId, { code: "Room1234" }]])),
     } as unknown as RoomsService;
-    const gateway = new RoomsGateway(rooms, new SessionService());
+    const limiter = {
+      assertMutationAllowed: vi.fn().mockResolvedValue(undefined),
+    } as unknown as JoinLimiterService;
+    const gateway = new RoomsGateway(rooms, new SessionService(), limiter);
     const hostSocket = {
       data: { participant: hostParticipant },
       emit: vi.fn(),
@@ -54,5 +58,6 @@ describe("participant gateway", () => {
       "room.state",
       expect.objectContaining({ code: "Room1234" }),
     );
+    expect(rooms.getStates).toHaveBeenCalledOnce();
   });
 });

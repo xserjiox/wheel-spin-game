@@ -28,12 +28,21 @@ describe("own proposals", () => {
     const updateMany = vi.fn().mockResolvedValue({ count: 1 });
     const roomUpdate = vi.fn().mockResolvedValue({});
     const tx = {
+      $queryRaw: vi.fn().mockResolvedValue([
+        {
+          status: RoomStatus.SPINNING,
+          expiresAt: new Date("2099-01-01T00:00:00.000Z"),
+        },
+      ]),
       proposal: { updateMany },
       room: { update: roomUpdate },
     };
     const prisma = {
       room: {
-        findUnique: vi.fn().mockResolvedValue({ status: RoomStatus.SPINNING }),
+        findUnique: vi.fn().mockResolvedValue({
+          status: RoomStatus.SPINNING,
+          expiresAt: new Date("2099-01-01T00:00:00.000Z"),
+        }),
       },
       $transaction: vi.fn(async (operation) => operation(tx)),
     } as unknown as PrismaService;
@@ -57,12 +66,21 @@ describe("own proposals", () => {
   it("does not delete another guest's or an already handled proposal", async () => {
     const roomUpdate = vi.fn();
     const tx = {
+      $queryRaw: vi.fn().mockResolvedValue([
+        {
+          status: RoomStatus.LOBBY,
+          expiresAt: new Date("2099-01-01T00:00:00.000Z"),
+        },
+      ]),
       proposal: { deleteMany: vi.fn().mockResolvedValue({ count: 0 }) },
       room: { update: roomUpdate },
     };
     const prisma = {
       room: {
-        findUnique: vi.fn().mockResolvedValue({ status: RoomStatus.LOBBY }),
+        findUnique: vi.fn().mockResolvedValue({
+          status: RoomStatus.LOBBY,
+          expiresAt: new Date("2099-01-01T00:00:00.000Z"),
+        }),
       },
       $transaction: vi.fn(async (operation) => operation(tx)),
     } as unknown as PrismaService;
@@ -77,9 +95,16 @@ describe("own proposals", () => {
   it("accepts the latest proposal label after atomically claiming it", async () => {
     const optionCreate = vi.fn().mockResolvedValue({});
     const tx = {
+      $queryRaw: vi.fn().mockResolvedValue([
+        {
+          status: RoomStatus.LOBBY,
+          expiresAt: new Date("2099-01-01T00:00:00.000Z"),
+        },
+      ]),
       proposal: {
         updateMany: vi.fn().mockResolvedValue({ count: 1 }),
         findUniqueOrThrow: vi.fn().mockResolvedValue({ label: "Latest label" }),
+        delete: vi.fn().mockResolvedValue({}),
       },
       option: {
         count: vi.fn().mockResolvedValue(2),
@@ -89,7 +114,10 @@ describe("own proposals", () => {
     };
     const prisma = {
       room: {
-        findUnique: vi.fn().mockResolvedValue({ status: RoomStatus.LOBBY }),
+        findUnique: vi.fn().mockResolvedValue({
+          status: RoomStatus.LOBBY,
+          expiresAt: new Date("2099-01-01T00:00:00.000Z"),
+        }),
       },
       $transaction: vi.fn(async (operation) => operation(tx)),
     } as unknown as PrismaService;
@@ -108,6 +136,9 @@ describe("own proposals", () => {
         label: "Latest label",
         position: 2,
       },
+    });
+    expect(tx.proposal.delete).toHaveBeenCalledWith({
+      where: { id: "proposal-id" },
     });
   });
 });

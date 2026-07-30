@@ -16,6 +16,8 @@ while guests join through an invite link and anonymously suggest new slots.
 - Up to 20 local slot templates without an account or backend storage
 - The 10 most recent spin results
 - Room expiration after 7 days of inactivity
+- Automatic pruning to the 10 most recent completed spins
+- Redis-backed request and WebSocket rate limits with expiring keys
 - A responsive, mobile-first interface based on the original prototype
 
 ## Limits
@@ -45,7 +47,8 @@ PostgreSQL and Redis remain accessible only through Railway's private network.
 The frontend follows Feature-Sliced Design:
 
 - `app` — application initialization, routing, and global styles
-- `pages` — route components for `/`, `/r/:code`, and the fallback page
+- `pages` — route components for localized home pages, `/r/:code`, and the
+  fallback page
 - `features` — user actions that are not tied to a single page
 - `entities` — room model, API, realtime state, and UI
 - `shared` — HTTP client, i18n, router helpers, and reusable UI
@@ -111,13 +114,53 @@ with ESLint, Prettier, TypeScript, or test failures.
 3. Add the following private variables to the application service:
    - `DATABASE_URL` referencing the PostgreSQL service
    - `REDIS_URL` referencing the Redis service
+   - `REDIS_REQUIRED=true`
+   - `REDIS_PREFIX=wheel-spin:production`
+   - `APP_ENV=production`
    - `COOKIE_SECURE=true`
+   - `PUBLIC_URL` with the canonical public origin, for example
+     `https://wheel.example.com`
 4. Create a public domain only for the application service.
 
 `railway.json` configures the Dockerfile build, Prisma migration before startup,
 the healthcheck, and one replica in EU West. The Redis adapter already supports
 multiple replicas, while spin initiation is protected by an atomic room-status
 update in PostgreSQL.
+
+For PostgreSQL, append an explicit Prisma pool limit to `DATABASE_URL` after
+checking the database's `max_connections`. With one application replica, a
+conservative starting point is
+`connection_limit=5&pool_timeout=10&connect_timeout=5`. Use `&` instead of `?`
+when the URL already contains query parameters.
+
+Create a separate Railway Cron service from the same image with no public
+domain. Run `npm run db:cleanup-expired` once per hour. The API also performs a
+small guarded cleanup at startup and once per hour, but the Cron service keeps
+retention independent from application restarts.
+
+Before the first deployment of the retention changes, create a PostgreSQL
+backup. After deploying the code that prevents new growth, inspect and remove
+old processed proposals and spin snapshots in bounded batches:
+
+```bash
+npm run build
+npm run db:cleanup-storage -- --dry-run
+npm run db:cleanup-storage -- --batch-size=500
+```
+
+The cleanup command is idempotent and uses PostgreSQL advisory locks. After a
+large cleanup, run `VACUUM (ANALYZE) "Spin";` and
+`VACUUM (ANALYZE) "Proposal";`. Do not run `VACUUM FULL` without a maintenance
+window because it takes an exclusive table lock.
+
+Production Redis keys use the configured prefix and all rate-limit keys have a
+TTL. `/health` is a liveness endpoint; `/ready` verifies PostgreSQL and required
+Redis connectivity.
+
+The production build pre-renders the indexable home pages at `/`, `/ru/`,
+`/uk/`, `/de/`, and `/zh/`. Temporary room, API, Socket.IO, and health URLs are
+served with `X-Robots-Tag: noindex, nofollow`. The application also exposes
+`/robots.txt` and a localized `/sitemap.xml`.
 
 ## Project structure
 
