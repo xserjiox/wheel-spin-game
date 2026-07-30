@@ -21,7 +21,9 @@
     "verify": "npm run validate && npm run build",
     "db:generate": "npm run db:generate --workspace @wheel-spin/api",
     "db:migrate": "npm run db:migrate --workspace @wheel-spin/api",
-    "db:deploy": "npm run db:deploy --workspace @wheel-spin/api"
+    "db:deploy": "npm run db:deploy --workspace @wheel-spin/api",
+    "db:cleanup-expired": "npm run db:cleanup-expired --workspace @wheel-spin/api --",
+    "db:cleanup-storage": "npm run db:cleanup-storage --workspace @wheel-spin/api --"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
