@@ -3,6 +3,7 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { PrismaService } from "../../../shared/database/prisma.service";
+import { RedisService } from "../../../shared/redis/redis.service";
 
 const PUBLIC_ORIGIN_TOKEN = "__PUBLIC_ORIGIN__";
 const LOCALIZED_PAGES = [
@@ -27,7 +28,10 @@ export class SystemController {
   );
   private readonly pageCache = new Map<string, string>();
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly redis: RedisService,
+  ) {}
 
   private publicOrigin(request: FastifyRequest): string {
     const configuredOrigin = process.env.PUBLIC_URL;
@@ -166,6 +170,7 @@ export class SystemController {
   @Get("ready")
   async ready() {
     await this.prisma.$queryRaw`SELECT 1`;
-    return { ok: true };
+    const redis = await this.redis.ping();
+    return { ok: true, redis };
   }
 }

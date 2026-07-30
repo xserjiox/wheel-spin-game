@@ -18,7 +18,13 @@ describe("participant kick", () => {
   it("removes a guest membership and keeps the room active", async () => {
     const participantDelete = vi.fn().mockReturnValue({ operation: "delete" });
     const roomUpdate = vi.fn().mockReturnValue({ operation: "update" });
-    const prisma = {
+    const transaction = {
+      $queryRaw: vi.fn().mockResolvedValue([
+        {
+          status: "LOBBY",
+          expiresAt: new Date("2099-01-01T00:00:00.000Z"),
+        },
+      ]),
       participant: {
         findFirst: vi.fn().mockResolvedValue({
           id: "guest-id",
@@ -27,7 +33,17 @@ describe("participant kick", () => {
         delete: participantDelete,
       },
       room: { update: roomUpdate },
-      $transaction: vi.fn().mockResolvedValue([]),
+    };
+    const prisma = {
+      room: {
+        findUnique: vi.fn().mockResolvedValue({
+          status: "LOBBY",
+          expiresAt: new Date("2099-01-01T00:00:00.000Z"),
+        }),
+      },
+      $transaction: vi.fn((operation: (client: typeof transaction) => Promise<void>) =>
+        operation(transaction),
+      ),
     } as unknown as PrismaService;
     const service = new RoomsService(prisma, new SessionService());
 
@@ -55,13 +71,30 @@ describe("participant kick", () => {
   });
 
   it("does not allow removing the host", async () => {
-    const prisma = {
+    const transaction = {
+      $queryRaw: vi.fn().mockResolvedValue([
+        {
+          status: "LOBBY",
+          expiresAt: new Date("2099-01-01T00:00:00.000Z"),
+        },
+      ]),
       participant: {
         findFirst: vi.fn().mockResolvedValue({
           id: host.id,
           role: ParticipantRole.HOST,
         }),
       },
+    };
+    const prisma = {
+      room: {
+        findUnique: vi.fn().mockResolvedValue({
+          status: "LOBBY",
+          expiresAt: new Date("2099-01-01T00:00:00.000Z"),
+        }),
+      },
+      $transaction: vi.fn((operation: (client: typeof transaction) => Promise<void>) =>
+        operation(transaction),
+      ),
     } as unknown as PrismaService;
     const service = new RoomsService(prisma, new SessionService());
 

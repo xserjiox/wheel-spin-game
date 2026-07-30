@@ -15,18 +15,31 @@ const guest = {
 
 describe("proposals during a spin", () => {
   it("lets a guest queue a proposal without changing the active spin", async () => {
-    const proposalCreate = vi.fn().mockReturnValue({ operation: "create" });
-    const roomUpdate = vi.fn().mockReturnValue({ operation: "update" });
-    const prisma = {
-      room: {
-        findUnique: vi.fn().mockResolvedValue({ status: RoomStatus.SPINNING }),
-        update: roomUpdate,
-      },
+    const proposalCreate = vi.fn().mockResolvedValue({});
+    const roomUpdate = vi.fn().mockResolvedValue({});
+    const transaction = {
+      $queryRaw: vi.fn().mockResolvedValue([
+        {
+          status: RoomStatus.SPINNING,
+          expiresAt: new Date("2099-01-01T00:00:00.000Z"),
+        },
+      ]),
       proposal: {
         count: vi.fn().mockResolvedValue(0),
         create: proposalCreate,
       },
-      $transaction: vi.fn().mockResolvedValue([]),
+      room: { update: roomUpdate },
+    };
+    const prisma = {
+      room: {
+        findUnique: vi.fn().mockResolvedValue({
+          status: RoomStatus.SPINNING,
+          expiresAt: new Date("2099-01-01T00:00:00.000Z"),
+        }),
+      },
+      $transaction: vi.fn((operation: (client: typeof transaction) => Promise<void>) =>
+        operation(transaction),
+      ),
     } as unknown as PrismaService;
     const service = new RoomsService(prisma, new SessionService());
 

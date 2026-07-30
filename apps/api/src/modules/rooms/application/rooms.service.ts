@@ -25,18 +25,63 @@ import type {
 import { assignAvailableName, normalizeDisplayName } from "../domain/name-policy";
 import { calculateFinalRotation } from "../domain/wheel-engine";
 
-const participantSelect = {
+const sessionParticipantSelect = {
   id: true,
   roomId: true,
   displayName: true,
-  normalizedName: true,
   role: true,
-  sessionHash: true,
 } satisfies Prisma.ParticipantSelect;
 
 type SessionParticipant = Prisma.ParticipantGetPayload<{
-  select: typeof participantSelect;
+  select: typeof sessionParticipantSelect;
 }>;
+
+const roomStateSelect = {
+  code: true,
+  title: true,
+  status: true,
+  version: true,
+  activeSpinId: true,
+  passwordHash: true,
+  expiresAt: true,
+  options: { orderBy: { position: "asc" as const } },
+  proposals: {
+    where: { status: ProposalStatus.PENDING },
+    orderBy: { createdAt: "asc" as const },
+    select: {
+      id: true,
+      participantId: true,
+      label: true,
+      createdAt: true,
+    },
+  },
+  spins: {
+    orderBy: [{ createdAt: "desc" as const }, { id: "desc" as const }],
+    take: HISTORY_LIMIT + 1,
+    select: {
+      id: true,
+      winnerLabel: true,
+      createdAt: true,
+    },
+  },
+  participants: {
+    orderBy: { connectedAt: "asc" as const },
+    select: { id: true, displayName: true, role: true, canSpin: true },
+  },
+} satisfies Prisma.RoomSelect;
+
+const activeSpinSelect = {
+  id: true,
+  optionsSnapshot: true,
+  winnerIndex: true,
+  winnerLabel: true,
+  startedAt: true,
+  durationMs: true,
+  finalRotation: true,
+} satisfies Prisma.SpinSelect;
+
+type RoomStateRecord = Prisma.RoomGetPayload<{ select: typeof roomStateSelect }>;
+type ActiveSpinRecord = Prisma.SpinGetPayload<{ select: typeof activeSpinSelect }>;
 
 @Injectable()
 export class RoomsService {
@@ -76,7 +121,7 @@ export class RoomsService {
               create: options.map((label, position) => ({ label, position })),
             },
           },
-          include: { participants: { select: participantSelect } },
+          include: { participants: { select: sessionParticipantSelect } },
         });
         const host = room.participants[0];
         return {
@@ -128,9 +173,14 @@ export class RoomsService {
   ): Promise<{ token: string; state: PublicRoomState }> {
     const room = await this.prisma.room.findUnique({
       where: { code },
-      include: { participants: { select: participantSelect } },
+      select: {
+        id: true,
+        passwordHash: true,
+        status: true,
+        expiresAt: true,
+      },
     });
-    if (!room || room.status === RoomStatus.CLOSED || room.expiresAt <= new Date()) {
+    if (!this.isRoomActive(room)) {
       throw new NotFoundException("Комната не найдена или уже закрыта");
     }
     if (
@@ -139,26 +189,45 @@ export class RoomsService {
     ) {
       throw new ForbiddenException("Неверный пароль");
     }
-    if (room.participants.length >= MAX_PARTICIPANTS) {
-      throw new BadRequestException("В комнате уже максимальное число участников");
-    }
 
-    const displayName = assignAvailableName(
-      input.name,
-      room.participants.map((participant) => participant.normalizedName),
-    );
     const session = this.sessions.create();
-    const participant = await this.prisma.participant.create({
-      data: {
-        roomId: room.id,
-        displayName,
-        normalizedName: normalizeDisplayName(displayName),
-        role: ParticipantRole.GUEST,
-        sessionHash: session.hash,
-      },
-      select: participantSelect,
+    const participant = await this.prisma.$transaction(async (tx) => {
+      await this.lockRoom(tx, room.id);
+      const currentRoom = await tx.room.findUnique({
+        where: { id: room.id },
+        select: { status: true, expiresAt: true },
+      });
+      if (!this.isRoomActive(currentRoom)) {
+        throw new NotFoundException("Комната не найдена или уже закрыта");
+      }
+
+      const participants = await tx.participant.findMany({
+        where: { roomId: room.id },
+        select: { normalizedName: true },
+      });
+      if (participants.length >= MAX_PARTICIPANTS) {
+        throw new BadRequestException("В комнате уже максимальное число участников");
+      }
+      const displayName = assignAvailableName(
+        input.name,
+        participants.map((current) => current.normalizedName),
+      );
+      const created = await tx.participant.create({
+        data: {
+          roomId: room.id,
+          displayName,
+          normalizedName: normalizeDisplayName(displayName),
+          role: ParticipantRole.GUEST,
+          sessionHash: session.hash,
+        },
+        select: sessionParticipantSelect,
+      });
+      await tx.room.update({
+        where: { id: room.id },
+        data: this.activityData(),
+      });
+      return created;
     });
-    await this.touch(room.id);
     return { token: session.token, state: await this.getState(code, participant) };
   }
 
@@ -169,7 +238,7 @@ export class RoomsService {
         sessionHash: this.sessions.hash(token),
         room: { code, expiresAt: { gt: new Date() }, status: { not: "CLOSED" } },
       },
-      select: participantSelect,
+      select: sessionParticipantSelect,
     });
     if (!participant) throw new ForbiddenException("Сессия комнаты недействительна");
     await this.prisma.participant.update({
@@ -263,52 +332,57 @@ export class RoomsService {
     participant: SessionParticipant,
     onlineParticipantIds: ReadonlySet<string> = new Set(),
   ): Promise<PublicRoomState> {
+    const states = await this.getStates(code, [participant], onlineParticipantIds);
+    const state = states.get(participant.id);
+    if (!state) throw new ForbiddenException("Сессия комнаты недействительна");
+    return state;
+  }
+
+  async getStates(
+    code: string,
+    participants: readonly SessionParticipant[],
+    onlineParticipantIds: ReadonlySet<string> = new Set(),
+  ): Promise<Map<string, PublicRoomState>> {
     await this.finalizeSpinIfNeeded(code);
     const room = await this.prisma.room.findUnique({
       where: { code },
-      include: {
-        options: { orderBy: { position: "asc" } },
-        proposals: {
-          where: { status: ProposalStatus.PENDING },
-          orderBy: { createdAt: "asc" },
-          select: {
-            id: true,
-            participantId: true,
-            label: true,
-            createdAt: true,
-          },
-        },
-        spins: {
-          orderBy: { createdAt: "desc" },
-          take: HISTORY_LIMIT + 1,
-          select: {
-            id: true,
-            winnerLabel: true,
-            createdAt: true,
-            optionsSnapshot: true,
-            winnerIndex: true,
-            startedAt: true,
-            durationMs: true,
-            finalRotation: true,
-          },
-        },
-        participants: {
-          orderBy: { connectedAt: "asc" },
-          select: { id: true, displayName: true, role: true, canSpin: true },
-        },
-      },
+      select: roomStateSelect,
     });
-    if (!room) throw new NotFoundException("Комната не найдена");
-    const currentParticipant = room.participants.find(
-      (roomParticipant) => roomParticipant.id === participant.id,
-    );
+    if (!this.isRoomActive(room)) {
+      throw new NotFoundException("Комната не найдена или уже закрыта");
+    }
 
     const activeRecord =
       room.status === RoomStatus.SPINNING && room.activeSpinId
-        ? (room.spins.find((spin) => spin.id === room.activeSpinId) ??
-          (await this.prisma.spin.findUnique({ where: { id: room.activeSpinId } })))
+        ? await this.prisma.spin.findUnique({
+            where: { id: room.activeSpinId },
+            select: activeSpinSelect,
+          })
         : null;
 
+    const states = new Map<string, PublicRoomState>();
+    participants.forEach((participant) => {
+      const currentParticipant = room.participants.find(
+        (roomParticipant) => roomParticipant.id === participant.id,
+      );
+      if (!currentParticipant) return;
+      states.set(
+        participant.id,
+        this.buildState(room, activeRecord, participant, onlineParticipantIds),
+      );
+    });
+    return states;
+  }
+
+  private buildState(
+    room: RoomStateRecord,
+    activeRecord: ActiveSpinRecord | null,
+    participant: SessionParticipant,
+    onlineParticipantIds: ReadonlySet<string>,
+  ): PublicRoomState {
+    const currentParticipant = room.participants.find(
+      (roomParticipant) => roomParticipant.id === participant.id,
+    );
     return {
       code: room.code,
       title: room.title,
@@ -380,9 +454,12 @@ export class RoomsService {
   ): Promise<void> {
     this.assertHost(participant);
     await this.assertEditable(participant.roomId);
-    await this.prisma.room.update({
-      where: { id: participant.roomId },
-      data: { title, version: { increment: 1 }, ...this.activityData() },
+    await this.prisma.$transaction(async (tx) => {
+      await this.lockRoom(tx, participant.roomId, RoomStatus.LOBBY);
+      await tx.room.update({
+        where: { id: participant.roomId },
+        data: { title, version: { increment: 1 }, ...this.activityData() },
+      });
     });
   }
 
@@ -392,13 +469,17 @@ export class RoomsService {
   ): Promise<void> {
     this.assertHost(participant);
     await this.assertEditable(participant.roomId);
-    await this.prisma.room.update({
-      where: { id: participant.roomId },
-      data: {
-        passwordHash: password ? await hashPassword(password) : null,
-        version: { increment: 1 },
-        ...this.activityData(),
-      },
+    const passwordHash = password ? await hashPassword(password) : null;
+    await this.prisma.$transaction(async (tx) => {
+      await this.lockRoom(tx, participant.roomId, RoomStatus.LOBBY);
+      await tx.room.update({
+        where: { id: participant.roomId },
+        data: {
+          passwordHash,
+          version: { increment: 1 },
+          ...this.activityData(),
+        },
+      });
     });
   }
 
@@ -406,6 +487,7 @@ export class RoomsService {
     this.assertHost(participant);
     await this.assertEditable(participant.roomId);
     await this.prisma.$transaction(async (tx) => {
+      await this.lockRoom(tx, participant.roomId, RoomStatus.LOBBY);
       const count = await tx.option.count({ where: { roomId: participant.roomId } });
       if (count >= MAX_OPTIONS) throw new BadRequestException("Достигнут лимит слотов");
       await tx.option.create({
@@ -422,6 +504,7 @@ export class RoomsService {
     this.assertHost(participant);
     await this.assertEditable(participant.roomId);
     await this.prisma.$transaction(async (tx) => {
+      await this.lockRoom(tx, participant.roomId, RoomStatus.LOBBY);
       const option = await tx.option.findFirst({
         where: { id: optionId, roomId: participant.roomId },
       });
@@ -449,24 +532,26 @@ export class RoomsService {
       throw new BadRequestException("Host может добавить слот напрямую");
     }
     await this.assertAcceptingProposals(participant.roomId);
-    const pending = await this.prisma.proposal.count({
-      where: {
-        participantId: participant.id,
-        status: ProposalStatus.PENDING,
-      },
-    });
-    if (pending >= MAX_PENDING_PROPOSALS) {
-      throw new BadRequestException("У вас уже 10 предложений на рассмотрении");
-    }
-    await this.prisma.$transaction([
-      this.prisma.proposal.create({
+    await this.prisma.$transaction(async (tx) => {
+      await this.lockRoom(tx, participant.roomId);
+      await this.lockParticipant(tx, participant.id);
+      const pending = await tx.proposal.count({
+        where: {
+          participantId: participant.id,
+          status: ProposalStatus.PENDING,
+        },
+      });
+      if (pending >= MAX_PENDING_PROPOSALS) {
+        throw new BadRequestException("У вас уже 10 предложений на рассмотрении");
+      }
+      await tx.proposal.create({
         data: { roomId: participant.roomId, participantId: participant.id, label },
-      }),
-      this.prisma.room.update({
+      });
+      await tx.room.update({
         where: { id: participant.roomId },
         data: { version: { increment: 1 }, ...this.activityData() },
-      }),
-    ]);
+      });
+    });
   }
 
   async updateOwnProposal(
@@ -476,6 +561,7 @@ export class RoomsService {
   ): Promise<void> {
     await this.assertAcceptingProposals(participant.roomId);
     await this.prisma.$transaction(async (tx) => {
+      await this.lockRoom(tx, participant.roomId);
       const result = await tx.proposal.updateMany({
         where: {
           id: proposalId,
@@ -501,6 +587,7 @@ export class RoomsService {
   ): Promise<void> {
     await this.assertAcceptingProposals(participant.roomId);
     await this.prisma.$transaction(async (tx) => {
+      await this.lockRoom(tx, participant.roomId);
       const result = await tx.proposal.deleteMany({
         where: {
           id: proposalId,
@@ -527,6 +614,7 @@ export class RoomsService {
     this.assertHost(participant);
     await this.assertEditable(participant.roomId);
     await this.prisma.$transaction(async (tx) => {
+      await this.lockRoom(tx, participant.roomId, RoomStatus.LOBBY);
       const claimed = await tx.proposal.updateMany({
         where: {
           id: proposalId,
@@ -562,6 +650,7 @@ export class RoomsService {
         where: { id: participant.roomId },
         data: { version: { increment: 1 }, ...this.activityData() },
       });
+      await tx.proposal.delete({ where: { id: proposalId } });
     });
   }
 
@@ -570,24 +659,25 @@ export class RoomsService {
     targetParticipantId: string,
   ): Promise<void> {
     this.assertHost(participant);
-    const target = await this.prisma.participant.findFirst({
-      where: { id: targetParticipantId, roomId: participant.roomId },
-      select: { id: true, role: true },
-    });
-    if (!target) {
-      throw new NotFoundException("PARTICIPANT_NOT_FOUND");
-    }
-    if (target.role === ParticipantRole.HOST) {
-      throw new BadRequestException("CANNOT_REMOVE_HOST");
-    }
-
-    await this.prisma.$transaction([
-      this.prisma.participant.delete({ where: { id: target.id } }),
-      this.prisma.room.update({
+    await this.assertRoomActive(participant.roomId);
+    await this.prisma.$transaction(async (tx) => {
+      await this.lockRoom(tx, participant.roomId);
+      const target = await tx.participant.findFirst({
+        where: { id: targetParticipantId, roomId: participant.roomId },
+        select: { id: true, role: true },
+      });
+      if (!target) {
+        throw new NotFoundException("PARTICIPANT_NOT_FOUND");
+      }
+      if (target.role === ParticipantRole.HOST) {
+        throw new BadRequestException("CANNOT_REMOVE_HOST");
+      }
+      await tx.participant.delete({ where: { id: target.id } });
+      await tx.room.update({
         where: { id: participant.roomId },
         data: { version: { increment: 1 }, ...this.activityData() },
-      }),
-    ]);
+      });
+    });
   }
 
   async setSpinPermission(
@@ -596,27 +686,28 @@ export class RoomsService {
     canSpin: boolean,
   ): Promise<void> {
     this.assertHost(participant);
-    const target = await this.prisma.participant.findFirst({
-      where: { id: targetParticipantId, roomId: participant.roomId },
-      select: { id: true, role: true },
-    });
-    if (!target) {
-      throw new NotFoundException("PARTICIPANT_NOT_FOUND");
-    }
-    if (target.role === ParticipantRole.HOST) {
-      throw new BadRequestException("CANNOT_CHANGE_HOST_SPIN_PERMISSION");
-    }
-
-    await this.prisma.$transaction([
-      this.prisma.participant.update({
+    await this.assertRoomActive(participant.roomId);
+    await this.prisma.$transaction(async (tx) => {
+      await this.lockRoom(tx, participant.roomId);
+      const target = await tx.participant.findFirst({
+        where: { id: targetParticipantId, roomId: participant.roomId },
+        select: { id: true, role: true },
+      });
+      if (!target) {
+        throw new NotFoundException("PARTICIPANT_NOT_FOUND");
+      }
+      if (target.role === ParticipantRole.HOST) {
+        throw new BadRequestException("CANNOT_CHANGE_HOST_SPIN_PERMISSION");
+      }
+      await tx.participant.update({
         where: { id: target.id },
         data: { canSpin },
-      }),
-      this.prisma.room.update({
+      });
+      await tx.room.update({
         where: { id: participant.roomId },
         data: { version: { increment: 1 }, ...this.activityData() },
-      }),
-    ]);
+      });
+    });
   }
 
   async spin(
@@ -624,6 +715,7 @@ export class RoomsService {
     requestId: string,
     durationMs: number,
   ): Promise<PublicRoomState["activeSpin"]> {
+    await this.assertRoomActive(participant.roomId);
     await this.assertCanSpin(participant);
     const existing = await this.prisma.spin.findUnique({
       where: { roomId_requestId: { roomId: participant.roomId, requestId } },
@@ -642,7 +734,11 @@ export class RoomsService {
 
     const result = await this.prisma.$transaction(async (tx) => {
       const claim = await tx.room.updateMany({
-        where: { id: participant.roomId, status: RoomStatus.LOBBY },
+        where: {
+          id: participant.roomId,
+          status: RoomStatus.LOBBY,
+          expiresAt: { gt: new Date() },
+        },
         data: { status: RoomStatus.SPINNING },
       });
       if (claim.count !== 1) throw new BadRequestException("Колесо уже вращается");
@@ -705,16 +801,32 @@ export class RoomsService {
   }
 
   async finishSpin(roomId: string, spinId: string): Promise<boolean> {
-    const result = await this.prisma.room.updateMany({
-      where: { id: roomId, status: RoomStatus.SPINNING, activeSpinId: spinId },
-      data: {
-        status: RoomStatus.LOBBY,
-        activeSpinId: null,
-        version: { increment: 1 },
-        ...this.activityData(),
-      },
+    return this.prisma.$transaction(async (tx) => {
+      const result = await tx.room.updateMany({
+        where: { id: roomId, status: RoomStatus.SPINNING, activeSpinId: spinId },
+        data: {
+          status: RoomStatus.LOBBY,
+          activeSpinId: null,
+          version: { increment: 1 },
+          ...this.activityData(),
+        },
+      });
+      if (result.count !== 1) return false;
+
+      const retained = await tx.spin.findMany({
+        where: { roomId },
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        take: HISTORY_LIMIT,
+        select: { id: true },
+      });
+      await tx.spin.deleteMany({
+        where: {
+          roomId,
+          id: { notIn: retained.map(({ id }) => id) },
+        },
+      });
+      return true;
     });
-    return result.count === 1;
   }
 
   async cancelSpin(participant: SessionParticipant): Promise<string> {
@@ -759,7 +871,7 @@ export class RoomsService {
       where: { id: room.activeSpinId },
       select: { startedAt: true, durationMs: true },
     });
-    if (spin && spin.startedAt.getTime() + spin.durationMs <= Date.now()) {
+    if (!spin || spin.startedAt.getTime() + spin.durationMs <= Date.now()) {
       await this.finishSpin(room.id, room.activeSpinId);
     }
   }
@@ -784,9 +896,9 @@ export class RoomsService {
   private async assertEditable(roomId: string): Promise<void> {
     const room = await this.prisma.room.findUnique({
       where: { id: roomId },
-      select: { status: true },
+      select: { status: true, expiresAt: true },
     });
-    if (!room || room.status !== RoomStatus.LOBBY) {
+    if (!this.isRoomActive(room) || room.status !== RoomStatus.LOBBY) {
       throw new BadRequestException("Дождитесь окончания вращения");
     }
   }
@@ -794,18 +906,61 @@ export class RoomsService {
   private async assertAcceptingProposals(roomId: string): Promise<void> {
     const room = await this.prisma.room.findUnique({
       where: { id: roomId },
-      select: { status: true },
+      select: { status: true, expiresAt: true },
     });
-    if (!room || room.status === RoomStatus.CLOSED) {
+    if (!this.isRoomActive(room)) {
       throw new BadRequestException("Комната не найдена или уже закрыта");
     }
   }
 
-  private async touch(roomId: string): Promise<void> {
-    await this.prisma.room.update({
+  private async assertRoomActive(roomId: string): Promise<void> {
+    const room = await this.prisma.room.findUnique({
       where: { id: roomId },
-      data: this.activityData(),
+      select: { status: true, expiresAt: true },
     });
+    if (!this.isRoomActive(room)) {
+      throw new BadRequestException("Комната не найдена или уже закрыта");
+    }
+  }
+
+  private isRoomActive(
+    room: { status: RoomStatus; expiresAt: Date } | null,
+  ): room is { status: RoomStatus; expiresAt: Date } {
+    return Boolean(
+      room && room.status !== RoomStatus.CLOSED && room.expiresAt > new Date(),
+    );
+  }
+
+  private async lockRoom(
+    tx: Prisma.TransactionClient,
+    roomId: string,
+    requiredStatus?: RoomStatus,
+  ): Promise<void> {
+    const rooms = await tx.$queryRaw<Array<{ status: RoomStatus; expiresAt: Date }>>`
+      SELECT status, "expiresAt"
+      FROM "Room"
+      WHERE id = ${roomId}
+      FOR UPDATE
+    `;
+    const room = rooms[0] ?? null;
+    if (!this.isRoomActive(room)) {
+      throw new BadRequestException("Комната не найдена или уже закрыта");
+    }
+    if (requiredStatus && room.status !== requiredStatus) {
+      throw new BadRequestException("Дождитесь окончания вращения");
+    }
+  }
+
+  private async lockParticipant(
+    tx: Prisma.TransactionClient,
+    participantId: string,
+  ): Promise<void> {
+    await tx.$queryRaw`
+      SELECT id
+      FROM "Participant"
+      WHERE id = ${participantId}
+      FOR UPDATE
+    `;
   }
 
   private activityData(): { lastActivityAt: Date; expiresAt: Date } {

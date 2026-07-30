@@ -28,6 +28,10 @@ async function bootstrap(): Promise<void> {
   const socketAdapter = new RedisIoAdapter(app);
   await socketAdapter.connect();
   app.useWebSocketAdapter(socketAdapter);
+  app
+    .getHttpAdapter()
+    .getInstance()
+    .addHook("onClose", async () => socketAdapter.disconnect());
 
   app.enableShutdownHooks();
   await app.listen(Number(process.env.PORT ?? 3000), "0.0.0.0");

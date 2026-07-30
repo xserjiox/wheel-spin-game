@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   HttpCode,
   Ip,
@@ -13,6 +14,7 @@ import {
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { roomCookieName } from "../../../../shared/config/room.config";
 import { parseRequest } from "../../../../shared/http/parse-request";
+import { RateLimitExceededException } from "../../../../shared/redis/rate-limiter.service";
 import { RoomsService } from "../../application/rooms.service";
 import {
   createRoomSchema,
@@ -31,7 +33,12 @@ export class RoomsController {
   ) {}
 
   @Post()
-  async create(@Body() body: unknown, @Res({ passthrough: true }) reply: FastifyReply) {
+  async create(
+    @Body() body: unknown,
+    @Ip() ip: string,
+    @Res({ passthrough: true }) reply: FastifyReply,
+  ) {
+    await this.withRateLimitHeader(reply, () => this.limiter.assertCreateAllowed(ip));
     const input = parseRequest(createRoomSchema, body);
     const result = await this.rooms.create(input);
     this.setSessionCookie(reply, result.code, result.token);
@@ -62,15 +69,18 @@ export class RoomsController {
   ) {
     const code = parseRequest(roomCodeSchema, rawCode);
     const input = parseRequest(joinRoomSchema, body);
-    const limitKey = `${ip}:${code}`;
-    this.limiter.assertAllowed(limitKey);
+    await this.withRateLimitHeader(reply, () =>
+      this.limiter.assertJoinAllowed(ip, code),
+    );
     try {
       const result = await this.rooms.join(code, input);
-      this.limiter.success(limitKey);
+      await this.limiter.successJoin(ip, code);
       this.setSessionCookie(reply, code, result.token);
       return { state: result.state };
     } catch (error) {
-      this.limiter.fail(limitKey);
+      if (error instanceof ForbiddenException) {
+        await this.limiter.failJoin(ip, code);
+      }
       throw error;
     }
   }
@@ -140,5 +150,19 @@ export class RoomsController {
 
   private clearSessionCookie(reply: FastifyReply, code: string): void {
     reply.clearCookie(roomCookieName(code), { path: "/" });
+  }
+
+  private async withRateLimitHeader(
+    reply: FastifyReply,
+    action: () => Promise<void>,
+  ): Promise<void> {
+    try {
+      await action();
+    } catch (error) {
+      if (error instanceof RateLimitExceededException) {
+        reply.header("Retry-After", String(error.retryAfterSeconds));
+      }
+      throw error;
+    }
   }
 }

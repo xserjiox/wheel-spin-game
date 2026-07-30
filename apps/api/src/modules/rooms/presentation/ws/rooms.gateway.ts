@@ -1,4 +1,4 @@
-import { Logger } from "@nestjs/common";
+import { Logger, OnModuleDestroy } from "@nestjs/common";
 import {
   ConnectedSocket,
   MessageBody,
@@ -19,6 +19,7 @@ import {
   proposalRemoveSchema,
   proposalReviewSchema,
   proposalUpdateSchema,
+  type PublicRoomState,
   roomCodeSchema,
   spinSchema,
   titleSchema,
@@ -26,13 +27,11 @@ import {
 import { roomCookieName } from "../../../../shared/config/room.config";
 import { SessionService } from "../../../../shared/security/session.service";
 import { RoomsService } from "../../application/rooms.service";
+import { JoinLimiterService } from "../../infrastructure/join-limiter.service";
 
 type ClientData = {
   code?: string;
-  participant?: Pick<
-    Participant,
-    "id" | "roomId" | "displayName" | "normalizedName" | "role" | "sessionHash"
-  >;
+  participant?: Pick<Participant, "id" | "roomId" | "displayName" | "role">;
 };
 
 // Socket.IO event names are validated by the gateway handlers and Zod schemas.
@@ -44,15 +43,20 @@ type RoomSocket = Socket<any, any, any, ClientData>;
   transports: ["websocket"],
   cors: { origin: false },
 })
-export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class RoomsGateway
+  implements OnGatewayConnection, OnGatewayDisconnect, OnModuleDestroy
+{
   @WebSocketServer()
   private server: Server;
 
   private readonly logger = new Logger(RoomsGateway.name);
+  private readonly disconnectTimers = new Map<string, NodeJS.Timeout>();
+  private readonly spinTimers = new Map<string, NodeJS.Timeout>();
 
   constructor(
     private readonly rooms: RoomsService,
     private readonly sessions: SessionService,
+    private readonly limiter: JoinLimiterService,
   ) {}
 
   handleConnection(client: RoomSocket): void {
@@ -63,17 +67,30 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const code = client.data.code;
     if (!code) return;
 
-    setTimeout(() => {
+    const existing = this.disconnectTimers.get(code);
+    if (existing) clearTimeout(existing);
+    const timer = setTimeout(() => {
+      this.disconnectTimers.delete(code);
       void this.broadcastState(code).catch((error) => {
         this.logger.error("Не удалось обновить статусы участников", error);
       });
     }, 5_000);
+    timer.unref();
+    this.disconnectTimers.set(code, timer);
+  }
+
+  onModuleDestroy(): void {
+    this.disconnectTimers.forEach((timer) => clearTimeout(timer));
+    this.spinTimers.forEach((timer) => clearTimeout(timer));
+    this.disconnectTimers.clear();
+    this.spinTimers.clear();
   }
 
   @SubscribeMessage("room.join")
   async join(@ConnectedSocket() client: RoomSocket, @MessageBody() body: unknown) {
     return this.safe(async () => {
       const code = roomCodeSchema.parse((body as { code?: unknown })?.code);
+      await this.limiter.assertSocketJoinAllowed(client.handshake.address, code);
       const token = this.sessions.readCookie(
         client.handshake.headers.cookie,
         roomCookieName(code),
@@ -82,9 +99,9 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       client.data.code = code;
       client.data.participant = participant;
       await client.join(this.channel(code));
-      const onlineParticipantIds = await this.getOnlineParticipantIds(code);
-      const state = await this.rooms.getState(code, participant, onlineParticipantIds);
-      await this.broadcastState(code);
+      const states = await this.broadcastState(code);
+      const state = states.get(participant.id);
+      if (!state) throw new Error("Сессия комнаты недействительна");
       return { state };
     });
   }
@@ -94,7 +111,7 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: RoomSocket,
     @MessageBody() body: unknown,
   ) {
-    return this.mutate(client, async (participant) => {
+    return this.mutate(client, "room.updateTitle", async (participant) => {
       const { title } = titleSchema.parse(body);
       await this.rooms.updateTitle(client.data.code!, participant, title);
     });
@@ -105,7 +122,7 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: RoomSocket,
     @MessageBody() body: unknown,
   ) {
-    return this.mutate(client, async (participant) => {
+    return this.mutate(client, "room.updatePassword", async (participant) => {
       const { password } = passwordSchema.parse(body);
       await this.rooms.updatePassword(participant, password);
     });
@@ -113,7 +130,7 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage("option.add")
   async addOption(@ConnectedSocket() client: RoomSocket, @MessageBody() body: unknown) {
-    return this.mutate(client, async (participant) => {
+    return this.mutate(client, "option.add", async (participant) => {
       const { label } = optionSchema.parse(body);
       await this.rooms.addOption(participant, label);
     });
@@ -124,7 +141,7 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: RoomSocket,
     @MessageBody() body: unknown,
   ) {
-    return this.mutate(client, async (participant) => {
+    return this.mutate(client, "option.remove", async (participant) => {
       const { optionId } = optionRemoveSchema.parse(body);
       await this.rooms.removeOption(participant, optionId);
     });
@@ -135,7 +152,7 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: RoomSocket,
     @MessageBody() body: unknown,
   ) {
-    return this.mutate(client, async (participant) => {
+    return this.mutate(client, "proposal.create", async (participant) => {
       const { label } = optionSchema.parse(body);
       await this.rooms.createProposal(participant, label);
     });
@@ -146,7 +163,7 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: RoomSocket,
     @MessageBody() body: unknown,
   ) {
-    return this.mutate(client, async (participant) => {
+    return this.mutate(client, "proposal.review", async (participant) => {
       const { proposalId, decision } = proposalReviewSchema.parse(body);
       await this.rooms.reviewProposal(participant, proposalId, decision);
     });
@@ -157,7 +174,7 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: RoomSocket,
     @MessageBody() body: unknown,
   ) {
-    return this.mutate(client, async (participant) => {
+    return this.mutate(client, "proposal.update", async (participant) => {
       const { proposalId, label } = proposalUpdateSchema.parse(body);
       await this.rooms.updateOwnProposal(participant, proposalId, label);
     });
@@ -168,7 +185,7 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: RoomSocket,
     @MessageBody() body: unknown,
   ) {
-    return this.mutate(client, async (participant) => {
+    return this.mutate(client, "proposal.remove", async (participant) => {
       const { proposalId } = proposalRemoveSchema.parse(body);
       await this.rooms.removeOwnProposal(participant, proposalId);
     });
@@ -181,6 +198,7 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     return this.safe(async () => {
       const participant = this.requireParticipant(client);
+      await this.limiter.assertMutationAllowed(participant.id, "participant.kick");
       const { participantId } = participantKickSchema.parse(body);
       await this.rooms.kickParticipant(participant, participantId);
       await this.disconnectParticipant(
@@ -197,7 +215,7 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: RoomSocket,
     @MessageBody() body: unknown,
   ) {
-    return this.mutate(client, async (participant) => {
+    return this.mutate(client, "participant.spinPermission", async (participant) => {
       const { participantId, canSpin } = participantSpinPermissionSchema.parse(body);
       await this.rooms.setSpinPermission(participant, participantId, canSpin);
     });
@@ -207,6 +225,7 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async spin(@ConnectedSocket() client: RoomSocket, @MessageBody() body: unknown) {
     return this.safe(async () => {
       const participant = this.requireParticipant(client);
+      await this.limiter.assertMutationAllowed(participant.id, "spin.start");
       const { requestId, durationMs } = spinSchema.parse(body);
       const spin = await this.rooms.spin(participant, requestId, durationMs);
       await this.broadcastState(client.data.code!);
@@ -214,7 +233,8 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         0,
         new Date(spin!.startedAt).getTime() + spin!.durationMs - Date.now(),
       );
-      setTimeout(async () => {
+      const timer = setTimeout(async () => {
+        this.spinTimers.delete(spin!.id);
         try {
           if (await this.rooms.finishSpin(participant.roomId, spin!.id)) {
             await this.broadcastState(client.data.code!);
@@ -223,6 +243,10 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
           this.logger.error("Не удалось завершить вращение", error);
         }
       }, finishIn + 80);
+      timer.unref();
+      const previousTimer = this.spinTimers.get(spin!.id);
+      if (previousTimer) clearTimeout(previousTimer);
+      this.spinTimers.set(spin!.id, timer);
       return { spin };
     });
   }
@@ -231,7 +255,13 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async cancelSpin(@ConnectedSocket() client: RoomSocket) {
     return this.safe(async () => {
       const participant = this.requireParticipant(client);
+      await this.limiter.assertMutationAllowed(participant.id, "spin.cancel");
       const spinId = await this.rooms.cancelSpin(participant);
+      const timer = this.spinTimers.get(spinId);
+      if (timer) {
+        clearTimeout(timer);
+        this.spinTimers.delete(spinId);
+      }
       this.server.to(this.channel(client.data.code!)).emit("spin.canceled", { spinId });
       await this.broadcastState(client.data.code!);
       return {};
@@ -268,10 +298,12 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   private async mutate(
     client: RoomSocket,
+    actionName: string,
     action: (participant: NonNullable<ClientData["participant"]>) => Promise<void>,
   ) {
     return this.safe(async () => {
       const participant = this.requireParticipant(client);
+      await this.limiter.assertMutationAllowed(participant.id, actionName);
       await action(participant);
       await this.broadcastState(client.data.code!);
       return {};
@@ -287,34 +319,32 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return client.data.participant;
   }
 
-  private async broadcastState(code: string): Promise<void> {
+  private async broadcastState(code: string): Promise<Map<string, PublicRoomState>> {
     const sockets = await this.server.in(this.channel(code)).fetchSockets();
+    if (sockets.length === 0) return new Map<string, PublicRoomState>();
     const onlineParticipantIds = new Set(
       sockets
         .map((socket) => (socket.data.participant as ClientData["participant"])?.id)
         .filter((participantId): participantId is string => Boolean(participantId)),
     );
-    await Promise.all(
-      sockets.map(async (socket) => {
-        const participant = socket.data.participant as ClientData["participant"];
-        if (!participant) return;
-        const state = await this.rooms.getState(
-          code,
-          participant,
-          onlineParticipantIds,
-        );
-        socket.emit("room.state", state);
-      }),
-    );
-  }
-
-  private async getOnlineParticipantIds(code: string): Promise<Set<string>> {
-    const sockets = await this.server.in(this.channel(code)).fetchSockets();
-    return new Set(
-      sockets
-        .map((socket) => (socket.data.participant as ClientData["participant"])?.id)
-        .filter((participantId): participantId is string => Boolean(participantId)),
-    );
+    const participants = [
+      ...new Map(
+        sockets
+          .map((socket) => socket.data.participant as ClientData["participant"])
+          .filter(
+            (participant): participant is NonNullable<ClientData["participant"]> =>
+              Boolean(participant),
+          )
+          .map((participant) => [participant.id, participant]),
+      ).values(),
+    ];
+    const states = await this.rooms.getStates(code, participants, onlineParticipantIds);
+    sockets.forEach((socket) => {
+      const participant = socket.data.participant as ClientData["participant"];
+      const state = participant ? states.get(participant.id) : undefined;
+      if (state) socket.emit("room.state", state);
+    });
+    return states;
   }
 
   private channel(code: string): string {
