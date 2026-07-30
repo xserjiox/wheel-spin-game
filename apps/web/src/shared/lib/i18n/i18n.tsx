@@ -1373,7 +1373,7 @@ const zh: Dictionary = {
 
 const dictionaries: Record<Locale, Dictionary> = { en, ru, uk, de, zh };
 
-// SEO metadata intentionally shares the typed dictionaries with the provider.
+// Build-time pre-rendering and the provider share the same typed dictionaries.
 // eslint-disable-next-line react-refresh/only-export-components
 export function getLocaleSeoMeta(locale: Locale): {
   title: string;
