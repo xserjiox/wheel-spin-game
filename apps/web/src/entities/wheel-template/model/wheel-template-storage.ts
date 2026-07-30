@@ -5,7 +5,7 @@ import {
 } from "./types";
 
 export const WHEEL_TEMPLATE_LIMIT = 20;
-export const WHEEL_TEMPLATE_STORAGE_KEY = "wheel-spin-templates";
+export const WHEEL_TEMPLATE_STORAGE_KEY = "gatherwheel-templates";
 
 function isWheelTemplate(value: unknown): value is WheelTemplate {
   if (!value || typeof value !== "object") return false;

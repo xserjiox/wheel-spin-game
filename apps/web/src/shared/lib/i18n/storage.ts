@@ -1,1 +1,1 @@
-export const LOCALE_STORAGE_KEY = "wheel-spin-locale";
+export const LOCALE_STORAGE_KEY = "gatherwheel-locale";

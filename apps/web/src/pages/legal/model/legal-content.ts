@@ -20,7 +20,7 @@ const privacyEn: LegalDocument = {
   eyebrow: "LEGAL",
   title: "Privacy Policy",
   summary:
-    "This policy explains what personal data Wheel Spin processes when you create or join a shared room.",
+    "This policy explains what personal data GatherWheel processes when you create or join a shared room.",
   effectiveDateLabel: "Effective date",
   controllerTitle: "1. Controller",
   contactLabel: "Privacy contact",
@@ -42,7 +42,7 @@ const privacyEn: LegalDocument = {
         "To load the fonts used by the current interface — our legitimate interest in presenting a consistent interface (GDPR Article 6(1)(f)).",
       ],
       paragraphs: [
-        "Wheel Spin does not currently use personal data for advertising, profiling, or analytics.",
+        "GatherWheel does not currently use personal data for advertising, profiling, or analytics.",
       ],
     },
     {
@@ -79,7 +79,7 @@ const privacyEn: LegalDocument = {
       title: "7. Required data and automated decisions",
       paragraphs: [
         "A display name and the room content needed for the selected feature are required to provide that feature. A room password, saved-room shortcut, and wheel template are optional. Without required room data, the corresponding room cannot be created or joined.",
-        "Wheel Spin does not make automated decisions that produce legal or similarly significant effects. A random wheel result is generated only when an authorized participant starts a spin.",
+        "GatherWheel does not make automated decisions that produce legal or similarly significant effects. A random wheel result is generated only when an authorized participant starts a spin.",
       ],
     },
     {
@@ -95,7 +95,7 @@ const privacyRu: LegalDocument = {
   eyebrow: "ПРАВОВАЯ ИНФОРМАЦИЯ",
   title: "Политика конфиденциальности",
   summary:
-    "Здесь описано, какие персональные данные Wheel Spin обрабатывает, когда вы создаёте общую комнату или входите в неё.",
+    "Здесь описано, какие персональные данные GatherWheel обрабатывает, когда вы создаёте общую комнату или входите в неё.",
   effectiveDateLabel: "Дата вступления в силу",
   controllerTitle: "1. Контролёр данных",
   contactLabel: "Контакт по вопросам данных",
@@ -117,7 +117,7 @@ const privacyRu: LegalDocument = {
         "Загрузка шрифтов текущего интерфейса — законный интерес в единообразном отображении сервиса (статья 6(1)(f) GDPR).",
       ],
       paragraphs: [
-        "Сейчас Wheel Spin не использует персональные данные для рекламы, профилирования или аналитики.",
+        "Сейчас GatherWheel не использует персональные данные для рекламы, профилирования или аналитики.",
       ],
     },
     {
@@ -154,7 +154,7 @@ const privacyRu: LegalDocument = {
       title: "7. Обязательные данные и автоматические решения",
       paragraphs: [
         "Отображаемое имя и содержимое, необходимое выбранной функции комнаты, обязательны для её работы. Пароль комнаты, сохранение ссылки и шаблоны колеса необязательны. Без обязательных данных соответствующую комнату нельзя создать или открыть.",
-        "Wheel Spin не принимает автоматических решений с юридическими или сопоставимо значимыми последствиями. Случайный результат создаётся только после запуска колеса уполномоченным участником.",
+        "GatherWheel не принимает автоматических решений с юридическими или сопоставимо значимыми последствиями. Случайный результат создаётся только после запуска колеса уполномоченным участником.",
       ],
     },
     {
@@ -170,7 +170,7 @@ const cookiesEn: LegalDocument = {
   eyebrow: "LEGAL",
   title: "Cookie and Browser Storage Policy",
   summary:
-    "Wheel Spin currently uses only storage needed for room sessions and features you explicitly request. It does not use analytics or advertising cookies.",
+    "GatherWheel currently uses only storage needed for room sessions and features you explicitly request. It does not use analytics or advertising cookies.",
   effectiveDateLabel: "Effective date",
   controllerTitle: "1. Who provides the service",
   contactLabel: "Privacy contact",
@@ -178,23 +178,23 @@ const cookiesEn: LegalDocument = {
     {
       title: "2. Storage we use",
       items: [
-        "wheel-spin_session_<room-code> — an HttpOnly, SameSite=Lax cookie containing a random room-session token. It identifies your participant role and permissions. It lasts up to seven days and is marked Secure in production.",
-        "wheel-spin-locale — browser local storage containing the language you selected. It remains until you clear device data.",
-        "wheel-spin-rooms — browser local storage containing room shortcuts only after you choose “Save room”. Shortcuts remain until you remove or clear them, and expired entries are removed when read.",
-        "wheel-spin-templates — browser local storage containing wheel templates you explicitly save. A template remains until you delete it or clear device data.",
+        "gatherwheel_session_<room-code> — an HttpOnly, SameSite=Lax cookie containing a random room-session token. It identifies your participant role and permissions. It lasts up to seven days and is marked Secure in production.",
+        "gatherwheel-locale — browser local storage containing the language you selected. It remains until you clear device data.",
+        "gatherwheel-rooms — browser local storage containing room shortcuts only after you choose “Save room”. Shortcuts remain until you remove or clear them, and expired entries are removed when read.",
+        "gatherwheel-templates — browser local storage containing wheel templates you explicitly save. A template remains until you delete it or clear device data.",
       ],
     },
     {
       title: "3. Why there is no consent banner now",
       paragraphs: [
-        "The session cookie is necessary to provide the room you asked to use. The local-storage entries are written only after you select a language or explicitly ask to save a room shortcut or template. Wheel Spin currently sets no analytics, advertising, or cross-site tracking storage.",
+        "The session cookie is necessary to provide the room you asked to use. The local-storage entries are written only after you select a language or explicitly ask to save a room shortcut or template. GatherWheel currently sets no analytics, advertising, or cross-site tracking storage.",
         "Because the current storage is necessary for, or activated by, an explicitly requested feature, the app does not show a separate cookie-consent banner. If non-essential analytics or other tracking is introduced, it must remain disabled until the required consent is obtained and this policy is updated.",
       ],
     },
     {
       title: "4. Your controls",
       paragraphs: [
-        "Use “Clear data on this device” under My rooms to remove Wheel Spin room shortcuts, templates, and language preference. You can also use your browser settings. This does not delete active server-side room data or every HttpOnly session cookie.",
+        "Use “Clear data on this device” under My rooms to remove GatherWheel room shortcuts, templates, and language preference. You can also use your browser settings. This does not delete active server-side room data or every HttpOnly session cookie.",
         "Deleting your participant data or deleting the room in Room Settings removes the corresponding server data and clears that room’s session cookie in the current browser.",
       ],
     },
@@ -205,7 +205,7 @@ const cookiesRu: LegalDocument = {
   eyebrow: "ПРАВОВАЯ ИНФОРМАЦИЯ",
   title: "Политика cookies и хранилища браузера",
   summary:
-    "Сейчас Wheel Spin использует только хранилище для сессий комнаты и функций, которые вы явно запрашиваете. Аналитических и рекламных cookies нет.",
+    "Сейчас GatherWheel использует только хранилище для сессий комнаты и функций, которые вы явно запрашиваете. Аналитических и рекламных cookies нет.",
   effectiveDateLabel: "Дата вступления в силу",
   controllerTitle: "1. Кто предоставляет сервис",
   contactLabel: "Контакт по вопросам данных",
@@ -213,16 +213,16 @@ const cookiesRu: LegalDocument = {
     {
       title: "2. Что хранится",
       items: [
-        "wheel-spin_session_<код-комнаты> — HttpOnly-cookie SameSite=Lax со случайным токеном сессии. Он определяет роль и права участника, действует до семи дней и в production помечен Secure.",
-        "wheel-spin-locale — выбранный язык в localStorage браузера. Хранится до очистки данных устройства.",
-        "wheel-spin-rooms — ссылки на комнаты в localStorage, записываемые только после нажатия «Сохранить комнату». Хранятся до удаления или очистки; истёкшие записи удаляются при чтении.",
-        "wheel-spin-templates — явно сохранённые шаблоны колеса в localStorage. Шаблон хранится до его удаления или очистки данных устройства.",
+        "gatherwheel_session_<код-комнаты> — HttpOnly-cookie SameSite=Lax со случайным токеном сессии. Он определяет роль и права участника, действует до семи дней и в production помечен Secure.",
+        "gatherwheel-locale — выбранный язык в localStorage браузера. Хранится до очистки данных устройства.",
+        "gatherwheel-rooms — ссылки на комнаты в localStorage, записываемые только после нажатия «Сохранить комнату». Хранятся до удаления или очистки; истёкшие записи удаляются при чтении.",
+        "gatherwheel-templates — явно сохранённые шаблоны колеса в localStorage. Шаблон хранится до его удаления или очистки данных устройства.",
       ],
     },
     {
       title: "3. Почему сейчас нет баннера согласия",
       paragraphs: [
-        "Cookie сессии необходим для работы запрошенной комнаты. Записи localStorage создаются только после выбора языка или явной команды сохранить ссылку либо шаблон. Wheel Spin не устанавливает хранилище для аналитики, рекламы или межсайтового отслеживания.",
+        "Cookie сессии необходим для работы запрошенной комнаты. Записи localStorage создаются только после выбора языка или явной команды сохранить ссылку либо шаблон. GatherWheel не устанавливает хранилище для аналитики, рекламы или межсайтового отслеживания.",
         "Поскольку текущее хранилище необходимо для явно запрошенной функции или активируется самим запросом пользователя, отдельный баннер согласия не показывается. Если появится необязательная аналитика или другое отслеживание, оно должно оставаться выключенным до получения требуемого согласия и обновления этой политики.",
       ],
     },

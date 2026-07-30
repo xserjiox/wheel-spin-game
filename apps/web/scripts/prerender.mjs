@@ -66,7 +66,7 @@ function seoHead(locale, title, description) {
   const structuredData = JSON.stringify({
     "@context": "https://schema.org",
     "@type": "WebApplication",
-    name: "Wheel Spin",
+    name: "GatherWheel",
     url: canonicalUrl,
     description,
     applicationCategory: "EntertainmentApplication",
@@ -85,20 +85,20 @@ function seoHead(locale, title, description) {
     <link rel="canonical" href="${canonicalUrl}" />
 ${alternateLinks()}
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Wheel Spin" />
+    <meta property="og:site_name" content="GatherWheel" />
     <meta property="og:locale" content="${openGraphLocales[locale]}" />
     <meta property="og:title" content="${safeTitle}" />
     <meta property="og:description" content="${safeDescription}" />
     <meta property="og:url" content="${canonicalUrl}" />
-    <meta property="og:image" content="${absoluteUrl("/wheel-spin-preview.jpg")}" />
+    <meta property="og:image" content="${absoluteUrl("/gatherwheel-preview.jpg")}" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="The colorful Wheel Spin logo" />
+    <meta property="og:image:alt" content="The colorful GatherWheel logo" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="${safeTitle}" />
     <meta name="twitter:description" content="${safeDescription}" />
-    <meta name="twitter:image" content="${absoluteUrl("/wheel-spin-preview.jpg")}" />
-    <meta name="twitter:image:alt" content="The colorful Wheel Spin logo" />
+    <meta name="twitter:image" content="${absoluteUrl("/gatherwheel-preview.jpg")}" />
+    <meta name="twitter:image:alt" content="The colorful GatherWheel logo" />
     <script type="application/ld+json">${structuredData}</script>
     <title>${safeTitle}</title>
     <!-- SEO_HEAD_END -->`;
@@ -106,21 +106,21 @@ ${alternateLinks()}
 
 function noIndexHead() {
   return `    <!-- SEO_HEAD_START -->
-    <meta name="description" content="A private shared Wheel Spin room." />
+    <meta name="description" content="A private shared GatherWheel room." />
     <meta name="robots" content="noindex, nofollow" />
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Wheel Spin" />
-    <meta property="og:title" content="Wheel Spin — shared room" />
-    <meta property="og:description" content="Join a private shared Wheel Spin room." />
-    <meta property="og:image" content="${absoluteUrl("/wheel-spin-preview.jpg")}" />
+    <meta property="og:site_name" content="GatherWheel" />
+    <meta property="og:title" content="GatherWheel — shared room" />
+    <meta property="og:description" content="Join a private shared GatherWheel room." />
+    <meta property="og:image" content="${absoluteUrl("/gatherwheel-preview.jpg")}" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="The colorful Wheel Spin logo" />
+    <meta property="og:image:alt" content="The colorful GatherWheel logo" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Wheel Spin — shared room" />
-    <meta name="twitter:description" content="Join a private shared Wheel Spin room." />
-    <meta name="twitter:image" content="${absoluteUrl("/wheel-spin-preview.jpg")}" />
-    <title>Wheel Spin — shared room</title>
+    <meta name="twitter:title" content="GatherWheel — shared room" />
+    <meta name="twitter:description" content="Join a private shared GatherWheel room." />
+    <meta name="twitter:image" content="${absoluteUrl("/gatherwheel-preview.jpg")}" />
+    <title>GatherWheel — shared room</title>
     <!-- SEO_HEAD_END -->`;
 }
 

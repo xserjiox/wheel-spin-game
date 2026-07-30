@@ -95,7 +95,7 @@ export class RoomsController {
     reply.header("Cache-Control", "no-store");
     reply.header(
       "Content-Disposition",
-      `attachment; filename="wheel-spin-${code.toLowerCase()}-data.json"`,
+      `attachment; filename="gatherwheel-${code.toLowerCase()}-data.json"`,
     );
     return this.rooms.exportOwnData(participant);
   }

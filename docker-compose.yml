@@ -2,21 +2,21 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_DB: wheel-spin
+      POSTGRES_DB: gatherwheel
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
       - "5432:5432"
     volumes:
-      - wheel-spin-postgres:/var/lib/postgresql/data
+      - gatherwheel-postgres:/var/lib/postgresql/data
 
   redis:
     image: redis:7-alpine
     ports:
       - "6379:6379"
     volumes:
-      - wheel-spin-redis:/data
+      - gatherwheel-redis:/data
 
 volumes:
-  wheel-spin-postgres:
-  wheel-spin-redis:
+  gatherwheel-postgres:
+  gatherwheel-redis:

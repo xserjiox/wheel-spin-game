@@ -1,4 +1,4 @@
-# Wheel Spin
+# GatherWheel
 
 A multiplayer random-choice wheel. The host creates a room and spins the wheel,
 while guests join through an invite link and anonymously suggest new slots.
@@ -115,11 +115,11 @@ with ESLint, Prettier, TypeScript, or test failures.
    - `DATABASE_URL` referencing the PostgreSQL service
    - `REDIS_URL` referencing the Redis service
    - `REDIS_REQUIRED=true`
-   - `REDIS_PREFIX=wheel-spin:production`
+   - `REDIS_PREFIX=gatherwheel:production`
    - `APP_ENV=production`
    - `COOKIE_SECURE=true`
    - `PUBLIC_URL` with the canonical public origin, for example
-     `https://wheel.example.com`
+     `https://gatherwheel.com`
    - `VITE_LEGAL_CONTROLLER_NAME` with the public name of the service operator
    - `VITE_PRIVACY_EMAIL` with the public privacy contact
 4. Create a public domain only for the application service.
