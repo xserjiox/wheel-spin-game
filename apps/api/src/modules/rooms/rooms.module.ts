@@ -12,5 +12,6 @@ import { RoomsGateway } from "./presentation/ws/rooms.gateway";
   imports: [DatabaseModule, RedisModule, SecurityModule],
   controllers: [RoomsController],
   providers: [RoomsService, RoomsGateway, JoinLimiterService, RoomCleanupService],
+  exports: [RoomsService],
 })
 export class RoomsModule {}

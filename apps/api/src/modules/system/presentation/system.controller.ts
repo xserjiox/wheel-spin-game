@@ -1,9 +1,12 @@
-import { Controller, Get, Req, Res } from "@nestjs/common";
+import { Controller, Get, Inject, Param, Req, Res } from "@nestjs/common";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { PrismaService } from "../../../shared/database/prisma.service";
+import { isKnownLinkPreviewBot } from "../../../shared/http/search-indexing";
 import { RedisService } from "../../../shared/redis/redis.service";
+import { RoomsService } from "../../rooms/application/rooms.service";
+import { renderRoomPreviewDocument } from "./room-preview";
 
 const PUBLIC_ORIGIN_TOKEN = "__PUBLIC_ORIGIN__";
 const LOCALIZED_PAGES = [
@@ -29,8 +32,12 @@ export class SystemController {
   private readonly pageCache = new Map<string, string>();
 
   constructor(
+    @Inject(PrismaService)
     private readonly prisma: PrismaService,
+    @Inject(RedisService)
     private readonly redis: RedisService,
+    @Inject(RoomsService)
+    private readonly rooms: RoomsService,
   ) {}
 
   private publicOrigin(request: FastifyRequest): string {
@@ -112,8 +119,29 @@ export class SystemController {
   }
 
   @Get("r/:code")
-  room(@Req() request: FastifyRequest, @Res() reply: FastifyReply) {
-    return this.sendPage("index.app.html", request, reply);
+  async room(
+    @Param("code") code: string,
+    @Req() request: FastifyRequest,
+    @Res() reply: FastifyReply,
+  ) {
+    reply.header("Vary", "User-Agent");
+    if (!isKnownLinkPreviewBot(request.headers["user-agent"])) {
+      return this.sendPage("index.app.html", request, reply);
+    }
+
+    const { title } = await this.rooms.meta(code);
+    const origin = this.publicOrigin(request);
+    const roomUrl = new URL(request.url.split("?")[0], `${origin}/`).toString();
+    const document = renderRoomPreviewDocument(await this.page("index.app.html"), {
+      roomTitle: title,
+      roomUrl,
+      imageUrl: `${origin}/gatherwheel-preview.jpg`,
+    });
+
+    return reply
+      .type("text/html; charset=utf-8")
+      .header("Cache-Control", "public, max-age=0, must-revalidate")
+      .send(document.replaceAll(PUBLIC_ORIGIN_TOKEN, origin));
   }
 
   @Get(["privacy", "cookies"])

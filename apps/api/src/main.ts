@@ -23,7 +23,7 @@ async function bootstrap(): Promise<void> {
     .getHttpAdapter()
     .getInstance()
     .addHook("onRequest", async (request, reply) => {
-      if (shouldPreventIndexing(request.url)) {
+      if (shouldPreventIndexing(request.url, request.headers["user-agent"])) {
         reply.header("X-Robots-Tag", "noindex, nofollow");
       }
     });
