@@ -1,13 +1,5 @@
 import { type FormEvent, useEffect, useMemo, useState } from "react";
-import {
-  type Ack,
-  deleteOwnData,
-  deleteRoomData,
-  exportOwnData,
-  type RoomState,
-  useRoom,
-  Wheel,
-} from "@/entities/room";
+import { type Ack, type RoomState, useRoom, Wheel } from "@/entities/room";
 import { trackAnalyticsEvent } from "@/shared/lib/analytics";
 import { readSavedRooms, removeSavedRoom, saveRoom } from "@/entities/saved-room";
 import { LanguageSwitcher } from "@/features/change-language";
@@ -20,9 +12,10 @@ import { MyProposals } from "@/features/manage-proposals";
 import { SaveRoomPrompt } from "@/features/manage-saved-rooms";
 import { SaveWheelTemplate } from "@/features/manage-wheel-templates";
 import { ShareRoomButton } from "@/features/share-room";
-import { translateError, useI18n } from "@/shared/lib/i18n";
+import { useI18n } from "@/shared/lib/i18n";
 import { Brand } from "@/shared/ui/brand";
 import { EditableRoomTitle } from "./EditableRoomTitle";
+import { RoomSettings } from "./RoomSettings";
 
 type Tab = "options" | "proposals" | "participants" | "history" | "settings";
 
@@ -269,7 +262,7 @@ export function RoomPage({
           {tab === "history" && <History state={state} />}
 
           {tab === "settings" && (
-            <Settings
+            <RoomSettings
               code={state.code}
               isHost={isHost}
               hasPassword={state.hasPassword}
@@ -551,161 +544,6 @@ function History({ state }: { state: RoomState }) {
           ))}
         </ol>
       )}
-    </section>
-  );
-}
-
-function Settings({
-  code,
-  isHost,
-  hasPassword,
-  disabled,
-  update,
-  onExit,
-}: {
-  code: string;
-  isHost: boolean;
-  hasPassword: boolean;
-  disabled: boolean;
-  update: (password: string) => Promise<unknown>;
-  onExit: () => void;
-}) {
-  const { t } = useI18n();
-  const [password, setPassword] = useState("");
-  const [saved, setSaved] = useState(false);
-  const [dataAction, setDataAction] = useState<"export" | "delete" | null>(null);
-  const [dataError, setDataError] = useState("");
-  const submit = async (event: FormEvent) => {
-    event.preventDefault();
-    const result = await update(password);
-    if ((result as { ok?: boolean }).ok) {
-      setPassword("");
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2_000);
-    }
-  };
-
-  const downloadData = async () => {
-    setDataAction("export");
-    setDataError("");
-    try {
-      const data = await exportOwnData(code);
-      const url = URL.createObjectURL(
-        new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }),
-      );
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `gatherwheel-${code.toLowerCase()}-data.json`;
-      document.body.append(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      setDataError(
-        error instanceof Error ? translateError(error.message, t) : t("requestFailed"),
-      );
-    } finally {
-      setDataAction(null);
-    }
-  };
-
-  const deleteData = async () => {
-    const confirmationKey = isHost ? "deleteRoomDataConfirm" : "deleteMyDataConfirm";
-    if (!window.confirm(t(confirmationKey))) return;
-
-    setDataAction("delete");
-    setDataError("");
-    try {
-      if (isHost) await deleteRoomData(code);
-      else await deleteOwnData(code);
-      removeSavedRoom(window.localStorage, code);
-      onExit();
-    } catch (error) {
-      setDataError(
-        error instanceof Error ? translateError(error.message, t) : t("requestFailed"),
-      );
-      setDataAction(null);
-    }
-  };
-
-  return (
-    <section className="panel-content">
-      {isHost && (
-        <div className="settings-section">
-          <p className="step-label">{t("access")}</p>
-          <h2>{t("roomPasswordTitle")}</h2>
-          <p className="panel-copy">
-            {hasPassword ? t("protectedCopy") : t("openCopy")}
-          </p>
-          <form className="proposal-form" onSubmit={submit}>
-            <label>
-              {t("newPassword")}
-              <input
-                type="password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                maxLength={72}
-                placeholder={hasPassword ? t("enterNewPassword") : t("createPassword")}
-                disabled={disabled}
-              />
-            </label>
-            <button className="primary-button" disabled={disabled}>
-              <span>
-                {saved
-                  ? t("saved")
-                  : hasPassword
-                    ? t("changePassword")
-                    : t("setPassword")}
-              </span>
-              <span className="button-arrow" aria-hidden="true">
-                ↗
-              </span>
-            </button>
-            {hasPassword && (
-              <button
-                className="danger-text-button"
-                type="button"
-                disabled={disabled}
-                onClick={() => void update("")}
-              >
-                {t("removePassword")}
-              </button>
-            )}
-          </form>
-          <p className="settings-note">{t("settingsNote")}</p>
-        </div>
-      )}
-
-      <div className="settings-section data-controls">
-        <p className="step-label">{t("privacyPolicy")}</p>
-        <h2>{t("dataControls")}</h2>
-        <p className="panel-copy">{t("dataControlsCopy")}</p>
-        <div className="data-control-actions">
-          <button
-            className="secondary-button"
-            type="button"
-            disabled={dataAction !== null}
-            onClick={() => void downloadData()}
-          >
-            {dataAction === "export" ? t("exportingData") : t("exportMyData")}
-          </button>
-          <button
-            className="danger-text-button data-delete-button"
-            type="button"
-            disabled={dataAction !== null}
-            onClick={() => void deleteData()}
-          >
-            {dataAction === "delete"
-              ? t("deletingData")
-              : t(isHost ? "deleteRoomData" : "deleteMyData")}
-          </button>
-        </div>
-        {dataError && (
-          <p className="form-error" role="alert">
-            {dataError}
-          </p>
-        )}
-      </div>
     </section>
   );
 }

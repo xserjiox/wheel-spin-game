@@ -2375,12 +2375,14 @@ input::placeholder {
   animation: result-in 300ms cubic-bezier(0.2, 0.9, 0.25, 1.2) both;
 }
 
-.kick-card {
+.kick-card,
+.delete-data-card {
   width: min(100%, 440px);
   box-shadow: 12px 12px 0 var(--orange);
 }
 
-.kick-symbol {
+.kick-symbol,
+.delete-data-symbol {
   display: grid;
   width: 52px;
   height: 52px;
@@ -2393,39 +2395,52 @@ input::placeholder {
   font-size: 27px;
 }
 
-.kick-card h2 {
+.kick-card h2,
+.delete-data-card h2 {
   overflow-wrap: anywhere;
   font-size: 20px;
 }
 
-.kick-description {
+.kick-description,
+.delete-data-description {
   margin: 14px 0 25px;
   color: var(--muted);
   font-size: 12px;
   line-height: 1.55;
 }
 
-.kick-actions {
+.kick-actions,
+.delete-data-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 9px;
 }
 
 .kick-cancel-button,
-.kick-confirm-button {
+.kick-confirm-button,
+.delete-data-cancel-button,
+.delete-data-confirm-button {
   min-height: 46px;
+  padding: 8px 12px;
   border: 1.5px solid var(--ink);
   cursor: pointer;
   font-size: 10px;
   font-weight: 800;
 }
 
-.kick-cancel-button {
+.kick-cancel-button,
+.delete-data-cancel-button {
   background: transparent;
 }
 
-.kick-confirm-button {
+.kick-confirm-button,
+.delete-data-confirm-button {
   background: var(--orange);
+}
+
+.delete-data-error {
+  margin: -10px 0 20px;
+  text-align: left;
 }
 
 .removed-room-card > p:not(.eyebrow) {
@@ -3293,6 +3308,10 @@ input::placeholder {
   }
 
   .kick-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .delete-data-actions {
     grid-template-columns: 1fr;
   }
 
