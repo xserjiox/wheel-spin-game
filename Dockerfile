@@ -6,6 +6,8 @@ COPY apps/api/package.json apps/api/package.json
 RUN npm ci
 
 FROM dependencies AS build
+ARG VITE_LEGAL_CONTROLLER_NAME
+ARG VITE_PRIVACY_EMAIL
 COPY . .
 RUN npm run db:generate
 RUN npm run validate
