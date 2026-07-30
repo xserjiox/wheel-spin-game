@@ -183,22 +183,11 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const participant = this.requireParticipant(client);
       const { participantId } = participantKickSchema.parse(body);
       await this.rooms.kickParticipant(participant, participantId);
-
-      const sockets = await this.server
-        .in(this.channel(client.data.code!))
-        .fetchSockets();
-      sockets
-        .filter(
-          (socket) =>
-            (socket.data.participant as ClientData["participant"])?.id ===
-            participantId,
-        )
-        .forEach((socket) => {
-          socket.emit("participant.kicked");
-          socket.disconnect(true);
-        });
-
-      await this.broadcastState(client.data.code!);
+      await this.disconnectParticipant(
+        client.data.code!,
+        participantId,
+        "participant.kicked",
+      );
       return {};
     });
   }
@@ -246,6 +235,34 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.server.to(this.channel(client.data.code!)).emit("spin.canceled", { spinId });
       await this.broadcastState(client.data.code!);
       return {};
+    });
+  }
+
+  async disconnectParticipant(
+    code: string,
+    participantId: string,
+    event: "participant.kicked" | "participant.deleted",
+  ): Promise<void> {
+    const sockets = await this.server.in(this.channel(code)).fetchSockets();
+    sockets
+      .filter(
+        (socket) =>
+          (socket.data.participant as ClientData["participant"])?.id === participantId,
+      )
+      .forEach((socket) => {
+        socket.data.code = undefined;
+        socket.emit(event);
+        socket.disconnect(true);
+      });
+    await this.broadcastState(code);
+  }
+
+  async disconnectRoom(code: string): Promise<void> {
+    const sockets = await this.server.in(this.channel(code)).fetchSockets();
+    sockets.forEach((socket) => {
+      socket.data.code = undefined;
+      socket.emit("room.deleted");
+      socket.disconnect(true);
     });
   }
 

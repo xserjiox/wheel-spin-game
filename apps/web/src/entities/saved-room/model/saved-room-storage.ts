@@ -134,3 +134,8 @@ export function removeSavedRoom(
   writeSavedRooms(storage, rooms);
   return rooms;
 }
+
+export function clearSavedRooms(storage: Storage): void {
+  storage.removeItem(SAVED_ROOM_STORAGE_KEY);
+  storage.removeItem(LEGACY_SAVED_HOST_ROOM_STORAGE_KEY);
+}

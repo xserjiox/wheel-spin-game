@@ -17,13 +17,16 @@ type Command =
   | "spin.start"
   | "spin.cancel";
 
+export type RoomExitReason = "kicked" | "participant-deleted" | "room-deleted";
+
 export function useRoom(code: string, initialState: RoomState) {
   const { t } = useI18n();
   const [state, setState] = useState(initialState);
   const [connected, setConnected] = useState(false);
   const [error, setError] = useState("");
   const [canceledSpinId, setCanceledSpinId] = useState<string | null>(null);
-  const [wasKicked, setWasKicked] = useState(false);
+  const [exitReason, setExitReason] = useState<RoomExitReason | null>(null);
+  const exitReasonRef = useRef<RoomExitReason | null>(null);
   const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
@@ -51,8 +54,9 @@ export function useRoom(code: string, initialState: RoomState) {
     socket.on("connect", enter);
     socket.on("disconnect", (reason) => {
       setConnected(false);
-      if (reason === "io server disconnect") {
-        setWasKicked(true);
+      if (reason === "io server disconnect" && !exitReasonRef.current) {
+        exitReasonRef.current = "kicked";
+        setExitReason("kicked");
       }
     });
     socket.on("room.state", (nextState: RoomState) => {
@@ -63,7 +67,18 @@ export function useRoom(code: string, initialState: RoomState) {
       setCanceledSpinId(spinId);
     });
     socket.on("participant.kicked", () => {
-      setWasKicked(true);
+      exitReasonRef.current = "kicked";
+      setExitReason("kicked");
+      setConnected(false);
+    });
+    socket.on("participant.deleted", () => {
+      exitReasonRef.current = "participant-deleted";
+      setExitReason("participant-deleted");
+      setConnected(false);
+    });
+    socket.on("room.deleted", () => {
+      exitReasonRef.current = "room-deleted";
+      setExitReason("room-deleted");
       setConnected(false);
     });
     return () => {
@@ -97,7 +112,7 @@ export function useRoom(code: string, initialState: RoomState) {
     error: error ? translateError(error, t) : "",
     clearError: () => setError(""),
     canceledSpinId,
-    wasKicked,
+    exitReason,
     command,
   };
 }

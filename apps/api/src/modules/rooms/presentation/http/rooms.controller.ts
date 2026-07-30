@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   Ip,
@@ -19,12 +20,14 @@ import {
   roomCodeSchema,
 } from "../../contracts/room.contracts";
 import { JoinLimiterService } from "../../infrastructure/join-limiter.service";
+import { RoomsGateway } from "../ws/rooms.gateway";
 
 @Controller("api/rooms")
 export class RoomsController {
   constructor(
     private readonly rooms: RoomsService,
     private readonly limiter: JoinLimiterService,
+    private readonly gateway: RoomsGateway,
   ) {}
 
   @Post()
@@ -72,6 +75,58 @@ export class RoomsController {
     }
   }
 
+  @Get(":code/me/export")
+  async exportOwnData(
+    @Param("code") rawCode: string,
+    @Req() request: FastifyRequest,
+    @Res({ passthrough: true }) reply: FastifyReply,
+  ) {
+    const { code, participant } = await this.authenticateRequest(rawCode, request);
+    reply.header("Cache-Control", "no-store");
+    reply.header(
+      "Content-Disposition",
+      `attachment; filename="wheel-spin-${code.toLowerCase()}-data.json"`,
+    );
+    return this.rooms.exportOwnData(participant);
+  }
+
+  @Delete(":code/me")
+  async deleteOwnData(
+    @Param("code") rawCode: string,
+    @Req() request: FastifyRequest,
+    @Res({ passthrough: true }) reply: FastifyReply,
+  ) {
+    const { code, participant } = await this.authenticateRequest(rawCode, request);
+    await this.rooms.deleteOwnData(participant);
+    this.clearSessionCookie(reply, code);
+    await this.gateway.disconnectParticipant(
+      code,
+      participant.id,
+      "participant.deleted",
+    );
+    return { ok: true };
+  }
+
+  @Delete(":code")
+  async deleteRoom(
+    @Param("code") rawCode: string,
+    @Req() request: FastifyRequest,
+    @Res({ passthrough: true }) reply: FastifyReply,
+  ) {
+    const { code, participant } = await this.authenticateRequest(rawCode, request);
+    await this.rooms.deleteRoom(participant);
+    this.clearSessionCookie(reply, code);
+    await this.gateway.disconnectRoom(code);
+    return { ok: true };
+  }
+
+  private async authenticateRequest(rawCode: string, request: FastifyRequest) {
+    const code = parseRequest(roomCodeSchema, rawCode);
+    const token = request.cookies[roomCookieName(code)] ?? null;
+    const participant = await this.rooms.authenticate(code, token);
+    return { code, participant };
+  }
+
   private setSessionCookie(reply: FastifyReply, code: string, token: string): void {
     reply.setCookie(roomCookieName(code), token, {
       httpOnly: true,
@@ -81,5 +136,9 @@ export class RoomsController {
       path: "/",
       maxAge: 7 * 24 * 60 * 60,
     });
+  }
+
+  private clearSessionCookie(reply: FastifyReply, code: string): void {
+    reply.clearCookie(roomCookieName(code), { path: "/" });
   }
 }

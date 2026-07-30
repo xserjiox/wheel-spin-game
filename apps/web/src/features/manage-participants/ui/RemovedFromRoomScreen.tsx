@@ -1,7 +1,25 @@
 import { useI18n } from "@/shared/lib/i18n";
 
-export function RemovedFromRoomScreen({ onHome }: { onHome: () => void }) {
+export function RemovedFromRoomScreen({
+  onHome,
+  reason = "kicked",
+}: {
+  onHome: () => void;
+  reason?: "kicked" | "participant-deleted" | "room-deleted";
+}) {
   const { t } = useI18n();
+  const title =
+    reason === "participant-deleted"
+      ? t("participantDataDeleted")
+      : reason === "room-deleted"
+        ? t("roomDataDeleted")
+        : t("removedFromRoomTitle");
+  const copy =
+    reason === "participant-deleted"
+      ? t("participantDataDeletedCopy")
+      : reason === "room-deleted"
+        ? t("roomDataDeletedCopy")
+        : t("removedFromRoomCopy");
 
   return (
     <main className="center-page">
@@ -10,8 +28,8 @@ export function RemovedFromRoomScreen({ onHome }: { onHome: () => void }) {
           ×
         </span>
         <p className="eyebrow">{t("removedFromRoom")}</p>
-        <h1>{t("removedFromRoomTitle")}</h1>
-        <p>{t("removedFromRoomCopy")}</p>
+        <h1>{title}</h1>
+        <p>{copy}</p>
         <button className="primary-button centered-button" onClick={onHome}>
           {t("home")}
         </button>

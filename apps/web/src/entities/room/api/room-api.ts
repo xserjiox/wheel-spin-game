@@ -1,5 +1,5 @@
 import { apiRequest } from "@/shared/api/http";
-import type { RoomMeta, RoomState } from "../model/types";
+import type { PersonalDataExport, RoomMeta, RoomState } from "../model/types";
 
 export function createRoom(input: {
   hostName: string;
@@ -31,4 +31,22 @@ export function joinRoom(code: string, input: { name: string; password: string }
       body: JSON.stringify(input),
     },
   );
+}
+
+export function exportOwnData(code: string) {
+  return apiRequest<PersonalDataExport>(
+    `/api/rooms/${encodeURIComponent(code)}/me/export`,
+  );
+}
+
+export function deleteOwnData(code: string) {
+  return apiRequest<{ ok: true }>(`/api/rooms/${encodeURIComponent(code)}/me`, {
+    method: "DELETE",
+  });
+}
+
+export function deleteRoomData(code: string) {
+  return apiRequest<{ ok: true }>(`/api/rooms/${encodeURIComponent(code)}`, {
+    method: "DELETE",
+  });
 }

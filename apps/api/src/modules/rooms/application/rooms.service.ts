@@ -179,6 +179,85 @@ export class RoomsService {
     return participant;
   }
 
+  async exportOwnData(participant: SessionParticipant) {
+    const record = await this.prisma.participant.findUnique({
+      where: { id: participant.id },
+      select: {
+        id: true,
+        displayName: true,
+        role: true,
+        canSpin: true,
+        connectedAt: true,
+        lastSeenAt: true,
+        room: {
+          select: {
+            code: true,
+            title: true,
+            createdAt: true,
+            expiresAt: true,
+          },
+        },
+        proposals: {
+          orderBy: { createdAt: "asc" },
+          select: {
+            id: true,
+            label: true,
+            status: true,
+            createdAt: true,
+            reviewedAt: true,
+          },
+        },
+      },
+    });
+    if (!record) {
+      throw new NotFoundException("PARTICIPANT_NOT_FOUND");
+    }
+
+    return {
+      exportedAt: new Date().toISOString(),
+      room: {
+        code: record.room.code,
+        title: record.room.title,
+        createdAt: record.room.createdAt.toISOString(),
+        expiresAt: record.room.expiresAt.toISOString(),
+      },
+      participant: {
+        id: record.id,
+        displayName: record.displayName,
+        role: record.role,
+        canSpin: record.canSpin,
+        connectedAt: record.connectedAt.toISOString(),
+        lastSeenAt: record.lastSeenAt.toISOString(),
+      },
+      proposals: record.proposals.map((proposal) => ({
+        id: proposal.id,
+        label: proposal.label,
+        status: proposal.status,
+        createdAt: proposal.createdAt.toISOString(),
+        reviewedAt: proposal.reviewedAt?.toISOString() ?? null,
+      })),
+    };
+  }
+
+  async deleteOwnData(participant: SessionParticipant): Promise<void> {
+    if (participant.role === ParticipantRole.HOST) {
+      throw new BadRequestException("HOST_MUST_DELETE_ROOM");
+    }
+
+    await this.prisma.$transaction([
+      this.prisma.participant.delete({ where: { id: participant.id } }),
+      this.prisma.room.update({
+        where: { id: participant.roomId },
+        data: { version: { increment: 1 } },
+      }),
+    ]);
+  }
+
+  async deleteRoom(participant: SessionParticipant): Promise<void> {
+    this.assertHost(participant);
+    await this.prisma.room.delete({ where: { id: participant.roomId } });
+  }
+
   async getState(
     code: string,
     participant: SessionParticipant,

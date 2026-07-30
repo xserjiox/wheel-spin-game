@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import {
+  clearSavedRooms,
   readSavedRooms,
   removeSavedRoom,
   saveRoom,
@@ -8,11 +9,11 @@ import {
 import type { SavedRoom } from "./types";
 
 export function useSavedRooms() {
-  const [rooms, setRooms] = useState<SavedRoom[]>(() =>
-    readSavedRooms(window.localStorage),
-  );
+  const [rooms, setRooms] = useState<SavedRoom[]>([]);
 
   useEffect(() => {
+    setRooms(readSavedRooms(window.localStorage));
+
     const syncRooms = (event: StorageEvent) => {
       if (event.key === SAVED_ROOM_STORAGE_KEY) {
         setRooms(readSavedRooms(window.localStorage));
@@ -38,5 +39,10 @@ export function useSavedRooms() {
     setRooms(removeSavedRoom(window.localStorage, code));
   }, []);
 
-  return { rooms, save, remove };
+  const clear = useCallback(() => {
+    clearSavedRooms(window.localStorage);
+    setRooms([]);
+  }, []);
+
+  return { rooms, save, remove, clear };
 }

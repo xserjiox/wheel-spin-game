@@ -1,4 +1,6 @@
 export {
+  clearSavedRooms,
+  LEGACY_SAVED_HOST_ROOM_STORAGE_KEY,
   readSavedRooms,
   removeSavedRoom,
   saveRoom,

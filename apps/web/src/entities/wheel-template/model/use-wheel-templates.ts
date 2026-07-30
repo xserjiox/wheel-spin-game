@@ -9,11 +9,11 @@ import {
 import type { WheelTemplate } from "./types";
 
 export function useWheelTemplates() {
-  const [templates, setTemplates] = useState<WheelTemplate[]>(() =>
-    readWheelTemplates(window.localStorage),
-  );
+  const [templates, setTemplates] = useState<WheelTemplate[]>([]);
 
   useEffect(() => {
+    setTemplates(readWheelTemplates(window.localStorage));
+
     const syncTemplates = (event: StorageEvent) => {
       if (event.key === WHEEL_TEMPLATE_STORAGE_KEY) {
         setTemplates(readWheelTemplates(window.localStorage));

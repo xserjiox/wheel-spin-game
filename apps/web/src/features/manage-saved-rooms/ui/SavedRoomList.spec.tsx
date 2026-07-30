@@ -19,6 +19,7 @@ describe("SavedRoomList", () => {
           onOpen={vi.fn()}
           onRemove={vi.fn()}
           onCreate={onCreate}
+          onClearDeviceData={vi.fn()}
         />
       </I18nProvider>,
     );
@@ -54,6 +55,7 @@ describe("SavedRoomList", () => {
           onOpen={vi.fn()}
           onRemove={vi.fn()}
           onCreate={vi.fn()}
+          onClearDeviceData={vi.fn()}
         />
       </I18nProvider>,
     );
