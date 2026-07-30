@@ -24,7 +24,7 @@ describe("MVP room rules", () => {
   });
 
   it("keeps a separate session cookie for each room", () => {
-    expect(roomCookieName("Ab7xK2pQ")).toBe("wheel-spin_session_ab7xk2pq");
+    expect(roomCookieName("Ab7xK2pQ")).toBe("gatherwheel_session_ab7xk2pq");
   });
 
   it("selects the target segment under the pointer", () => {
@@ -102,8 +102,8 @@ describe("MVP room rules", () => {
     expect(created.hash).toBe(sessions.hash(created.token));
     expect(
       sessions.readCookie(
-        "wheel-spin_session_one=first; wheel-spin_session_two=second",
-        "wheel-spin_session_two",
+        "gatherwheel_session_one=first; gatherwheel_session_two=second",
+        "gatherwheel_session_two",
       ),
     ).toBe("second");
   });

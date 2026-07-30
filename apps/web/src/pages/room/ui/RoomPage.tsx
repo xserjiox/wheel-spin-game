@@ -590,7 +590,7 @@ function Settings({
       );
       const link = document.createElement("a");
       link.href = url;
-      link.download = `wheel-spin-${code.toLowerCase()}-data.json`;
+      link.download = `gatherwheel-${code.toLowerCase()}-data.json`;
       document.body.append(link);
       link.click();
       link.remove();

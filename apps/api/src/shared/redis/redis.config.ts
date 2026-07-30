@@ -1,6 +1,6 @@
 import type { RedisOptions } from "ioredis";
 
-const DEFAULT_REDIS_PREFIX = "wheel-spin";
+const DEFAULT_REDIS_PREFIX = "gatherwheel";
 
 export function redisRequired(): boolean {
   return (

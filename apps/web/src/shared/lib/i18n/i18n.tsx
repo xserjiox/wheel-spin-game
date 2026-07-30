@@ -185,7 +185,7 @@ const privacyUi = {
 
 const en = {
   ...privacyUi.en,
-  metaTitle: "Shared Online Wheel for Groups | Wheel Spin",
+  metaTitle: "Shared Online Wheel for Groups | GatherWheel",
   metaDescription:
     "Create a shared room, invite friends or teammates, and spin one synchronized random wheel together.",
   language: "Language",
@@ -214,7 +214,7 @@ const en = {
   useCasesCopy:
     "Choose where to eat, pick a game, assign a task, select a classroom activity, or settle the next team discussion fairly.",
   faqTitle: "Frequently asked questions",
-  faqFreeQuestion: "Is Wheel Spin free?",
+  faqFreeQuestion: "Is GatherWheel free?",
   faqFreeAnswer:
     "Yes. You can create and join shared wheels without an account or payment.",
   faqAccountQuestion: "Does everyone need an account?",
@@ -428,7 +428,7 @@ type Dictionary = Record<TranslationKey, string>;
 
 const ru: Dictionary = {
   ...privacyUi.ru,
-  metaTitle: "Общее онлайн-колесо для компании | Wheel Spin",
+  metaTitle: "Общее онлайн-колесо для компании | GatherWheel",
   metaDescription:
     "Создайте общую комнату, пригласите друзей или команду и вместе крутите одно синхронное колесо случайного выбора.",
   language: "Язык",
@@ -457,7 +457,7 @@ const ru: Dictionary = {
   useCasesCopy:
     "Выберите, где поесть, во что играть, кому достанется задача, какое упражнение провести на уроке или какую тему обсудить команде.",
   faqTitle: "Частые вопросы",
-  faqFreeQuestion: "Wheel Spin бесплатный?",
+  faqFreeQuestion: "GatherWheel бесплатный?",
   faqFreeAnswer:
     "Да. Создавать общие колёса и присоединяться к ним можно без аккаунта и оплаты.",
   faqAccountQuestion: "Каждому участнику нужен аккаунт?",
@@ -667,7 +667,7 @@ const ru: Dictionary = {
 
 const uk: Dictionary = {
   ...privacyUi.uk,
-  metaTitle: "Спільне онлайн-колесо для компанії | Wheel Spin",
+  metaTitle: "Спільне онлайн-колесо для компанії | GatherWheel",
   metaDescription:
     "Створіть спільну кімнату, запросіть друзів або команду та разом крутіть одне синхронне колесо випадкового вибору.",
   language: "Мова",
@@ -696,7 +696,7 @@ const uk: Dictionary = {
   useCasesCopy:
     "Оберіть, де поїсти, у що грати, кому дати завдання, яку вправу провести на уроці або яку тему обговорити команді.",
   faqTitle: "Поширені запитання",
-  faqFreeQuestion: "Wheel Spin безкоштовний?",
+  faqFreeQuestion: "GatherWheel безкоштовний?",
   faqFreeAnswer:
     "Так. Створювати спільні колеса та приєднуватися до них можна без облікового запису й оплати.",
   faqAccountQuestion: "Кожному учаснику потрібен обліковий запис?",
@@ -905,7 +905,7 @@ const uk: Dictionary = {
 
 const de: Dictionary = {
   ...privacyUi.de,
-  metaTitle: "Gemeinsames Online-Glücksrad für Gruppen | Wheel Spin",
+  metaTitle: "Gemeinsames Online-Glücksrad für Gruppen | GatherWheel",
   metaDescription:
     "Erstelle einen gemeinsamen Raum, lade Freunde oder dein Team ein und dreht zusammen ein synchrones Zufallsrad.",
   language: "Sprache",
@@ -934,7 +934,7 @@ const de: Dictionary = {
   useCasesCopy:
     "Wählt ein Restaurant oder Spiel, verteilt eine Aufgabe, bestimmt eine Aktivität im Unterricht oder entscheidet fair über das nächste Teamthema.",
   faqTitle: "Häufig gestellte Fragen",
-  faqFreeQuestion: "Ist Wheel Spin kostenlos?",
+  faqFreeQuestion: "Ist GatherWheel kostenlos?",
   faqFreeAnswer:
     "Ja. Gemeinsame Räder können ohne Konto oder Bezahlung erstellt und genutzt werden.",
   faqAccountQuestion: "Brauchen alle Teilnehmer ein Konto?",
@@ -1144,7 +1144,7 @@ const de: Dictionary = {
 
 const zh: Dictionary = {
   ...privacyUi.zh,
-  metaTitle: "多人共享在线随机转盘 | Wheel Spin",
+  metaTitle: "多人共享在线随机转盘 | GatherWheel",
   metaDescription:
     "创建共享房间，邀请好友或团队成员，并一起转动同一个实时同步的随机转盘。",
   language: "语言",
@@ -1171,7 +1171,7 @@ const zh: Dictionary = {
   useCasesCopy:
     "可以用来选择餐厅或游戏、分配任务、挑选课堂活动，或公平决定团队的下一个讨论主题。",
   faqTitle: "常见问题",
-  faqFreeQuestion: "Wheel Spin 免费吗？",
+  faqFreeQuestion: "GatherWheel 免费吗？",
   faqFreeAnswer: "免费。创建和加入共享转盘都不需要账号或付费。",
   faqAccountQuestion: "每位参与者都需要账号吗？",
   faqAccountAnswer: "不需要。打开房间链接、输入显示名称后即可立即加入。",

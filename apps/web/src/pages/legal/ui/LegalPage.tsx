@@ -13,7 +13,7 @@ export function LegalPage({ kind }: { kind: "privacy" | "cookies" }) {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    document.title = `${content.title} | Wheel Spin`;
+    document.title = `${content.title} | GatherWheel`;
     document
       .querySelector('meta[name="description"]')
       ?.setAttribute("content", content.summary);

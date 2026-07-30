@@ -1,16 +1,16 @@
 {
-  "name": "wheel-spin",
+  "name": "gatherwheel",
   "private": true,
   "version": "1.0.0",
   "workspaces": [
     "apps/*"
   ],
   "scripts": {
-    "build": "npm run build --workspace @wheel-spin/web && npm run build --workspace @wheel-spin/api",
-    "dev": "concurrently -n web,api -c cyan,magenta \"npm run dev --workspace @wheel-spin/web\" \"npm run dev --workspace @wheel-spin/api\"",
-    "dev:web": "npm run dev --workspace @wheel-spin/web",
-    "dev:api": "npm run dev --workspace @wheel-spin/api",
-    "start": "npm run start --workspace @wheel-spin/api",
+    "build": "npm run build --workspace @gatherwheel/web && npm run build --workspace @gatherwheel/api",
+    "dev": "concurrently -n web,api -c cyan,magenta \"npm run dev --workspace @gatherwheel/web\" \"npm run dev --workspace @gatherwheel/api\"",
+    "dev:web": "npm run dev --workspace @gatherwheel/web",
+    "dev:api": "npm run dev --workspace @gatherwheel/api",
+    "start": "npm run start --workspace @gatherwheel/api",
     "test": "npm run test --workspaces --if-present",
     "lint": "eslint . --max-warnings=0",
     "lint:fix": "eslint . --fix",
@@ -19,11 +19,11 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "validate": "npm run format:check && npm run lint && npm run typecheck && npm run test",
     "verify": "npm run validate && npm run build",
-    "db:generate": "npm run db:generate --workspace @wheel-spin/api",
-    "db:migrate": "npm run db:migrate --workspace @wheel-spin/api",
-    "db:deploy": "npm run db:deploy --workspace @wheel-spin/api",
-    "db:cleanup-expired": "npm run db:cleanup-expired --workspace @wheel-spin/api --",
-    "db:cleanup-storage": "npm run db:cleanup-storage --workspace @wheel-spin/api --"
+    "db:generate": "npm run db:generate --workspace @gatherwheel/api",
+    "db:migrate": "npm run db:migrate --workspace @gatherwheel/api",
+    "db:deploy": "npm run db:deploy --workspace @gatherwheel/api",
+    "db:cleanup-expired": "npm run db:cleanup-expired --workspace @gatherwheel/api --",
+    "db:cleanup-storage": "npm run db:cleanup-storage --workspace @gatherwheel/api --"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",

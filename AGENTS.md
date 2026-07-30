@@ -1,4 +1,4 @@
-# Wheel Spin agent notes
+# GatherWheel agent notes
 
 ## Required checks
 

@@ -1,8 +1,8 @@
 import type { SavedRoom, SavedRoomStore } from "./types";
 
 export const SAVED_ROOM_LIMIT = 20;
-export const SAVED_ROOM_STORAGE_KEY = "wheel-spin-rooms";
-export const LEGACY_SAVED_HOST_ROOM_STORAGE_KEY = "wheel-spin-host-rooms";
+export const SAVED_ROOM_STORAGE_KEY = "gatherwheel-rooms";
+export const LEGACY_SAVED_HOST_ROOM_STORAGE_KEY = "gatherwheel-host-rooms";
 
 function isIsoDate(value: unknown): value is string {
   return (

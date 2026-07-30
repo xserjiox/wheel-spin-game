@@ -367,7 +367,7 @@ export function HomePage() {
       </section>
 
       <footer className="landing-footer">
-        <span>© {new Date().getFullYear()} Wheel Spin</span>
+        <span>© {new Date().getFullYear()} GatherWheel</span>
         <nav aria-label={`${t("privacyPolicy")} / ${t("cookiePolicy")}`}>
           <Link to="/privacy">{t("privacyPolicy")}</Link>
           <Link to="/cookies">{t("cookiePolicy")}</Link>
