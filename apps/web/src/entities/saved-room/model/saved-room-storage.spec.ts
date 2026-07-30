@@ -2,6 +2,7 @@
 
 import { beforeEach, describe, expect, it } from "vitest";
 import {
+  clearSavedRooms,
   LEGACY_SAVED_HOST_ROOM_STORAGE_KEY,
   readSavedRooms,
   removeSavedRoom,
@@ -127,5 +128,15 @@ describe("saved room storage", () => {
     );
 
     expect(readSavedRooms(window.localStorage)).toEqual([]);
+  });
+
+  it("clears current and legacy saved-room keys", () => {
+    window.localStorage.setItem(SAVED_ROOM_STORAGE_KEY, "current");
+    window.localStorage.setItem(LEGACY_SAVED_HOST_ROOM_STORAGE_KEY, "legacy");
+
+    clearSavedRooms(window.localStorage);
+
+    expect(window.localStorage.getItem(SAVED_ROOM_STORAGE_KEY)).toBeNull();
+    expect(window.localStorage.getItem(LEGACY_SAVED_HOST_ROOM_STORAGE_KEY)).toBeNull();
   });
 });

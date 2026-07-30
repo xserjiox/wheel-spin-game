@@ -53,6 +53,31 @@ export type RoomMeta = {
   requiresPassword: boolean;
 };
 
+export type PersonalDataExport = {
+  exportedAt: string;
+  room: {
+    code: string;
+    title: string;
+    createdAt: string;
+    expiresAt: string;
+  };
+  participant: {
+    id: string;
+    displayName: string;
+    role: "HOST" | "GUEST";
+    canSpin: boolean;
+    connectedAt: string;
+    lastSeenAt: string;
+  };
+  proposals: Array<{
+    id: string;
+    label: string;
+    status: "PENDING" | "ACCEPTED" | "REJECTED";
+    createdAt: string;
+    reviewedAt: string | null;
+  }>;
+};
+
 export type Ack<T = Record<string, never>> =
   ({ ok: true } & T) | { ok: false; error: string };
 

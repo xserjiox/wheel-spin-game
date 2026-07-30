@@ -66,10 +66,12 @@ export function JoinRoomPage({
               onChange={(event) => setName(event.target.value)}
               maxLength={32}
               placeholder={t("guestNameExample")}
+              autoComplete="nickname"
               autoFocus
               required
             />
           </label>
+          <p className="form-hint privacy-input-hint">{t("privacyInputHint")}</p>
           {meta.requiresPassword && (
             <label>
               {t("roomPassword")}

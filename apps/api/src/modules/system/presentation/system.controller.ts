@@ -116,6 +116,11 @@ export class SystemController {
     return this.sendPage("index.app.html", request, reply);
   }
 
+  @Get(["privacy", "cookies"])
+  legal(@Req() request: FastifyRequest, @Res() reply: FastifyReply) {
+    return this.sendPage("index.app.html", request, reply);
+  }
+
   @Get("robots.txt")
   robots(@Req() request: FastifyRequest, @Res() reply: FastifyReply) {
     return reply

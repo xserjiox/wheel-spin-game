@@ -125,3 +125,7 @@ export function deleteWheelTemplate(storage: Storage, id: string): WheelTemplate
   writeWheelTemplates(storage, templates);
   return templates;
 }
+
+export function clearWheelTemplates(storage: Storage): void {
+  storage.removeItem(WHEEL_TEMPLATE_STORAGE_KEY);
+}

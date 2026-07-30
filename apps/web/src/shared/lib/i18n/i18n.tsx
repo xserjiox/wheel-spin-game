@@ -8,8 +8,183 @@ import {
   useState,
 } from "react";
 import { homePathForLocale, localeFromHomePath, type Locale } from "./locale";
+import { LOCALE_STORAGE_KEY } from "./storage";
+
+const privacyUi = {
+  en: {
+    privacyPolicy: "Privacy",
+    cookiePolicy: "Cookies",
+    privacyInputHint:
+      "Use a nickname where possible. Do not enter sensitive or confidential information.",
+    saveRoomQuestion: "Save this room on this device?",
+    saveRoomCopy:
+      "This stores a shortcut in this browser. It does not create an account.",
+    saveRoomAction: "Save room",
+    notNow: "Not now",
+    roomSaved: "Room saved on this device",
+    clearDeviceData: "Clear data on this device",
+    clearDeviceDataCopy:
+      "Removes saved room shortcuts, wheel templates, and language preference. Active room sessions are not deleted.",
+    clearDeviceDataConfirm:
+      "Clear saved room shortcuts, wheel templates, and language preference from this device?",
+    dataControls: "Your data",
+    dataControlsCopy:
+      "Download the data linked to your current room identity or delete it.",
+    exportMyData: "Download my data",
+    exportingData: "Preparing download…",
+    deleteMyData: "Delete my room data",
+    deleteMyDataConfirm:
+      "Delete your participant identity and suggestions from this room? This cannot be undone.",
+    deleteRoomData: "Delete room and all its data",
+    deleteRoomDataConfirm:
+      "Permanently delete this room, all participants, choices, suggestions, and spin history? This cannot be undone.",
+    deletingData: "Deleting…",
+    participantDataDeleted: "Your room data was deleted",
+    participantDataDeletedCopy:
+      "This participant identity no longer has access to the room.",
+    roomDataDeleted: "The room was deleted",
+    roomDataDeletedCopy: "The room and its stored data are no longer available.",
+    errorHostMustDeleteRoom:
+      "The host must delete the whole room instead of only the host identity",
+  },
+  ru: {
+    privacyPolicy: "Конфиденциальность",
+    cookiePolicy: "Cookies",
+    privacyInputHint:
+      "По возможности используйте псевдоним. Не вводите чувствительные или конфиденциальные данные.",
+    saveRoomQuestion: "Сохранить эту комнату на устройстве?",
+    saveRoomCopy:
+      "В этом браузере сохранится только ссылка на комнату. Аккаунт не создаётся.",
+    saveRoomAction: "Сохранить комнату",
+    notNow: "Не сейчас",
+    roomSaved: "Комната сохранена на этом устройстве",
+    clearDeviceData: "Очистить данные на этом устройстве",
+    clearDeviceDataCopy:
+      "Удалит ссылки на комнаты, шаблоны колеса и выбор языка. Активные сессии комнат не удаляются.",
+    clearDeviceDataConfirm:
+      "Удалить с этого устройства ссылки на комнаты, шаблоны колеса и выбор языка?",
+    dataControls: "Ваши данные",
+    dataControlsCopy:
+      "Скачайте данные, связанные с вашей текущей ролью в комнате, или удалите их.",
+    exportMyData: "Скачать мои данные",
+    exportingData: "Подготавливаем файл…",
+    deleteMyData: "Удалить мои данные из комнаты",
+    deleteMyDataConfirm:
+      "Удалить вашу роль участника и предложения из этой комнаты? Это действие необратимо.",
+    deleteRoomData: "Удалить комнату и все её данные",
+    deleteRoomDataConfirm:
+      "Навсегда удалить комнату, участников, варианты, предложения и историю вращений? Это действие необратимо.",
+    deletingData: "Удаляем…",
+    participantDataDeleted: "Ваши данные из комнаты удалены",
+    participantDataDeletedCopy: "У этой роли участника больше нет доступа к комнате.",
+    roomDataDeleted: "Комната удалена",
+    roomDataDeletedCopy: "Комната и сохранённые в ней данные больше недоступны.",
+    errorHostMustDeleteRoom:
+      "Организатор должен удалить всю комнату, а не только свою роль",
+  },
+  uk: {
+    privacyPolicy: "Конфіденційність",
+    cookiePolicy: "Cookies",
+    privacyInputHint:
+      "За можливості використовуйте псевдонім. Не вводьте чутливі або конфіденційні дані.",
+    saveRoomQuestion: "Зберегти цю кімнату на пристрої?",
+    saveRoomCopy:
+      "У цьому браузері збережеться лише посилання на кімнату. Обліковий запис не створюється.",
+    saveRoomAction: "Зберегти кімнату",
+    notNow: "Не зараз",
+    roomSaved: "Кімнату збережено на цьому пристрої",
+    clearDeviceData: "Очистити дані на цьому пристрої",
+    clearDeviceDataCopy:
+      "Видалить посилання на кімнати, шаблони колеса та вибір мови. Активні сесії кімнат не видаляються.",
+    clearDeviceDataConfirm:
+      "Видалити з цього пристрою посилання на кімнати, шаблони колеса та вибір мови?",
+    dataControls: "Ваші дані",
+    dataControlsCopy:
+      "Завантажте дані, пов’язані з вашою поточною роллю в кімнаті, або видаліть їх.",
+    exportMyData: "Завантажити мої дані",
+    exportingData: "Готуємо файл…",
+    deleteMyData: "Видалити мої дані з кімнати",
+    deleteMyDataConfirm:
+      "Видалити вашу роль учасника та пропозиції з цієї кімнати? Цю дію не можна скасувати.",
+    deleteRoomData: "Видалити кімнату та всі її дані",
+    deleteRoomDataConfirm:
+      "Назавжди видалити кімнату, учасників, варіанти, пропозиції та історію обертань? Цю дію не можна скасувати.",
+    deletingData: "Видаляємо…",
+    participantDataDeleted: "Ваші дані з кімнати видалено",
+    participantDataDeletedCopy: "Ця роль учасника більше не має доступу до кімнати.",
+    roomDataDeleted: "Кімнату видалено",
+    roomDataDeletedCopy: "Кімната та збережені в ній дані більше недоступні.",
+    errorHostMustDeleteRoom:
+      "Організатор має видалити всю кімнату, а не лише свою роль",
+  },
+  de: {
+    privacyPolicy: "Datenschutz",
+    cookiePolicy: "Cookies",
+    privacyInputHint:
+      "Verwende möglichst einen Spitznamen. Gib keine sensiblen oder vertraulichen Daten ein.",
+    saveRoomQuestion: "Diesen Raum auf dem Gerät speichern?",
+    saveRoomCopy:
+      "Nur eine Verknüpfung wird in diesem Browser gespeichert. Es wird kein Konto erstellt.",
+    saveRoomAction: "Raum speichern",
+    notNow: "Nicht jetzt",
+    roomSaved: "Raum auf diesem Gerät gespeichert",
+    clearDeviceData: "Daten auf diesem Gerät löschen",
+    clearDeviceDataCopy:
+      "Entfernt Raumverknüpfungen, Radvorlagen und die Sprachauswahl. Aktive Raumsitzungen bleiben bestehen.",
+    clearDeviceDataConfirm:
+      "Raumverknüpfungen, Radvorlagen und Sprachauswahl von diesem Gerät löschen?",
+    dataControls: "Deine Daten",
+    dataControlsCopy:
+      "Lade die mit deiner aktuellen Raumidentität verknüpften Daten herunter oder lösche sie.",
+    exportMyData: "Meine Daten herunterladen",
+    exportingData: "Download wird vorbereitet…",
+    deleteMyData: "Meine Raumdaten löschen",
+    deleteMyDataConfirm:
+      "Teilnehmeridentität und Vorschläge aus diesem Raum löschen? Dies kann nicht rückgängig gemacht werden.",
+    deleteRoomData: "Raum und alle Daten löschen",
+    deleteRoomDataConfirm:
+      "Raum, Teilnehmer, Auswahlmöglichkeiten, Vorschläge und Verlauf dauerhaft löschen? Dies kann nicht rückgängig gemacht werden.",
+    deletingData: "Wird gelöscht…",
+    participantDataDeleted: "Deine Raumdaten wurden gelöscht",
+    participantDataDeletedCopy: "Diese Teilnehmeridentität hat keinen Zugriff mehr.",
+    roomDataDeleted: "Der Raum wurde gelöscht",
+    roomDataDeletedCopy:
+      "Der Raum und seine gespeicherten Daten sind nicht mehr verfügbar.",
+    errorHostMustDeleteRoom:
+      "Der Host muss den gesamten Raum statt nur die eigene Identität löschen",
+  },
+  zh: {
+    privacyPolicy: "隐私",
+    cookiePolicy: "Cookie",
+    privacyInputHint: "请尽量使用昵称。请勿输入敏感或机密信息。",
+    saveRoomQuestion: "在此设备上保存这个房间？",
+    saveRoomCopy: "浏览器只会保存房间快捷方式，不会创建账户。",
+    saveRoomAction: "保存房间",
+    notNow: "暂不",
+    roomSaved: "房间已保存在此设备上",
+    clearDeviceData: "清除此设备上的数据",
+    clearDeviceDataCopy: "删除房间快捷方式、转盘模板和语言偏好。不会删除当前房间会话。",
+    clearDeviceDataConfirm: "删除此设备上的房间快捷方式、转盘模板和语言偏好？",
+    dataControls: "你的数据",
+    dataControlsCopy: "下载或删除与你当前房间身份相关的数据。",
+    exportMyData: "下载我的数据",
+    exportingData: "正在准备下载…",
+    deleteMyData: "删除我的房间数据",
+    deleteMyDataConfirm: "删除你在此房间的参与者身份和建议？此操作无法撤销。",
+    deleteRoomData: "删除房间及其全部数据",
+    deleteRoomDataConfirm:
+      "永久删除房间、所有参与者、选项、建议和转动历史？此操作无法撤销。",
+    deletingData: "正在删除…",
+    participantDataDeleted: "你的房间数据已删除",
+    participantDataDeletedCopy: "此参与者身份已无法访问该房间。",
+    roomDataDeleted: "房间已删除",
+    roomDataDeletedCopy: "该房间及其中保存的数据已不可用。",
+    errorHostMustDeleteRoom: "主持人必须删除整个房间，而不能只删除自己的身份",
+  },
+} as const;
 
 const en = {
+  ...privacyUi.en,
   metaTitle: "Shared Online Wheel for Groups | Wheel Spin",
   metaDescription:
     "Create a shared room, invite friends or teammates, and spin one synchronized random wheel together.",
@@ -21,7 +196,7 @@ const en = {
   lead: "Create a room, send the link to friends, and run one wheel for everyone.",
   features: "Features",
   featureGuests: "✦ Up to 50 guests",
-  featureAnonymous: "✦ Anonymous ideas",
+  featureAnonymous: "✦ Author hidden from the group",
   featureResult: "✦ One shared result",
   howItWorks: "How the shared wheel works",
   howItWorksCopy:
@@ -34,7 +209,7 @@ const en = {
     "The host or an assigned leader starts the wheel, and every participant sees the synchronized result.",
   whySharedTitle: "More than a single-player wheel spinner",
   whySharedCopy:
-    "Guests can suggest ideas anonymously while the host keeps control of the final list. Optional passwords keep private decisions inside your group.",
+    "Guests can suggest ideas without their name being shown to the group, while the host keeps control of the final list. Optional passwords restrict new access.",
   useCasesTitle: "Built for group decisions",
   useCasesCopy:
     "Choose where to eat, pick a game, assign a task, select a classroom activity, or settle the next team discussion fairly.",
@@ -54,7 +229,7 @@ const en = {
   savedRoomsEyebrow: "SAVED IN THIS BROWSER",
   savedRoomsTitle: "Your rooms",
   noSavedRooms: "No rooms yet",
-  noSavedRoomsHint: "Rooms you create or join will appear here.",
+  noSavedRoomsHint: "Only rooms you explicitly save will appear here.",
   hostRole: "HOST",
   guestRole: "GUEST",
   lastOpened: "Last opened: {date}",
@@ -185,13 +360,15 @@ const en = {
   editIdeaNamed: "Edit {idea}",
   deleteIdeaNamed: "Delete {idea}",
   removingIdea: "Deleting…",
-  privacyIntro: "The host sees only the text and never who sent it.",
+  privacyIntro:
+    "The group interface shows the text without the author's name. The service can still link it to your participant record.",
   newOption: "New choice",
   proposalExample: "For example, Order pizza",
   sent: "Sent!",
   proposeSlot: "Suggest slot",
-  anonymous: "Fully anonymous",
-  anonymousCopy: "The author's name is hidden even from the host.",
+  anonymous: "Author hidden from the group",
+  anonymousCopy:
+    "The author's name is not shown to the host or participants in the room interface.",
   suggestions: "Suggestions",
   noIdeas: "No new ideas yet",
   add: "Add",
@@ -250,6 +427,7 @@ type TranslationKey = keyof typeof en;
 type Dictionary = Record<TranslationKey, string>;
 
 const ru: Dictionary = {
+  ...privacyUi.ru,
   metaTitle: "Общее онлайн-колесо для компании | Wheel Spin",
   metaDescription:
     "Создайте общую комнату, пригласите друзей или команду и вместе крутите одно синхронное колесо случайного выбора.",
@@ -261,7 +439,7 @@ const ru: Dictionary = {
   lead: "Создайте комнату, отправьте ссылку друзьям и запустите одно колесо для всех участников.",
   features: "Возможности",
   featureGuests: "✦ До 50 гостей",
-  featureAnonymous: "✦ Анонимные идеи",
+  featureAnonymous: "✦ Автор скрыт от участников",
   featureResult: "✦ Один результат",
   howItWorks: "Как работает общее колесо",
   howItWorksCopy:
@@ -274,7 +452,7 @@ const ru: Dictionary = {
     "Хост или назначенный ведущий запускает колесо, а все участники одновременно видят результат.",
   whySharedTitle: "Больше, чем обычное колесо фортуны",
   whySharedCopy:
-    "Гости могут анонимно предлагать варианты, а хост управляет итоговым списком. Для приватных решений комнату можно защитить паролем.",
+    "Гости могут предлагать варианты без показа имени участникам, а хост управляет итоговым списком. Пароль ограничивает новый доступ к комнате.",
   useCasesTitle: "Для совместных решений",
   useCasesCopy:
     "Выберите, где поесть, во что играть, кому достанется задача, какое упражнение провести на уроке или какую тему обсудить команде.",
@@ -294,7 +472,7 @@ const ru: Dictionary = {
   savedRoomsEyebrow: "СОХРАНЕНО В ЭТОМ БРАУЗЕРЕ",
   savedRoomsTitle: "Ваши комнаты",
   noSavedRooms: "Пока нет комнат",
-  noSavedRoomsHint: "Созданные и посещённые вами комнаты появятся здесь.",
+  noSavedRoomsHint: "Здесь появятся только комнаты, которые вы явно сохраните.",
   hostRole: "ХОСТ",
   guestRole: "ГОСТЬ",
   lastOpened: "Открывали: {date}",
@@ -425,13 +603,15 @@ const ru: Dictionary = {
   editIdeaNamed: "Изменить «{idea}»",
   deleteIdeaNamed: "Удалить «{idea}»",
   removingIdea: "Удаляем…",
-  privacyIntro: "Host увидит только текст и не узнает, кто его отправил.",
+  privacyIntro:
+    "В интерфейсе комнаты текст показывается без имени автора. Сервис всё равно может связать его с записью участника.",
   newOption: "Новый вариант",
   proposalExample: "Например, Заказать пиццу",
   sent: "Отправлено!",
   proposeSlot: "Предложить слот",
-  anonymous: "Полностью анонимно",
-  anonymousCopy: "Имя автора не отображается даже для host.",
+  anonymous: "Автор скрыт от участников",
+  anonymousCopy:
+    "Имя автора не показывается организатору и участникам в интерфейсе комнаты.",
   suggestions: "Предложения",
   noIdeas: "Новых идей пока нет",
   add: "Добавить",
@@ -486,6 +666,7 @@ const ru: Dictionary = {
 };
 
 const uk: Dictionary = {
+  ...privacyUi.uk,
   metaTitle: "Спільне онлайн-колесо для компанії | Wheel Spin",
   metaDescription:
     "Створіть спільну кімнату, запросіть друзів або команду та разом крутіть одне синхронне колесо випадкового вибору.",
@@ -497,7 +678,7 @@ const uk: Dictionary = {
   lead: "Створіть кімнату, надішліть посилання друзям і запустіть одне колесо для всіх.",
   features: "Можливості",
   featureGuests: "✦ До 50 гостей",
-  featureAnonymous: "✦ Анонімні ідеї",
+  featureAnonymous: "✦ Автор прихований від учасників",
   featureResult: "✦ Один результат",
   howItWorks: "Як працює спільне колесо",
   howItWorksCopy:
@@ -510,7 +691,7 @@ const uk: Dictionary = {
     "Хост або призначений ведучий запускає колесо, а всі учасники одночасно бачать результат.",
   whySharedTitle: "Більше, ніж звичайне колесо фортуни",
   whySharedCopy:
-    "Гості можуть анонімно пропонувати варіанти, а хост керує підсумковим списком. Для приватних рішень кімнату можна захистити паролем.",
+    "Гості можуть пропонувати варіанти без показу імені учасникам, а хост керує підсумковим списком. Пароль обмежує новий доступ до кімнати.",
   useCasesTitle: "Для спільних рішень",
   useCasesCopy:
     "Оберіть, де поїсти, у що грати, кому дати завдання, яку вправу провести на уроці або яку тему обговорити команді.",
@@ -530,7 +711,7 @@ const uk: Dictionary = {
   savedRoomsEyebrow: "ЗБЕРЕЖЕНО В ЦЬОМУ БРАУЗЕРІ",
   savedRoomsTitle: "Ваші кімнати",
   noSavedRooms: "Кімнат ще немає",
-  noSavedRoomsHint: "Створені та відвідані вами кімнати з’являться тут.",
+  noSavedRoomsHint: "Тут з’являться лише кімнати, які ви явно збережете.",
   hostRole: "ХОСТ",
   guestRole: "ГІСТЬ",
   lastOpened: "Відкривали: {date}",
@@ -660,13 +841,15 @@ const uk: Dictionary = {
   editIdeaNamed: "Змінити «{idea}»",
   deleteIdeaNamed: "Видалити «{idea}»",
   removingIdea: "Видаляємо…",
-  privacyIntro: "Ведучий побачить лише текст і не дізнається, хто його надіслав.",
+  privacyIntro:
+    "В інтерфейсі кімнати текст показується без імені автора. Сервіс усе одно може пов’язати його із записом учасника.",
   newOption: "Новий варіант",
   proposalExample: "Наприклад, Замовити піцу",
   sent: "Надіслано!",
   proposeSlot: "Запропонувати слот",
-  anonymous: "Повністю анонімно",
-  anonymousCopy: "Ім’я автора приховане навіть від ведучого.",
+  anonymous: "Автор прихований від учасників",
+  anonymousCopy:
+    "Ім’я автора не показується організатору та учасникам в інтерфейсі кімнати.",
   suggestions: "Пропозиції",
   noIdeas: "Нових ідей поки немає",
   add: "Додати",
@@ -721,6 +904,7 @@ const uk: Dictionary = {
 };
 
 const de: Dictionary = {
+  ...privacyUi.de,
   metaTitle: "Gemeinsames Online-Glücksrad für Gruppen | Wheel Spin",
   metaDescription:
     "Erstelle einen gemeinsamen Raum, lade Freunde oder dein Team ein und dreht zusammen ein synchrones Zufallsrad.",
@@ -732,7 +916,7 @@ const de: Dictionary = {
   lead: "Erstelle einen Raum, sende den Link an Freunde und starte ein Rad für alle.",
   features: "Funktionen",
   featureGuests: "✦ Bis zu 50 Gäste",
-  featureAnonymous: "✦ Anonyme Ideen",
+  featureAnonymous: "✦ Autor für die Gruppe verborgen",
   featureResult: "✦ Ein gemeinsames Ergebnis",
   howItWorks: "So funktioniert das gemeinsame Rad",
   howItWorksCopy:
@@ -745,7 +929,7 @@ const de: Dictionary = {
     "Der Host oder eine zugewiesene Leitung startet das Rad, und alle Teilnehmer sehen das synchronisierte Ergebnis.",
   whySharedTitle: "Mehr als ein Glücksrad für eine Person",
   whySharedCopy:
-    "Gäste können Ideen anonym vorschlagen, während der Host die endgültige Liste kontrolliert. Ein optionales Passwort schützt private Entscheidungen.",
+    "Gäste können Ideen vorschlagen, ohne dass ihr Name der Gruppe angezeigt wird. Der Host kontrolliert die endgültige Liste; ein Passwort beschränkt neuen Zugriff.",
   useCasesTitle: "Für Entscheidungen in der Gruppe",
   useCasesCopy:
     "Wählt ein Restaurant oder Spiel, verteilt eine Aufgabe, bestimmt eine Aktivität im Unterricht oder entscheidet fair über das nächste Teamthema.",
@@ -765,7 +949,7 @@ const de: Dictionary = {
   savedRoomsEyebrow: "IN DIESEM BROWSER GESPEICHERT",
   savedRoomsTitle: "Deine Räume",
   noSavedRooms: "Noch keine Räume",
-  noSavedRoomsHint: "Erstellte und besuchte Räume erscheinen hier.",
+  noSavedRoomsHint: "Nur ausdrücklich gespeicherte Räume erscheinen hier.",
   hostRole: "HOST",
   guestRole: "GAST",
   lastOpened: "Zuletzt geöffnet: {date}",
@@ -896,13 +1080,15 @@ const de: Dictionary = {
   editIdeaNamed: "{idea} bearbeiten",
   deleteIdeaNamed: "{idea} löschen",
   removingIdea: "Wird gelöscht…",
-  privacyIntro: "Der Host sieht nur den Text und erfährt nie, wer ihn gesendet hat.",
+  privacyIntro:
+    "Die Raumoberfläche zeigt den Text ohne Namen. Der Dienst kann ihn weiterhin dem Teilnehmerdatensatz zuordnen.",
   newOption: "Neue Option",
   proposalExample: "Zum Beispiel, Pizza bestellen",
   sent: "Gesendet!",
   proposeSlot: "Feld vorschlagen",
-  anonymous: "Vollständig anonym",
-  anonymousCopy: "Der Name des Autors bleibt selbst für den Host verborgen.",
+  anonymous: "Autor für die Gruppe verborgen",
+  anonymousCopy:
+    "Der Name wird dem Host und den Teilnehmern in der Raumoberfläche nicht angezeigt.",
   suggestions: "Vorschläge",
   noIdeas: "Noch keine neuen Ideen",
   add: "Hinzufügen",
@@ -957,6 +1143,7 @@ const de: Dictionary = {
 };
 
 const zh: Dictionary = {
+  ...privacyUi.zh,
   metaTitle: "多人共享在线随机转盘 | Wheel Spin",
   metaDescription:
     "创建共享房间，邀请好友或团队成员，并一起转动同一个实时同步的随机转盘。",
@@ -968,7 +1155,7 @@ const zh: Dictionary = {
   lead: "创建房间，把链接发给好友，让所有人共享同一个转盘。",
   features: "功能",
   featureGuests: "✦ 最多 50 位参与者",
-  featureAnonymous: "✦ 匿名建议",
+  featureAnonymous: "✦ 不向房间成员显示作者",
   featureResult: "✦ 共享同一结果",
   howItWorks: "共享转盘如何使用",
   howItWorksCopy:
@@ -979,7 +1166,7 @@ const zh: Dictionary = {
   stepSpinCopy: "房主或指定主持人启动转盘，所有参与者会同时看到同步结果。",
   whySharedTitle: "不只是单人幸运转盘",
   whySharedCopy:
-    "参与者可以匿名提交建议，房主则保留最终列表的控制权。还可以使用密码保护私密决定。",
+    "参与者提交建议时，房间成员看不到其姓名；房主仍控制最终列表。密码可限制新用户进入。",
   useCasesTitle: "适合共同做决定",
   useCasesCopy:
     "可以用来选择餐厅或游戏、分配任务、挑选课堂活动，或公平决定团队的下一个讨论主题。",
@@ -997,7 +1184,7 @@ const zh: Dictionary = {
   savedRoomsEyebrow: "已保存在此浏览器",
   savedRoomsTitle: "你的房间",
   noSavedRooms: "还没有房间",
-  noSavedRoomsHint: "你创建或加入的房间会显示在这里。",
+  noSavedRoomsHint: "只有你明确保存的房间才会显示在这里。",
   hostRole: "房主",
   guestRole: "访客",
   lastOpened: "上次打开：{date}",
@@ -1125,13 +1312,13 @@ const zh: Dictionary = {
   editIdeaNamed: "编辑“{idea}”",
   deleteIdeaNamed: "删除“{idea}”",
   removingIdea: "正在删除…",
-  privacyIntro: "房主只能看到文字，不会知道是谁发送的。",
+  privacyIntro: "房间界面只显示文字，不显示作者姓名。服务仍可将建议关联到参与者记录。",
   newOption: "新选项",
   proposalExample: "例如：订披萨",
   sent: "已发送！",
   proposeSlot: "提交选项",
-  anonymous: "完全匿名",
-  anonymousCopy: "即使房主也看不到作者姓名。",
+  anonymous: "不向房间成员显示作者",
+  anonymousCopy: "房间界面不会向房主或其他参与者显示作者姓名。",
   suggestions: "建议",
   noIdeas: "暂时没有新建议",
   add: "添加",
@@ -1186,7 +1373,7 @@ const zh: Dictionary = {
 
 const dictionaries: Record<Locale, Dictionary> = { en, ru, uk, de, zh };
 
-// Build-time pre-rendering uses the same localized metadata as the provider.
+// Build-time pre-rendering and the provider share the same typed dictionaries.
 // eslint-disable-next-line react-refresh/only-export-components
 export function getLocaleSeoMeta(locale: Locale): {
   title: string;
@@ -1228,8 +1415,6 @@ type I18nValue = {
 };
 
 const I18nContext = createContext<I18nValue | null>(null);
-const STORAGE_KEY = "wheel-spin-locale";
-
 function detectInitialLocale(preferredLocale?: Locale): Locale {
   if (preferredLocale) return preferredLocale;
   if (typeof window === "undefined") return "en";
@@ -1237,7 +1422,7 @@ function detectInitialLocale(preferredLocale?: Locale): Locale {
   const pathLocale = localeFromHomePath(window.location.pathname);
   if (pathLocale) return pathLocale;
 
-  const stored = window.localStorage.getItem(STORAGE_KEY);
+  const stored = window.localStorage.getItem(LOCALE_STORAGE_KEY);
   if (stored && stored in dictionaries) return stored as Locale;
   return "en";
 }
@@ -1268,7 +1453,7 @@ export function I18nProvider({
   );
 
   const setLocale = useCallback((nextLocale: Locale) => {
-    window.localStorage.setItem(STORAGE_KEY, nextLocale);
+    window.localStorage.setItem(LOCALE_STORAGE_KEY, nextLocale);
 
     if (localeFromHomePath(window.location.pathname)) {
       const nextPath = homePathForLocale(nextLocale);
@@ -1294,12 +1479,15 @@ export function I18nProvider({
   useEffect(() => {
     document.documentElement.lang =
       locale === "uk" ? "uk" : locale === "zh" ? "zh-CN" : locale;
-    document.title = t("metaTitle");
-    setMetaContent('meta[name="description"]', t("metaDescription"));
-    setMetaContent('meta[property="og:title"]', t("metaTitle"));
-    setMetaContent('meta[property="og:description"]', t("metaDescription"));
-    setMetaContent('meta[name="twitter:title"]', t("metaTitle"));
-    setMetaContent('meta[name="twitter:description"]', t("metaDescription"));
+    const isLegalPage = ["/privacy", "/cookies"].includes(window.location.pathname);
+    if (!isLegalPage) {
+      document.title = t("metaTitle");
+      setMetaContent('meta[name="description"]', t("metaDescription"));
+      setMetaContent('meta[property="og:title"]', t("metaTitle"));
+      setMetaContent('meta[property="og:description"]', t("metaDescription"));
+      setMetaContent('meta[name="twitter:title"]', t("metaTitle"));
+      setMetaContent('meta[name="twitter:description"]', t("metaDescription"));
+    }
 
     const homeLocale = localeFromHomePath(window.location.pathname);
     if (homeLocale) {
@@ -1345,6 +1533,7 @@ const errorKeys: Record<string, TranslationKey> = {
   CANNOT_REMOVE_HOST: "errorCannotRemoveHost",
   SPIN_PERMISSION_REQUIRED: "errorSpinPermissionRequired",
   CANNOT_CHANGE_HOST_SPIN_PERMISSION: "errorCannotChangeHostSpinPermission",
+  HOST_MUST_DELETE_ROOM: "errorHostMustDeleteRoom",
   "Не удалось создать код комнаты": "errorCode",
   "Комната не найдена или уже закрыта": "errorClosed",
   "Неверный пароль": "errorWrongPassword",

@@ -1,13 +1,15 @@
 import { type FormEvent, useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { createRoom, restoreRoom, type RoomNavigationState } from "@/entities/room";
 import { useSavedRooms, type SavedRoom } from "@/entities/saved-room";
+import { clearWheelTemplates } from "@/entities/wheel-template";
 import { LanguageSwitcher } from "@/features/change-language";
 import { SavedRoomList } from "@/features/manage-saved-rooms";
 import { WheelTemplatePicker } from "@/features/manage-wheel-templates";
 import { ApiRequestError } from "@/shared/api/http";
 import {
   homePathForLocale,
+  LOCALE_STORAGE_KEY,
   type Locale,
   SUPPORTED_LOCALES,
   translateError,
@@ -36,7 +38,12 @@ export function HomePage() {
   const { defaultRoomOptions, locale, t } = useI18n();
   const localizedDefaultTitle = t("defaultTitle");
   const previousDefaultTitle = useRef(localizedDefaultTitle);
-  const { rooms, save: saveRoom, remove: removeRoom } = useSavedRooms();
+  const {
+    rooms,
+    save: saveRoom,
+    remove: removeRoom,
+    clear: clearRooms,
+  } = useSavedRooms();
   const [mode, setMode] = useState<"create" | "join" | "rooms">("create");
   const [hostName, setHostName] = useState("");
   const [title, setTitle] = useState(localizedDefaultTitle);
@@ -66,7 +73,6 @@ export function HomePage() {
         password,
         options: templateOptions ?? defaultRoomOptions,
       } satisfies CreateInput);
-      saveRoom(result.state);
       navigate(roomPath(result.code), {
         state: {
           initialRoomState: result.state,
@@ -117,6 +123,14 @@ export function HomePage() {
       }
       setOpeningCode(null);
     }
+  };
+
+  const clearDeviceData = () => {
+    if (!window.confirm(t("clearDeviceDataConfirm"))) return;
+    clearRooms();
+    clearWheelTemplates(window.localStorage);
+    window.localStorage.removeItem(LOCALE_STORAGE_KEY);
+    window.location.assign("/");
   };
 
   return (
@@ -196,10 +210,11 @@ export function HomePage() {
                   onChange={(event) => setHostName(event.target.value)}
                   maxLength={32}
                   placeholder={t("nameExample")}
-                  autoComplete="name"
+                  autoComplete="nickname"
                   required
                 />
               </label>
+              <p className="form-hint privacy-input-hint">{t("privacyInputHint")}</p>
               <label>
                 {t("wheelTitle")}
                 <input
@@ -284,6 +299,7 @@ export function HomePage() {
                   setMode("create");
                   setError("");
                 }}
+                onClearDeviceData={clearDeviceData}
               />
               {error && (
                 <p className="form-error saved-room-error" role="alert">
@@ -352,6 +368,10 @@ export function HomePage() {
 
       <footer className="landing-footer">
         <span>© {new Date().getFullYear()} Wheel Spin</span>
+        <nav aria-label={`${t("privacyPolicy")} / ${t("cookiePolicy")}`}>
+          <Link to="/privacy">{t("privacyPolicy")}</Link>
+          <Link to="/cookies">{t("cookiePolicy")}</Link>
+        </nav>
         <nav aria-label={t("language")}>
           {SUPPORTED_LOCALES.map((option) => (
             <a

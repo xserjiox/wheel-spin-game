@@ -7,12 +7,14 @@ export function SavedRoomList({
   onOpen,
   onRemove,
   onCreate,
+  onClearDeviceData,
 }: {
   rooms: SavedRoom[];
   openingCode: string | null;
   onOpen: (room: SavedRoom) => void;
   onRemove: (code: string) => void;
   onCreate: () => void;
+  onClearDeviceData: () => void;
 }) {
   const { localeTag, t } = useI18n();
 
@@ -79,6 +81,13 @@ export function SavedRoomList({
           })}
         </div>
       )}
+
+      <div className="clear-device-data">
+        <button type="button" onClick={onClearDeviceData}>
+          {t("clearDeviceData")}
+        </button>
+        <p>{t("clearDeviceDataCopy")}</p>
+      </div>
     </section>
   );
 }

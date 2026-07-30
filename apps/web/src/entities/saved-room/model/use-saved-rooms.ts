@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import {
+  clearSavedRooms,
   readSavedRooms,
   removeSavedRoom,
   saveRoom,
@@ -38,5 +39,10 @@ export function useSavedRooms() {
     setRooms(removeSavedRoom(window.localStorage, code));
   }, []);
 
-  return { rooms, save, remove };
+  const clear = useCallback(() => {
+    clearSavedRooms(window.localStorage);
+    setRooms([]);
+  }, []);
+
+  return { rooms, save, remove, clear };
 }

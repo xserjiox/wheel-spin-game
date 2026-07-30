@@ -47,8 +47,8 @@ PostgreSQL and Redis remain accessible only through Railway's private network.
 The frontend follows Feature-Sliced Design:
 
 - `app` — application initialization, routing, and global styles
-- `pages` — route components for localized home pages, `/r/:code`, and the
-  fallback page
+- `pages` — route components for localized home pages, `/r/:code`, `/privacy`,
+  `/cookies`, and the fallback page
 - `features` — user actions that are not tied to a single page
 - `entities` — room model, API, realtime state, and UI
 - `shared` — HTTP client, i18n, router helpers, and reusable UI
@@ -120,6 +120,8 @@ with ESLint, Prettier, TypeScript, or test failures.
    - `COOKIE_SECURE=true`
    - `PUBLIC_URL` with the canonical public origin, for example
      `https://wheel.example.com`
+   - `VITE_LEGAL_CONTROLLER_NAME` with the public name of the service operator
+   - `VITE_PRIVACY_EMAIL` with the public privacy contact
 4. Create a public domain only for the application service.
 
 `railway.json` configures the Dockerfile build, Prisma migration before startup,
