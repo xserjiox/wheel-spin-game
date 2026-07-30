@@ -48,6 +48,7 @@ export function Wheel({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
+  const centerRef = useRef<HTMLElement | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
@@ -62,6 +63,9 @@ export function Wheel({
   const [transition, setTransition] = useState("none");
   const [winner, setWinner] = useState("");
   const [optionTooltip, setOptionTooltip] = useState<OptionTooltip | null>(null);
+  const setCenterRef = useCallback((element: HTMLElement | null) => {
+    centerRef.current = element;
+  }, []);
   const visibleOptions = activeSpin?.optionsSnapshot ?? options;
   const emptyLabel = t("addOptions");
   const centerStatusLabel = !connected
@@ -75,13 +79,20 @@ export function Wheel({
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const draw = (layoutWidth = canvas.clientWidth) =>
-      drawWheel(canvas, visibleOptions, emptyLabel, layoutWidth);
+    const draw = () =>
+      drawWheel(
+        canvas,
+        visibleOptions,
+        emptyLabel,
+        canvas.clientWidth,
+        centerRef.current?.offsetWidth ?? 0,
+      );
     draw();
-    const observer = new ResizeObserver(([entry]) => {
-      draw(entry?.contentRect.width);
+    const observer = new ResizeObserver(() => {
+      draw();
     });
     observer.observe(canvas);
+    if (centerRef.current) observer.observe(centerRef.current);
     document.fonts?.ready.then(() => draw());
     return () => observer.disconnect();
   }, [emptyLabel, visibleOptions]);
@@ -327,6 +338,7 @@ export function Wheel({
         )}
         {centerStatusLabel ? (
           <div
+            ref={setCenterRef}
             className={`spin-center wheel-center-status ${activeSpin ? "spinning" : ""} ${!connected ? "reconnecting" : ""}`}
             role="status"
             aria-live="polite"
@@ -342,6 +354,7 @@ export function Wheel({
           </div>
         ) : (
           <button
+            ref={setCenterRef}
             className="spin-center"
             type="button"
             aria-label={t("startSpin")}
@@ -410,6 +423,7 @@ function drawWheel(
   options: Option[],
   emptyLabel: string,
   layoutWidth: number,
+  centerSize: number,
 ): void {
   const size = Math.max(260, Math.round(layoutWidth || canvas.clientWidth || 570));
   const ratio = Math.min(window.devicePixelRatio || 1, 2);
@@ -439,6 +453,11 @@ function drawWheel(
   }
 
   const arc = (Math.PI * 2) / options.length;
+  const outerLabelRadius = radius * 0.83;
+  const fallbackCenterSize = size <= 470 ? 86 : 108;
+  const centerRadius = (centerSize || fallbackCenterSize) / 2;
+  const centerGap = Math.max(8, Math.min(12, size * 0.02));
+  const maxLabelWidth = Math.max(24, outerLabelRadius - centerRadius - centerGap);
   options.forEach((option, index) => {
     const start = -Math.PI / 2 + index * arc;
     const end = start + arc;
@@ -456,11 +475,18 @@ function drawWheel(
     const normalizedAngle = (angle + Math.PI * 2) % (Math.PI * 2);
     const flipLabel =
       normalizedAngle > Math.PI / 2 && normalizedAngle < (Math.PI * 3) / 2;
-    const fontSize = Math.max(8, Math.min(15, size * 0.035, arc * radius * 0.19));
+    const preferredFontSize = Math.max(
+      8,
+      Math.min(15, size * 0.035, arc * radius * 0.19),
+    );
+    const labelCharacters = Array.from(option.label);
     const maxLength = options.length > 12 ? 12 : 20;
-    const label =
-      option.label.length > maxLength
-        ? `${option.label.slice(0, maxLength - 1)}…`
+    const shortenedLabel =
+      labelCharacters.length > maxLength
+        ? `${labelCharacters
+            .slice(0, maxLength - 1)
+            .join("")
+            .trimEnd()}…`
         : option.label;
     context.save();
     context.translate(center, center);
@@ -468,8 +494,49 @@ function drawWheel(
     context.textAlign = flipLabel ? "left" : "right";
     context.textBaseline = "middle";
     context.fillStyle = "#1d211b";
-    context.font = `800 ${fontSize}px Manrope, sans-serif`;
-    context.fillText(label, (flipLabel ? -1 : 1) * radius * 0.83, 0, radius * 0.6);
+    const fittedLabel = fitWheelLabel(
+      context,
+      shortenedLabel,
+      preferredFontSize,
+      maxLabelWidth,
+    );
+    context.font = wheelLabelFont(fittedLabel.fontSize);
+    context.fillText(fittedLabel.text, (flipLabel ? -1 : 1) * outerLabelRadius, 0);
     context.restore();
   });
+}
+
+function fitWheelLabel(
+  context: CanvasRenderingContext2D,
+  label: string,
+  preferredFontSize: number,
+  maxWidth: number,
+): { text: string; fontSize: number } {
+  let fontSize = preferredFontSize;
+  context.font = wheelLabelFont(fontSize);
+
+  while (fontSize > 8 && context.measureText(label).width > maxWidth) {
+    fontSize = Math.max(8, fontSize - 0.5);
+    context.font = wheelLabelFont(fontSize);
+  }
+
+  if (context.measureText(label).width <= maxWidth) {
+    return { text: label, fontSize };
+  }
+
+  const characters = Array.from(label);
+  const ellipsis = "…";
+  while (characters.length > 1) {
+    characters.pop();
+    const candidate = `${characters.join("").trimEnd()}${ellipsis}`;
+    if (context.measureText(candidate).width <= maxWidth) {
+      return { text: candidate, fontSize };
+    }
+  }
+
+  return { text: ellipsis, fontSize };
+}
+
+function wheelLabelFont(size: number): string {
+  return `800 ${size}px Manrope, sans-serif`;
 }

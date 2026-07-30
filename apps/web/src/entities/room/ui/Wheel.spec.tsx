@@ -11,7 +11,7 @@ const options: Option[] = [
   { id: "sushi", label: "Sushi", position: 1 },
 ];
 
-function mockCanvas(): void {
+function mockCanvas(): CanvasRenderingContext2D {
   const context = {
     arc: vi.fn(),
     beginPath: vi.fn(),
@@ -29,6 +29,12 @@ function mockCanvas(): void {
     fillStyle: "",
     font: "",
     lineWidth: 1,
+    measureText: vi.fn(
+      (text: string) =>
+        ({
+          width: Array.from(text).length * 7,
+        }) as TextMetrics,
+    ),
     strokeStyle: "",
     textAlign: "start",
     textBaseline: "alphabetic",
@@ -36,11 +42,14 @@ function mockCanvas(): void {
 
   vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(context);
   vi.spyOn(HTMLCanvasElement.prototype, "clientWidth", "get").mockReturnValue(347);
+  return context;
 }
 
 describe("Wheel", () => {
+  let canvasContext: CanvasRenderingContext2D;
+
   beforeEach(() => {
-    mockCanvas();
+    canvasContext = mockCanvas();
     vi.stubGlobal("PointerEvent", MouseEvent);
     Object.defineProperty(window, "matchMedia", {
       configurable: true,
@@ -101,6 +110,39 @@ describe("Wheel", () => {
     const canvas = container.querySelector("canvas");
     expect(canvas?.width).toBe(347);
     expect(canvas?.height).toBe(347);
+  });
+
+  it("keeps mobile labels clear of the center control", () => {
+    const mobileOptions = Array.from({ length: 9 }, (_, index) => ({
+      id: `option-${index}`,
+      label: "Кубик льда по телу",
+      position: index,
+    }));
+
+    render(
+      <I18nProvider>
+        <Wheel
+          options={mobileOptions}
+          activeSpin={null}
+          canSpin={false}
+          isHost={false}
+          connected
+          onSpin={() => {}}
+        />
+      </I18nProvider>,
+    );
+
+    const drawnLabels = vi
+      .mocked(canvasContext.fillText)
+      .mock.calls.slice(-mobileOptions.length);
+
+    expect(drawnLabels).toHaveLength(mobileOptions.length);
+    expect(drawnLabels.some(([label]) => String(label).endsWith("…"))).toBe(true);
+    for (const [label, x, , maxWidth] of drawnLabels) {
+      const innerEdge = Math.abs(x) - canvasContext.measureText(label).width;
+      expect(maxWidth).toBeUndefined();
+      expect(innerEdge).toBeGreaterThanOrEqual(51);
+    }
   });
 
   it("shows guests a non-interactive center status", () => {
