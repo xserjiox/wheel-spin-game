@@ -133,10 +133,10 @@ conservative starting point is
 `connection_limit=5&pool_timeout=10&connect_timeout=5`. Use `&` instead of `?`
 when the URL already contains query parameters.
 
-Create a separate Railway Cron service from the same image with no public
-domain. Run `npm run db:cleanup-expired` once per hour. The API also performs a
-small guarded cleanup at startup and once per hour, but the Cron service keeps
-retention independent from application restarts.
+The API performs a guarded cleanup of expired rooms at startup and once per
+hour. Run `npm run db:cleanup-expired` manually when an immediate cleanup is
+needed. A separate Railway Cron service requires its own config-as-code file so
+that the web service's start command and healthcheck are not inherited.
 
 Before the first deployment of the retention changes, create a PostgreSQL
 backup. After deploying the code that prevents new growth, inspect and remove
