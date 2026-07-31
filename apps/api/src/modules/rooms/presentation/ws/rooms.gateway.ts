@@ -12,6 +12,7 @@ import type { Participant } from "@prisma/client";
 import type { Server, Socket } from "socket.io";
 import {
   optionRemoveSchema,
+  optionRestoreSchema,
   optionSchema,
   participantKickSchema,
   participantSpinPermissionSchema,
@@ -21,6 +22,7 @@ import {
   proposalUpdateSchema,
   type PublicRoomState,
   roomCodeSchema,
+  selectionModeSchema,
   spinSchema,
   titleSchema,
 } from "../../contracts/room.contracts";
@@ -128,6 +130,17 @@ export class RoomsGateway
     });
   }
 
+  @SubscribeMessage("room.updateSelectionMode")
+  async updateSelectionMode(
+    @ConnectedSocket() client: RoomSocket,
+    @MessageBody() body: unknown,
+  ) {
+    return this.mutate(client, "room.updateSelectionMode", async (participant) => {
+      const { selectionMode } = selectionModeSchema.parse(body);
+      await this.rooms.updateSelectionMode(participant, selectionMode);
+    });
+  }
+
   @SubscribeMessage("option.add")
   async addOption(@ConnectedSocket() client: RoomSocket, @MessageBody() body: unknown) {
     return this.mutate(client, "option.add", async (participant) => {
@@ -144,6 +157,24 @@ export class RoomsGateway
     return this.mutate(client, "option.remove", async (participant) => {
       const { optionId } = optionRemoveSchema.parse(body);
       await this.rooms.removeOption(participant, optionId);
+    });
+  }
+
+  @SubscribeMessage("option.restore")
+  async restoreOption(
+    @ConnectedSocket() client: RoomSocket,
+    @MessageBody() body: unknown,
+  ) {
+    return this.mutate(client, "option.restore", async (participant) => {
+      const { optionId } = optionRestoreSchema.parse(body);
+      await this.rooms.restoreOption(participant, optionId);
+    });
+  }
+
+  @SubscribeMessage("round.reset")
+  async resetRound(@ConnectedSocket() client: RoomSocket) {
+    return this.mutate(client, "round.reset", async (participant) => {
+      await this.rooms.resetRound(participant);
     });
   }
 

@@ -6,7 +6,7 @@ import {
   renameWheelTemplate,
   WHEEL_TEMPLATE_STORAGE_KEY,
 } from "./wheel-template-storage";
-import type { WheelTemplate } from "./types";
+import type { WheelSelectionMode, WheelTemplate } from "./types";
 
 export function useWheelTemplates() {
   const [templates, setTemplates] = useState<WheelTemplate[]>([]);
@@ -23,14 +23,24 @@ export function useWheelTemplates() {
     return () => window.removeEventListener("storage", syncTemplates);
   }, []);
 
-  const create = useCallback((name: string, options: string[]) => {
-    const template = createWheelTemplate(window.localStorage, {
-      name,
-      options,
-    });
-    setTemplates(readWheelTemplates(window.localStorage));
-    return template;
-  }, []);
+  const create = useCallback(
+    (
+      name: string,
+      options: string[],
+      roomTitle?: string,
+      selectionMode?: WheelSelectionMode,
+    ) => {
+      const template = createWheelTemplate(window.localStorage, {
+        name,
+        options,
+        roomTitle,
+        selectionMode,
+      });
+      setTemplates(readWheelTemplates(window.localStorage));
+      return template;
+    },
+    [],
+  );
 
   const rename = useCallback((id: string, name: string) => {
     setTemplates(renameWheelTemplate(window.localStorage, id, name));

@@ -40,6 +40,10 @@ export function RoomPage({
   const [savePromptDismissed, setSavePromptDismissed] = useState(false);
   const isHost = state.role === "HOST";
   const isSpinning = state.status === "SPINNING";
+  const availableOptions = useMemo(
+    () => state.options.filter((option) => !option.excluded),
+    [state.options],
+  );
 
   useEffect(() => {
     if (isSaved) saveRoom(window.localStorage, state);
@@ -81,6 +85,18 @@ export function RoomPage({
 
   const cancelSpin = async () => {
     await command("spin.cancel", {});
+  };
+
+  const updateSelectionMode = async (selectionMode: RoomState["selectionMode"]) => {
+    const result = await command("room.updateSelectionMode", { selectionMode });
+    if (result.ok && selectionMode === "ELIMINATION") {
+      trackAnalyticsEvent("elimination_enable");
+    }
+  };
+
+  const resetRound = async () => {
+    const result = await command("round.reset", {});
+    if (result.ok) trackAnalyticsEvent("round_reset");
   };
 
   return (
@@ -154,17 +170,27 @@ export function RoomPage({
           </div>
 
           <Wheel
-            options={state.options}
+            options={availableOptions}
             activeSpin={state.activeSpin}
             canceledSpinId={canceledSpinId}
             canSpin={
-              state.canSpin && connected && !isSpinning && state.options.length >= 2
+              state.canSpin && connected && !isSpinning && availableOptions.length >= 2
             }
             canControlSpin={state.canSpin}
             isHost={isHost}
             connected={connected}
             onSpin={run}
           />
+
+          {state.selectionMode === "ELIMINATION" && (
+            <div className="available-summary" aria-live="polite">
+              <span aria-hidden="true">↻</span>
+              {t("availableChoices", {
+                available: availableOptions.length,
+                total: state.options.length,
+              })}
+            </div>
+          )}
 
           <div
             className={`spin-status ${isSpinning ? "spinning" : ""}`}
@@ -177,6 +203,7 @@ export function RoomPage({
           <SaveWheelTemplate
             title={state.title}
             options={state.options.map((option) => option.label)}
+            selectionMode={state.selectionMode}
             onStatus={setNotice}
           />
         </section>
@@ -219,6 +246,9 @@ export function RoomPage({
                 setDuration={setDuration}
                 add={(label) => command("option.add", { label })}
                 remove={(optionId) => command("option.remove", { optionId })}
+                restore={(optionId) => command("option.restore", { optionId })}
+                updateSelectionMode={updateSelectionMode}
+                resetRound={resetRound}
                 spin={run}
                 cancelSpin={cancelSpin}
               />
@@ -301,6 +331,9 @@ function HostOptions({
   setDuration,
   add,
   remove,
+  restore,
+  updateSelectionMode,
+  resetRound,
   spin,
   cancelSpin,
 }: {
@@ -311,11 +344,16 @@ function HostOptions({
   setDuration: (duration: string) => void;
   add: (label: string) => Promise<unknown>;
   remove: (id: string) => Promise<unknown>;
+  restore: (id: string) => Promise<unknown>;
+  updateSelectionMode: (mode: RoomState["selectionMode"]) => Promise<void>;
+  resetRound: () => Promise<void>;
   spin: () => Promise<void>;
   cancelSpin: () => Promise<void>;
 }) {
   const { localeTag, t } = useI18n();
   const [label, setLabel] = useState("");
+  const availableOptions = state.options.filter((option) => !option.excluded);
+  const excludedCount = state.options.length - availableOptions.length;
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     if (!label.trim()) return;
@@ -329,7 +367,64 @@ function HostOptions({
           <p className="step-label">{t("wheelLabel")}</p>
           <h2>{t("choices")}</h2>
         </div>
-        <span className="count-badge">{state.options.length}</span>
+        <span className="count-badge">
+          {state.selectionMode === "ELIMINATION"
+            ? `${availableOptions.length}/${state.options.length}`
+            : state.options.length}
+        </span>
+      </div>
+      <div className="selection-mode-control">
+        <div className="selection-mode-heading">
+          <strong>{t("selectionMode")}</strong>
+          <span>
+            {state.selectionMode === "ELIMINATION"
+              ? t("noRepeatsDescription")
+              : t("repeatsDescription")}
+          </span>
+        </div>
+        <div
+          className="selection-mode-buttons"
+          role="group"
+          aria-label={t("selectionMode")}
+        >
+          <button
+            className={state.selectionMode === "REPEAT" ? "active" : ""}
+            type="button"
+            disabled={disabled || !connected}
+            aria-pressed={state.selectionMode === "REPEAT"}
+            onClick={() => {
+              if (state.selectionMode !== "REPEAT") {
+                void updateSelectionMode("REPEAT");
+              }
+            }}
+          >
+            {t("repeatsShort")}
+          </button>
+          <button
+            className={state.selectionMode === "ELIMINATION" ? "active" : ""}
+            type="button"
+            disabled={disabled || !connected}
+            aria-pressed={state.selectionMode === "ELIMINATION"}
+            onClick={() => {
+              if (state.selectionMode !== "ELIMINATION") {
+                void updateSelectionMode("ELIMINATION");
+              }
+            }}
+          >
+            {t("noRepeatsShort")}
+          </button>
+        </div>
+        {state.selectionMode === "ELIMINATION" && excludedCount > 0 && (
+          <button
+            className="round-reset-button"
+            type="button"
+            disabled={disabled || !connected}
+            onClick={() => void resetRound()}
+          >
+            <span aria-hidden="true">↺</span>
+            {t("startNewRound")}
+          </button>
+        )}
       </div>
       <form className="add-form" onSubmit={submit}>
         <input
@@ -346,9 +441,24 @@ function HostOptions({
       </form>
       <div className="options-list">
         {state.options.map((option, index) => (
-          <div className="option-row" key={option.id}>
+          <div
+            className={`option-row ${option.excluded ? "excluded" : ""}`}
+            key={option.id}
+          >
             <span className={`option-color color-${index % 7}`} />
             <span className="option-name">{option.label}</span>
+            {option.excluded && (
+              <button
+                className="restore-option"
+                type="button"
+                disabled={disabled || !connected}
+                onClick={() => void restore(option.id)}
+                aria-label={t("restoreNamed", { name: option.label })}
+                title={t("restoreChoice")}
+              >
+                ↺
+              </button>
+            )}
             <button
               className="remove-option"
               type="button"
@@ -362,9 +472,9 @@ function HostOptions({
         ))}
       </div>
       <p className="probability">
-        {state.options.length
+        {availableOptions.length >= 2
           ? t("probability", {
-              value: (100 / state.options.length).toLocaleString(localeTag, {
+              value: (100 / availableOptions.length).toLocaleString(localeTag, {
                 maximumFractionDigits: 2,
               }),
             })
@@ -375,7 +485,7 @@ function HostOptions({
         duration={duration}
         isSpinning={disabled}
         connected={connected}
-        hasEnoughOptions={state.options.length >= 2}
+        hasEnoughOptions={availableOptions.length >= 2}
         setDuration={setDuration}
         onSpin={() => void spin()}
         onCancel={() => void cancelSpin()}

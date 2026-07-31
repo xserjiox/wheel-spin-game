@@ -7,6 +7,7 @@ export const createRoomSchema = z.object({
   title: cleanText(60).default("Кому повезёт?"),
   password: z.string().max(72).optional().default(""),
   options: z.array(cleanText(80)).min(2).max(100).optional(),
+  selectionMode: z.enum(["REPEAT", "ELIMINATION"]).default("REPEAT"),
 });
 
 export const joinRoomSchema = z.object({
@@ -20,6 +21,10 @@ export const titleSchema = z.object({ title: cleanText(60) });
 export const passwordSchema = z.object({ password: z.string().max(72) });
 export const optionSchema = z.object({ label: cleanText(80) });
 export const optionRemoveSchema = z.object({ optionId: z.string().uuid() });
+export const optionRestoreSchema = z.object({ optionId: z.string().uuid() });
+export const selectionModeSchema = z.object({
+  selectionMode: z.enum(["REPEAT", "ELIMINATION"]),
+});
 export const proposalReviewSchema = z.object({
   proposalId: z.string().uuid(),
   decision: z.enum(["accept", "reject"]),
@@ -53,6 +58,7 @@ export type PublicRoomState = {
   version: number;
   role: "HOST" | "GUEST";
   canSpin: boolean;
+  selectionMode: "REPEAT" | "ELIMINATION";
   displayName: string;
   participantCount: number;
   participants: Array<{
@@ -62,7 +68,12 @@ export type PublicRoomState = {
     canSpin: boolean;
     online: boolean;
   }>;
-  options: Array<{ id: string; label: string; position: number }>;
+  options: Array<{
+    id: string;
+    label: string;
+    position: number;
+    excluded: boolean;
+  }>;
   proposals: Array<{ id: string; label: string; createdAt: string }>;
   myProposals: Array<{ id: string; label: string; createdAt: string }>;
   history: Array<{
@@ -72,7 +83,12 @@ export type PublicRoomState = {
   }>;
   activeSpin: null | {
     id: string;
-    optionsSnapshot: Array<{ id: string; label: string; position: number }>;
+    optionsSnapshot: Array<{
+      id: string;
+      label: string;
+      position: number;
+      excluded?: boolean;
+    }>;
     winnerIndex: number;
     winnerLabel: string;
     startedAt: string;

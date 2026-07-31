@@ -2,6 +2,7 @@ export type Option = {
   id: string;
   label: string;
   position: number;
+  excluded?: boolean;
 };
 
 export type ActiveSpin = {
@@ -35,6 +36,7 @@ export type RoomState = {
   version: number;
   role: "HOST" | "GUEST";
   canSpin: boolean;
+  selectionMode: "REPEAT" | "ELIMINATION";
   displayName: string;
   participantCount: number;
   participants: RoomParticipant[];

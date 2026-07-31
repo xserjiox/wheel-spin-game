@@ -4,7 +4,13 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { ParticipantRole, Prisma, ProposalStatus, RoomStatus } from "@prisma/client";
+import {
+  ParticipantRole,
+  Prisma,
+  ProposalStatus,
+  RoomStatus,
+  SelectionMode,
+} from "@prisma/client";
 import { hash as hashPassword, verify as verifyPassword } from "@node-rs/argon2";
 import { randomInt } from "node:crypto";
 import {
@@ -39,6 +45,7 @@ type SessionParticipant = Prisma.ParticipantGetPayload<{
 const roomStateSelect = {
   code: true,
   title: true,
+  selectionMode: true,
   status: true,
   version: true,
   activeSpinId: true,
@@ -108,6 +115,7 @@ export class RoomsService {
             code,
             title: input.title,
             passwordHash,
+            selectionMode: input.selectionMode,
             expiresAt,
             participants: {
               create: {
@@ -392,6 +400,7 @@ export class RoomsService {
       canSpin:
         participant.role === ParticipantRole.HOST ||
         Boolean(currentParticipant?.canSpin),
+      selectionMode: room.selectionMode,
       displayName: participant.displayName,
       participantCount: room.participants.length,
       participants: room.participants.map((roomParticipant) => ({
@@ -400,10 +409,11 @@ export class RoomsService {
           roomParticipant.role === ParticipantRole.HOST || roomParticipant.canSpin,
         online: onlineParticipantIds.has(roomParticipant.id),
       })),
-      options: room.options.map(({ id, label, position }) => ({
+      options: room.options.map(({ id, label, position, excludedAt }) => ({
         id,
         label,
         position,
+        excluded: Boolean(excludedAt),
       })),
       proposals:
         participant.role === ParticipantRole.HOST
@@ -479,6 +489,76 @@ export class RoomsService {
           version: { increment: 1 },
           ...this.activityData(),
         },
+      });
+    });
+  }
+
+  async updateSelectionMode(
+    participant: SessionParticipant,
+    selectionMode: SelectionMode,
+  ): Promise<void> {
+    this.assertHost(participant);
+    await this.assertEditable(participant.roomId);
+    await this.prisma.$transaction(async (tx) => {
+      await this.lockRoom(tx, participant.roomId, RoomStatus.LOBBY);
+      const room = await tx.room.findUniqueOrThrow({
+        where: { id: participant.roomId },
+        select: { selectionMode: true },
+      });
+      if (room.selectionMode === selectionMode) return;
+      await tx.option.updateMany({
+        where: { roomId: participant.roomId, excludedAt: { not: null } },
+        data: { excludedAt: null },
+      });
+      await tx.room.update({
+        where: { id: participant.roomId },
+        data: {
+          selectionMode,
+          version: { increment: 1 },
+          ...this.activityData(),
+        },
+      });
+    });
+  }
+
+  async restoreOption(
+    participant: SessionParticipant,
+    optionId: string,
+  ): Promise<void> {
+    this.assertHost(participant);
+    await this.assertEditable(participant.roomId);
+    await this.prisma.$transaction(async (tx) => {
+      await this.lockRoom(tx, participant.roomId, RoomStatus.LOBBY);
+      const restored = await tx.option.updateMany({
+        where: {
+          id: optionId,
+          roomId: participant.roomId,
+          excludedAt: { not: null },
+        },
+        data: { excludedAt: null },
+      });
+      if (restored.count !== 1) {
+        throw new NotFoundException("OPTION_NOT_FOUND");
+      }
+      await tx.room.update({
+        where: { id: participant.roomId },
+        data: { version: { increment: 1 }, ...this.activityData() },
+      });
+    });
+  }
+
+  async resetRound(participant: SessionParticipant): Promise<void> {
+    this.assertHost(participant);
+    await this.assertEditable(participant.roomId);
+    await this.prisma.$transaction(async (tx) => {
+      await this.lockRoom(tx, participant.roomId, RoomStatus.LOBBY);
+      await tx.option.updateMany({
+        where: { roomId: participant.roomId, excludedAt: { not: null } },
+        data: { excludedAt: null },
+      });
+      await tx.room.update({
+        where: { id: participant.roomId },
+        data: { version: { increment: 1 }, ...this.activityData() },
       });
     });
   }
@@ -747,22 +827,27 @@ export class RoomsService {
         where: { id: participant.roomId },
         include: { options: { orderBy: { position: "asc" } } },
       });
-      if (room.options.length < 2) {
-        throw new BadRequestException("Добавьте хотя бы два слота");
+      const eligibleOptions =
+        room.selectionMode === SelectionMode.ELIMINATION
+          ? room.options.filter((option) => option.excludedAt === null)
+          : room.options;
+      if (eligibleOptions.length < 2) {
+        throw new BadRequestException("NOT_ENOUGH_AVAILABLE_OPTIONS");
       }
-      const winnerIndex = randomInt(room.options.length);
-      const winner = room.options[winnerIndex];
+      const winnerIndex = randomInt(eligibleOptions.length);
+      const winner = eligibleOptions[winnerIndex];
       const finalRotation = calculateFinalRotation({
-        optionCount: room.options.length,
+        optionCount: eligibleOptions.length,
         winnerIndex,
         currentRotation: room.currentRotation,
         durationMs,
       });
       const startedAt = new Date(Date.now() + 350);
-      const snapshot = room.options.map(({ id, label, position }) => ({
+      const snapshot = eligibleOptions.map(({ id, label, position }) => ({
         id,
         label,
         position,
+        excluded: false,
       }));
       const spin = await tx.spin.create({
         data: {
@@ -812,6 +897,27 @@ export class RoomsService {
         },
       });
       if (result.count !== 1) return false;
+
+      const [room, spin] = await Promise.all([
+        tx.room.findUnique({
+          where: { id: roomId },
+          select: { selectionMode: true },
+        }),
+        tx.spin.findUnique({
+          where: { id: spinId },
+          select: { winnerOptionId: true },
+        }),
+      ]);
+      if (room?.selectionMode === SelectionMode.ELIMINATION && spin) {
+        await tx.option.updateMany({
+          where: {
+            id: spin.winnerOptionId,
+            roomId,
+            excludedAt: null,
+          },
+          data: { excludedAt: new Date() },
+        });
+      }
 
       const retained = await tx.spin.findMany({
         where: { roomId },

@@ -1,8 +1,12 @@
-import { type FormEvent, useEffect, useRef, useState } from "react";
+import { type FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { createRoom, restoreRoom, type RoomNavigationState } from "@/entities/room";
 import { useSavedRooms, type SavedRoom } from "@/entities/saved-room";
-import { clearWheelTemplates } from "@/entities/wheel-template";
+import {
+  clearWheelTemplates,
+  type WheelSelectionMode,
+  type WheelSetupSelection,
+} from "@/entities/wheel-template";
 import { LanguageSwitcher } from "@/features/change-language";
 import { SavedRoomList } from "@/features/manage-saved-rooms";
 import { WheelTemplatePicker } from "@/features/manage-wheel-templates";
@@ -24,6 +28,7 @@ type CreateInput = {
   title: string;
   password: string;
   options: string[];
+  selectionMode: WheelSelectionMode;
 };
 
 const localeLabels: Record<Locale, string> = {
@@ -51,9 +56,19 @@ export function HomePage() {
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
   const [templateOptions, setTemplateOptions] = useState<string[] | null>(null);
+  const [selectionMode, setSelectionMode] = useState<WheelSelectionMode>("REPEAT");
   const [busy, setBusy] = useState(false);
   const [openingCode, setOpeningCode] = useState<string | null>(null);
   const [error, setError] = useState("");
+
+  const applyWheelSetup = useCallback(
+    (selection: WheelSetupSelection | null) => {
+      setTemplateOptions(selection?.options ?? null);
+      setSelectionMode(selection?.selectionMode ?? "REPEAT");
+      setTitle(selection?.roomTitle ?? localizedDefaultTitle);
+    },
+    [localizedDefaultTitle],
+  );
 
   useEffect(() => {
     const oldDefaultTitle = previousDefaultTitle.current;
@@ -73,6 +88,7 @@ export function HomePage() {
         title,
         password,
         options: templateOptions ?? defaultRoomOptions,
+        selectionMode,
       } satisfies CreateInput);
       trackAnalyticsEvent("room_create");
       navigate(roomPath(result.code), {
@@ -226,11 +242,7 @@ export function HomePage() {
                   required
                 />
               </label>
-              <WheelTemplatePicker
-                onTemplateChange={(template) =>
-                  setTemplateOptions(template?.options ?? null)
-                }
-              />
+              <WheelTemplatePicker onTemplateChange={applyWheelSetup} />
               <label>
                 <span className="field-label-row">
                   <span>{t("password")}</span>

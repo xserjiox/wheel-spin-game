@@ -5,6 +5,7 @@ import {
   optionSchema,
   participantSpinPermissionSchema,
   proposalUpdateSchema,
+  selectionModeSchema,
   spinSchema,
 } from "../src/modules/rooms/contracts/room.contracts";
 import {
@@ -94,6 +95,15 @@ describe("MVP room rules", () => {
         canSpin: "yes",
       }).success,
     ).toBe(false);
+  });
+
+  it("validates the room selection mode", () => {
+    expect(selectionModeSchema.parse({ selectionMode: "ELIMINATION" })).toEqual({
+      selectionMode: "ELIMINATION",
+    });
+    expect(selectionModeSchema.safeParse({ selectionMode: "weighted" }).success).toBe(
+      false,
+    );
   });
 
   it("hashes tokens and reads only the requested room cookie", () => {

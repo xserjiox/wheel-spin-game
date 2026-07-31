@@ -183,8 +183,128 @@ const privacyUi = {
   },
 } as const;
 
+const wheelEnhancementUi = {
+  en: {
+    wheelSetup: "Wheel setup",
+    wheelSetupHint: "Start quickly, use a ready scenario, or reopen your own template.",
+    quickSetup: "Quick",
+    readyScenarios: "Scenarios",
+    myTemplates: "My templates",
+    quickWheel: "Quick wheel",
+    quickWheelCopy: "Use the standard choices and adjust them inside the room.",
+    noTemplates: "No templates yet",
+    noTemplatesCopy: "Save a useful wheel from a room and it will appear here.",
+    noRepeatsShort: "No repeats",
+    repeatsShort: "Repeats",
+    choiceCount: "{count} choices",
+    selectionMode: "Selection mode",
+    noRepeatsDescription: "A selected choice rests until the next round.",
+    repeatsDescription: "Every choice can be selected again.",
+    availableChoices: "{available} of {total} choices available",
+    startNewRound: "Start new round",
+    restoreNamed: "Return {name} to this round",
+    restoreChoice: "Return to round",
+    errorNeedAvailableOptions: "Return a choice or start a new round to keep spinning",
+  },
+  ru: {
+    wheelSetup: "Настройка колеса",
+    wheelSetupHint:
+      "Начните быстро, выберите готовый сценарий или откройте свой шаблон.",
+    quickSetup: "Быстро",
+    readyScenarios: "Сценарии",
+    myTemplates: "Мои шаблоны",
+    quickWheel: "Быстрое колесо",
+    quickWheelCopy: "Используйте стандартные варианты и отредактируйте их в комнате.",
+    noTemplates: "Шаблонов пока нет",
+    noTemplatesCopy: "Сохраните полезное колесо из комнаты, и оно появится здесь.",
+    noRepeatsShort: "Без повторов",
+    repeatsShort: "С повторами",
+    choiceCount: "Вариантов: {count}",
+    selectionMode: "Режим выбора",
+    noRepeatsDescription: "Выпавший вариант отдыхает до нового раунда.",
+    repeatsDescription: "Каждый вариант может выпасть снова.",
+    availableChoices: "Доступно {available} из {total}",
+    startNewRound: "Начать новый раунд",
+    restoreNamed: "Вернуть «{name}» в этот раунд",
+    restoreChoice: "Вернуть в раунд",
+    errorNeedAvailableOptions:
+      "Верните вариант или начните новый раунд, чтобы продолжить",
+  },
+  uk: {
+    wheelSetup: "Налаштування колеса",
+    wheelSetupHint:
+      "Почніть швидко, оберіть готовий сценарій або відкрийте свій шаблон.",
+    quickSetup: "Швидко",
+    readyScenarios: "Сценарії",
+    myTemplates: "Мої шаблони",
+    quickWheel: "Швидке колесо",
+    quickWheelCopy: "Використайте стандартні варіанти та відредагуйте їх у кімнаті.",
+    noTemplates: "Шаблонів поки немає",
+    noTemplatesCopy: "Збережіть корисне колесо з кімнати, і воно з’явиться тут.",
+    noRepeatsShort: "Без повторів",
+    repeatsShort: "З повторами",
+    choiceCount: "Варіантів: {count}",
+    selectionMode: "Режим вибору",
+    noRepeatsDescription: "Обраний варіант відпочиває до нового раунду.",
+    repeatsDescription: "Кожен варіант може випасти знову.",
+    availableChoices: "Доступно {available} із {total}",
+    startNewRound: "Почати новий раунд",
+    restoreNamed: "Повернути «{name}» у цей раунд",
+    restoreChoice: "Повернути в раунд",
+    errorNeedAvailableOptions:
+      "Поверніть варіант або почніть новий раунд, щоб продовжити",
+  },
+  de: {
+    wheelSetup: "Rad einrichten",
+    wheelSetupHint:
+      "Schnell starten, ein Szenario verwenden oder eine eigene Vorlage öffnen.",
+    quickSetup: "Schnell",
+    readyScenarios: "Szenarien",
+    myTemplates: "Meine Vorlagen",
+    quickWheel: "Schnelles Rad",
+    quickWheelCopy: "Verwendet die Standardauswahl und passt sie im Raum an.",
+    noTemplates: "Noch keine Vorlagen",
+    noTemplatesCopy:
+      "Speichert ein nützliches Rad aus einem Raum, dann erscheint es hier.",
+    noRepeatsShort: "Ohne Wiederholung",
+    repeatsShort: "Mit Wiederholung",
+    choiceCount: "{count} Optionen",
+    selectionMode: "Auswahlmodus",
+    noRepeatsDescription: "Eine gewählte Option pausiert bis zur nächsten Runde.",
+    repeatsDescription: "Jede Option kann erneut gewählt werden.",
+    availableChoices: "{available} von {total} Optionen verfügbar",
+    startNewRound: "Neue Runde starten",
+    restoreNamed: "{name} in diese Runde zurückholen",
+    restoreChoice: "In die Runde zurückholen",
+    errorNeedAvailableOptions: "Holt eine Option zurück oder startet eine neue Runde",
+  },
+  zh: {
+    wheelSetup: "转盘设置",
+    wheelSetupHint: "快速开始、使用现成场景或打开自己的模板。",
+    quickSetup: "快速",
+    readyScenarios: "场景",
+    myTemplates: "我的模板",
+    quickWheel: "快速转盘",
+    quickWheelCopy: "使用默认选项，并在房间中继续编辑。",
+    noTemplates: "还没有模板",
+    noTemplatesCopy: "在房间中保存一个有用的转盘后，它会显示在这里。",
+    noRepeatsShort: "不重复",
+    repeatsShort: "可重复",
+    choiceCount: "{count} 个选项",
+    selectionMode: "选择模式",
+    noRepeatsDescription: "已选中的选项会暂停到下一轮。",
+    repeatsDescription: "每个选项都可以再次被选中。",
+    availableChoices: "{total} 个选项中有 {available} 个可用",
+    startNewRound: "开始新一轮",
+    restoreNamed: "将“{name}”放回本轮",
+    restoreChoice: "放回本轮",
+    errorNeedAvailableOptions: "请放回一个选项或开始新一轮后继续",
+  },
+} as const;
+
 const en = {
   ...privacyUi.en,
+  ...wheelEnhancementUi.en,
   metaTitle: "Shared Online Wheel for Groups | GatherWheel",
   metaDescription:
     "Create a shared room, invite friends or teammates, and spin one synchronized random wheel together.",
@@ -428,6 +548,7 @@ type Dictionary = Record<TranslationKey, string>;
 
 const ru: Dictionary = {
   ...privacyUi.ru,
+  ...wheelEnhancementUi.ru,
   metaTitle: "Общее онлайн-колесо для компании | GatherWheel",
   metaDescription:
     "Создайте общую комнату, пригласите друзей или команду и вместе крутите одно синхронное колесо случайного выбора.",
@@ -667,6 +788,7 @@ const ru: Dictionary = {
 
 const uk: Dictionary = {
   ...privacyUi.uk,
+  ...wheelEnhancementUi.uk,
   metaTitle: "Спільне онлайн-колесо для компанії | GatherWheel",
   metaDescription:
     "Створіть спільну кімнату, запросіть друзів або команду та разом крутіть одне синхронне колесо випадкового вибору.",
@@ -905,6 +1027,7 @@ const uk: Dictionary = {
 
 const de: Dictionary = {
   ...privacyUi.de,
+  ...wheelEnhancementUi.de,
   metaTitle: "Gemeinsames Online-Glücksrad für Gruppen | GatherWheel",
   metaDescription:
     "Erstelle einen gemeinsamen Raum, lade Freunde oder dein Team ein und dreht zusammen ein synchrones Zufallsrad.",
@@ -1144,6 +1267,7 @@ const de: Dictionary = {
 
 const zh: Dictionary = {
   ...privacyUi.zh,
+  ...wheelEnhancementUi.zh,
   metaTitle: "多人共享在线随机转盘 | GatherWheel",
   metaDescription:
     "创建共享房间，邀请好友或团队成员，并一起转动同一个实时同步的随机转盘。",
@@ -1534,6 +1658,8 @@ const errorKeys: Record<string, TranslationKey> = {
   SPIN_PERMISSION_REQUIRED: "errorSpinPermissionRequired",
   CANNOT_CHANGE_HOST_SPIN_PERMISSION: "errorCannotChangeHostSpinPermission",
   HOST_MUST_DELETE_ROOM: "errorHostMustDeleteRoom",
+  OPTION_NOT_FOUND: "errorSlotMissing",
+  NOT_ENOUGH_AVAILABLE_OPTIONS: "errorNeedAvailableOptions",
   "Не удалось создать код комнаты": "errorCode",
   "Комната не найдена или уже закрыта": "errorClosed",
   "Неверный пароль": "errorWrongPassword",

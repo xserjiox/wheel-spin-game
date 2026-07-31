@@ -1,14 +1,21 @@
 import { type FormEvent, useEffect, useState } from "react";
-import { useWheelTemplates, WheelTemplateError } from "@/entities/wheel-template";
+import {
+  type WheelSelectionMode,
+  useWheelTemplates,
+  WheelTemplateError,
+} from "@/entities/wheel-template";
+import { trackAnalyticsEvent } from "@/shared/lib/analytics";
 import { useI18n } from "@/shared/lib/i18n";
 
 export function SaveWheelTemplate({
   title,
   options,
+  selectionMode = "REPEAT",
   onStatus,
 }: {
   title: string;
   options: string[];
+  selectionMode?: WheelSelectionMode;
   onStatus: (message: string) => void;
 }) {
   const { create } = useWheelTemplates();
@@ -27,8 +34,9 @@ export function SaveWheelTemplate({
     setSaving(true);
 
     try {
-      const template = create(name, options);
+      const template = create(name, options, title, selectionMode);
       onStatus(t("templateSaved", { name: template.name }));
+      trackAnalyticsEvent("template_save");
       setExpanded(false);
     } catch (error) {
       onStatus(

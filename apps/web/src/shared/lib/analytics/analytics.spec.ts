@@ -66,6 +66,7 @@ describe("analytics consent application", () => {
     applyAnalyticsConsent(true);
     trackAnalyticsPageView("/privacy");
     trackAnalyticsEvent("share_room");
+    trackAnalyticsEvent("template_save");
 
     const commands = (testAnalyticsWindow().dataLayer ?? []).map((command) =>
       Array.from(command as ArrayLike<unknown>),
@@ -85,5 +86,10 @@ describe("analytics consent application", () => {
       }),
     ]);
     expect(commands).toContainEqual(["event", "share_room", { send_to: "G-TEST123" }]);
+    expect(commands).toContainEqual([
+      "event",
+      "template_save",
+      { send_to: "G-TEST123" },
+    ]);
   });
 });

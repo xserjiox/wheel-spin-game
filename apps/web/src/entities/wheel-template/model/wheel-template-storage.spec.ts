@@ -23,11 +23,37 @@ describe("wheel template storage", () => {
     });
 
     expect(template.name).toBe("Friday lunch");
+    expect(template.selectionMode).toBe("REPEAT");
     expect(template.options).toEqual(["Pizza", "Sushi set"]);
     expect(readWheelTemplates(window.localStorage)).toEqual([template]);
     expect(
       JSON.parse(window.localStorage.getItem(WHEEL_TEMPLATE_STORAGE_KEY) ?? ""),
-    ).toMatchObject({ version: 1 });
+    ).toMatchObject({ version: 2 });
+  });
+
+  it("migrates version 1 templates to repeat mode", () => {
+    window.localStorage.setItem(
+      WHEEL_TEMPLATE_STORAGE_KEY,
+      JSON.stringify({
+        version: 1,
+        templates: [
+          {
+            id: "legacy-template",
+            name: "Legacy",
+            options: ["One", "Two"],
+            createdAt: "2026-01-01T00:00:00.000Z",
+            updatedAt: "2026-01-01T00:00:00.000Z",
+          },
+        ],
+      }),
+    );
+
+    expect(readWheelTemplates(window.localStorage)).toEqual([
+      expect.objectContaining({
+        id: "legacy-template",
+        selectionMode: "REPEAT",
+      }),
+    ]);
   });
 
   it("renames and deletes a template", () => {
@@ -65,7 +91,7 @@ describe("wheel template storage", () => {
   it("ignores invalid or unsupported stored data", () => {
     window.localStorage.setItem(
       WHEEL_TEMPLATE_STORAGE_KEY,
-      JSON.stringify({ version: 2, templates: [{ name: "Broken" }] }),
+      JSON.stringify({ version: 3, templates: [{ name: "Broken" }] }),
     );
 
     expect(readWheelTemplates(window.localStorage)).toEqual([]);

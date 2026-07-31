@@ -6,8 +6,11 @@ import type { Ack, RoomState } from "./types";
 type Command =
   | "room.updateTitle"
   | "room.updatePassword"
+  | "room.updateSelectionMode"
   | "option.add"
   | "option.remove"
+  | "option.restore"
+  | "round.reset"
   | "proposal.create"
   | "proposal.update"
   | "proposal.remove"

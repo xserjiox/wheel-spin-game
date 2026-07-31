@@ -6,6 +6,7 @@ export function createRoom(input: {
   title: string;
   password: string;
   options?: string[];
+  selectionMode?: "REPEAT" | "ELIMINATION";
 }) {
   return apiRequest<{ code: string; state: RoomState }>("/api/rooms", {
     method: "POST",

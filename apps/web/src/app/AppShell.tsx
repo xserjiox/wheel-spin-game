@@ -14,10 +14,21 @@ function AnalyticsPageTracker() {
   return null;
 }
 
+function RouteScrollReset() {
+  const location = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [location.pathname]);
+
+  return null;
+}
+
 export function AppShell() {
   return (
     <ConsentProvider>
       <AnalyticsPageTracker />
+      <RouteScrollReset />
       <Outlet />
       <ConsentBanner />
     </ConsentProvider>

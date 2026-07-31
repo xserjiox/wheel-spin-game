@@ -11,8 +11,10 @@ describe("spin retention", () => {
     const transaction = {
       room: {
         updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+        findUnique: vi.fn().mockResolvedValue(null),
       },
       spin: {
+        findUnique: vi.fn().mockResolvedValue(null),
         findMany: vi.fn().mockResolvedValue(retained),
         deleteMany: vi.fn().mockResolvedValue({ count: 3 }),
       },

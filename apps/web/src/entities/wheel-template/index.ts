@@ -4,4 +4,11 @@ export {
   WHEEL_TEMPLATE_LIMIT,
   WHEEL_TEMPLATE_STORAGE_KEY,
 } from "./model/wheel-template-storage";
-export { WheelTemplateError, type WheelTemplate } from "./model/types";
+export { getWheelPresetCategoryLabel, getWheelPresets } from "./model/wheel-presets";
+export {
+  WheelTemplateError,
+  type WheelPreset,
+  type WheelSelectionMode,
+  type WheelSetupSelection,
+  type WheelTemplate,
+} from "./model/types";

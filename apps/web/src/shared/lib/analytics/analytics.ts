@@ -159,7 +159,16 @@ export function trackAnalyticsPageView(pathname: string): void {
 }
 
 export function trackAnalyticsEvent(
-  eventName: "room_create" | "room_join" | "share_room" | "spin_start",
+  eventName:
+    | "room_create"
+    | "room_join"
+    | "share_room"
+    | "spin_start"
+    | "preset_select"
+    | "template_select"
+    | "template_save"
+    | "elimination_enable"
+    | "round_reset",
 ): void {
   const { measurementId } = analyticsConfig;
   if (!analyticsEnabled || !measurementId) return;

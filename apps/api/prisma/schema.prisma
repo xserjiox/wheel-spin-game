@@ -24,53 +24,61 @@ enum ProposalStatus {
   REJECTED
 }
 
+enum SelectionMode {
+  REPEAT
+  ELIMINATION
+}
+
 model Room {
-  id             String        @id @default(uuid())
-  code           String        @unique
-  title          String
-  passwordHash   String?
-  status         RoomStatus    @default(LOBBY)
-  version        Int           @default(1)
-  currentRotation Float        @default(0)
-  activeSpinId   String?
-  createdAt      DateTime      @default(now())
-  lastActivityAt DateTime      @default(now())
-  expiresAt      DateTime
-  participants   Participant[]
-  options        Option[]
-  proposals      Proposal[]
-  spins          Spin[]
+  id              String        @id @default(uuid())
+  code            String        @unique
+  title           String
+  passwordHash    String?
+  selectionMode   SelectionMode @default(REPEAT)
+  status          RoomStatus    @default(LOBBY)
+  version         Int           @default(1)
+  currentRotation Float         @default(0)
+  activeSpinId    String?
+  createdAt       DateTime      @default(now())
+  lastActivityAt  DateTime      @default(now())
+  expiresAt       DateTime
+  participants    Participant[]
+  options         Option[]
+  proposals       Proposal[]
+  spins           Spin[]
 
   @@index([expiresAt])
 }
 
 model Participant {
-  id           String          @id @default(uuid())
-  roomId       String
-  room         Room            @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  displayName  String
+  id             String          @id @default(uuid())
+  roomId         String
+  room           Room            @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  displayName    String
   normalizedName String
-  role         ParticipantRole
-  canSpin      Boolean         @default(false)
-  sessionHash  String          @unique
-  connectedAt  DateTime        @default(now())
-  lastSeenAt   DateTime        @default(now())
-  proposals    Proposal[]
+  role           ParticipantRole
+  canSpin        Boolean         @default(false)
+  sessionHash    String          @unique
+  connectedAt    DateTime        @default(now())
+  lastSeenAt     DateTime        @default(now())
+  proposals      Proposal[]
 
-  @@index([roomId])
   @@unique([roomId, normalizedName])
+  @@index([roomId])
 }
 
 model Option {
-  id        String   @id @default(uuid())
-  roomId    String
-  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  label     String
-  position  Int
-  createdAt DateTime @default(now())
+  id         String    @id @default(uuid())
+  roomId     String
+  room       Room      @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  label      String
+  position   Int
+  excludedAt DateTime?
+  createdAt  DateTime  @default(now())
 
   @@unique([roomId, position])
   @@index([roomId])
+  @@index([roomId, excludedAt])
 }
 
 model Proposal {

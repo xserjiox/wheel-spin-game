@@ -14,6 +14,8 @@ while guests join through an invite link and anonymously suggest new slots.
 - The same server-authoritative spin for every connected participant
 - Room and active-spin recovery after a page refresh
 - Up to 20 local slot templates without an account or backend storage
+- Localized ready-made scenarios for friends, teams, and classrooms
+- Repeat and no-repeat rounds with host-controlled restore/reset actions
 - The 10 most recent spin results
 - Room expiration after 7 days of inactivity
 - Automatic pruning to the 10 most recent completed spins
@@ -142,8 +144,9 @@ checklist so the property matches the code and legal notices:
    applicable.
 5. Configure internal-traffic and unwanted-referral filters if needed, then use
    Realtime/DebugView to confirm there is one normalized `page_view` per route
-   and the four parameter-free events `room_create`, `room_join`, `spin_start`,
-   and `share_room`.
+   and the parameter-free events `room_create`, `room_join`, `spin_start`,
+   `share_room`, `preset_select`, `template_select`, `template_save`,
+   `elimination_enable`, and `round_reset`.
 
 GatherWheel uses Basic Consent Mode: the Google tag is not loaded until a
 visitor allows analytics, advertising consent remains denied, and analytics

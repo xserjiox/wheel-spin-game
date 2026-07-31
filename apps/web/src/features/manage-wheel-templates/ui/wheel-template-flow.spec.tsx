@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
-import { fireEvent, render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { I18nProvider } from "@/shared/lib/i18n";
 import { SaveWheelTemplate } from "./SaveWheelTemplate";
 import { WheelTemplatePicker } from "./WheelTemplatePicker";
@@ -10,6 +10,8 @@ describe("wheel template flow", () => {
   beforeEach(() => {
     window.localStorage.clear();
   });
+
+  afterEach(() => cleanup());
 
   it("saves, selects, renames, and deletes a local template", () => {
     const onStatus = vi.fn();
@@ -35,16 +37,16 @@ describe("wheel template flow", () => {
       </I18nProvider>,
     );
 
-    const picker = screen.getByRole("combobox", { name: /Saved slots/ });
-    fireEvent.click(picker);
-    const savedOption = screen.getByRole("option", {
-      name: "Friday lunch 2 slots",
+    fireEvent.click(screen.getByRole("tab", { name: /My templates/ }));
+    const savedOption = screen.getByRole("button", {
+      name: /Friday lunch 2 choices/,
     });
     fireEvent.click(savedOption);
     expect(onTemplateChange).toHaveBeenLastCalledWith(
       expect.objectContaining({
         name: "Friday lunch",
         options: ["Pizza", "Sushi"],
+        selectionMode: "REPEAT",
       }),
     );
 
@@ -53,12 +55,30 @@ describe("wheel template flow", () => {
       target: { value: "Dinner" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Save name" }));
-    fireEvent.click(picker);
-    expect(screen.getByRole("option", { name: "Dinner 2 slots" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Dinner 2 choices/ })).toBeTruthy();
 
     vi.spyOn(window, "confirm").mockReturnValue(true);
     fireEvent.click(screen.getByRole("button", { name: "Delete" }));
-    fireEvent.click(picker);
-    expect(screen.queryByRole("option", { name: "Dinner 2 slots" })).toBeNull();
+    expect(screen.queryByRole("button", { name: /Dinner 2 choices/ })).toBeNull();
+  });
+
+  it("applies a localized ready scenario with its recommended mode", () => {
+    const onTemplateChange = vi.fn();
+    render(
+      <I18nProvider>
+        <WheelTemplatePicker onTemplateChange={onTemplateChange} />
+      </I18nProvider>,
+    );
+
+    fireEvent.click(screen.getByRole("tab", { name: "Scenarios" }));
+    fireEvent.click(screen.getByRole("button", { name: /Icebreaker questions/ }));
+
+    expect(onTemplateChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        source: "preset",
+        roomTitle: "Icebreaker questions",
+        selectionMode: "ELIMINATION",
+      }),
+    );
   });
 });

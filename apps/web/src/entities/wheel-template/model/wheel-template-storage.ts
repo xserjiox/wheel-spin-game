@@ -2,12 +2,15 @@ import {
   WheelTemplateError,
   type WheelTemplate,
   type WheelTemplateStore,
+  type WheelSelectionMode,
 } from "./types";
 
 export const WHEEL_TEMPLATE_LIMIT = 20;
 export const WHEEL_TEMPLATE_STORAGE_KEY = "gatherwheel-templates";
 
-function isWheelTemplate(value: unknown): value is WheelTemplate {
+type LegacyWheelTemplate = Omit<WheelTemplate, "roomTitle" | "selectionMode">;
+
+function isBaseWheelTemplate(value: unknown): value is LegacyWheelTemplate {
   if (!value || typeof value !== "object") return false;
   const template = value as Partial<WheelTemplate>;
 
@@ -27,6 +30,34 @@ function isWheelTemplate(value: unknown): value is WheelTemplate {
     typeof template.createdAt === "string" &&
     typeof template.updatedAt === "string"
   );
+}
+
+function isSelectionMode(value: unknown): value is WheelSelectionMode {
+  return value === "REPEAT" || value === "ELIMINATION";
+}
+
+function normalizeStoredTemplate(
+  value: unknown,
+  version: number,
+): WheelTemplate | null {
+  if (!isBaseWheelTemplate(value)) return null;
+  const template = value as Partial<WheelTemplate>;
+  if (version === 2 && !isSelectionMode(template.selectionMode)) return null;
+  if (
+    template.roomTitle !== undefined &&
+    (typeof template.roomTitle !== "string" || template.roomTitle.length > 60)
+  ) {
+    return null;
+  }
+
+  return {
+    ...value,
+    roomTitle: template.roomTitle?.trim() || undefined,
+    selectionMode:
+      version === 2 && isSelectionMode(template.selectionMode)
+        ? template.selectionMode
+        : "REPEAT",
+  };
 }
 
 function normalizeName(name: string): string {
@@ -56,10 +87,17 @@ export function readWheelTemplates(storage: Storage): WheelTemplate[] {
     const raw = storage.getItem(WHEEL_TEMPLATE_STORAGE_KEY);
     if (!raw) return [];
 
-    const parsed = JSON.parse(raw) as Partial<WheelTemplateStore>;
-    if (parsed.version !== 1 || !Array.isArray(parsed.templates)) return [];
+    const parsed = JSON.parse(raw) as Partial<WheelTemplateStore> & {
+      version?: number;
+    };
+    if (![1, 2].includes(parsed.version ?? 0) || !Array.isArray(parsed.templates)) {
+      return [];
+    }
 
-    return parsed.templates.filter(isWheelTemplate).slice(0, WHEEL_TEMPLATE_LIMIT);
+    return parsed.templates
+      .map((template) => normalizeStoredTemplate(template, parsed.version ?? 1))
+      .filter((template): template is WheelTemplate => Boolean(template))
+      .slice(0, WHEEL_TEMPLATE_LIMIT);
   } catch {
     return [];
   }
@@ -68,7 +106,7 @@ export function readWheelTemplates(storage: Storage): WheelTemplate[] {
 function writeWheelTemplates(storage: Storage, templates: WheelTemplate[]): void {
   try {
     const value: WheelTemplateStore = {
-      version: 1,
+      version: 2,
       templates,
     };
     storage.setItem(WHEEL_TEMPLATE_STORAGE_KEY, JSON.stringify(value));
@@ -79,7 +117,12 @@ function writeWheelTemplates(storage: Storage, templates: WheelTemplate[]): void
 
 export function createWheelTemplate(
   storage: Storage,
-  input: { name: string; options: string[] },
+  input: {
+    name: string;
+    roomTitle?: string;
+    options: string[];
+    selectionMode?: WheelSelectionMode;
+  },
 ): WheelTemplate {
   const templates = readWheelTemplates(storage);
   if (templates.length >= WHEEL_TEMPLATE_LIMIT) {
@@ -90,7 +133,9 @@ export function createWheelTemplate(
   const template: WheelTemplate = {
     id: crypto.randomUUID(),
     name: normalizeName(input.name),
+    roomTitle: input.roomTitle ? normalizeName(input.roomTitle) : undefined,
     options: normalizeOptions(input.options),
+    selectionMode: input.selectionMode ?? "REPEAT",
     createdAt: now,
     updatedAt: now,
   };
