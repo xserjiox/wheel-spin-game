@@ -36,7 +36,11 @@ const localeLabels: Record<Locale, string> = {
   ru: "Русский",
   uk: "Українська",
   de: "Deutsch",
-  zh: "中文",
+  zh: "简体中文",
+  "zh-Hant": "繁體中文",
+  es: "Español",
+  pt: "Português",
+  ja: "日本語",
 };
 
 export function HomePage() {
@@ -275,7 +279,13 @@ export function HomePage() {
               onSubmit={(event) => {
                 event.preventDefault();
                 const cleanCode = code.trim();
-                if (cleanCode) navigate(roomPath(cleanCode));
+                if (cleanCode) {
+                  navigate(roomPath(cleanCode), {
+                    state: {
+                      joinEntryType: "manual_code",
+                    } satisfies RoomNavigationState,
+                  });
+                }
               }}
             >
               <div>
@@ -391,7 +401,7 @@ export function HomePage() {
             <a
               key={option}
               href={homePathForLocale(option)}
-              hrefLang={option === "zh" ? "zh-CN" : option}
+              hrefLang={option === "zh" ? "zh-Hans" : option}
               aria-current={option === locale ? "page" : undefined}
             >
               {localeLabels[option]}

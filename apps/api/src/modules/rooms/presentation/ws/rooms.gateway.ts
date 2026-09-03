@@ -11,6 +11,7 @@ import {
 import type { Participant } from "@prisma/client";
 import type { Server, Socket } from "socket.io";
 import {
+  optionChanceSchema,
   optionRemoveSchema,
   optionRestoreSchema,
   optionSchema,
@@ -157,6 +158,17 @@ export class RoomsGateway
     return this.mutate(client, "option.remove", async (participant) => {
       const { optionId } = optionRemoveSchema.parse(body);
       await this.rooms.removeOption(participant, optionId);
+    });
+  }
+
+  @SubscribeMessage("option.updateChance")
+  async updateOptionChance(
+    @ConnectedSocket() client: RoomSocket,
+    @MessageBody() body: unknown,
+  ) {
+    return this.mutate(client, "option.updateChance", async (participant) => {
+      const { optionId, chance } = optionChanceSchema.parse(body);
+      await this.rooms.updateOptionChance(participant, optionId, chance);
     });
   }
 
@@ -394,7 +406,7 @@ export class RoomsGateway
         "message" in error &&
         typeof error.message === "string"
           ? error.message
-          : "Что-то пошло не так";
+          : "REQUEST_FAILED";
       return { ok: false, error: message.replace(/^.*?: /, "") };
     }
   }

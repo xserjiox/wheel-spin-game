@@ -80,7 +80,12 @@ export function analyticsPageTitle(pathname: string): string {
   if (normalized === "/r/:room") return "Shared room";
   if (normalized === "/privacy") return "Privacy Policy";
   if (normalized === "/cookies") return "Cookie Policy";
-  if (["/", "/ru/", "/uk/", "/de/", "/zh/"].includes(normalized)) return "Home";
+  if (
+    ["/", "/ru/", "/uk/", "/de/", "/zh/", "/zh-hant/", "/es/", "/pt/", "/ja/"].includes(
+      normalized,
+    )
+  )
+    return "Home";
   return "Page";
 }
 
@@ -142,9 +147,8 @@ export function applyAnalyticsConsent(granted: boolean): void {
 
 export function trackAnalyticsPageView(pathname: string): void {
   const { measurementId } = analyticsConfig;
-  if (!measurementId) return;
+  if (!analyticsEnabled || !measurementId) return;
 
-  applyAnalyticsConsent(true);
   const pagePath = normalizeAnalyticsPath(pathname);
   if (lastPageKey === pagePath) return;
   lastPageKey = pagePath;
@@ -158,19 +162,58 @@ export function trackAnalyticsPageView(pathname: string): void {
   });
 }
 
+type JoinEntryType = "shared_link" | "manual_code";
+type JoinFailureReason =
+  | "validation"
+  | "unauthorized"
+  | "unavailable"
+  | "rate_limited"
+  | "network"
+  | "server"
+  | "unknown";
+type JoinAnalyticsParameters = {
+  entry_type: JoinEntryType;
+  has_password: boolean;
+};
+type ShareAnalyticsParameters = {
+  role: "host" | "guest";
+  method: "copy_link";
+};
+type ParameterlessAnalyticsEventName =
+  | "room_create"
+  | "spin_start"
+  | "preset_select"
+  | "template_select"
+  | "template_save"
+  | "elimination_enable"
+  | "round_reset";
+type AnalyticsEventName =
+  | ParameterlessAnalyticsEventName
+  | "room_join_start"
+  | "room_join"
+  | "room_join_failed"
+  | "share_room"
+  | "share_room_failed";
+type AnalyticsEventParameters = Record<string, string | number | boolean>;
+
+export function trackAnalyticsEvent(eventName: ParameterlessAnalyticsEventName): void;
 export function trackAnalyticsEvent(
-  eventName:
-    | "room_create"
-    | "room_join"
-    | "share_room"
-    | "spin_start"
-    | "preset_select"
-    | "template_select"
-    | "template_save"
-    | "elimination_enable"
-    | "round_reset",
+  eventName: "room_join_start" | "room_join",
+  parameters: JoinAnalyticsParameters,
+): void;
+export function trackAnalyticsEvent(
+  eventName: "room_join_failed",
+  parameters: JoinAnalyticsParameters & { reason: JoinFailureReason },
+): void;
+export function trackAnalyticsEvent(
+  eventName: "share_room" | "share_room_failed",
+  parameters: ShareAnalyticsParameters,
+): void;
+export function trackAnalyticsEvent(
+  eventName: AnalyticsEventName,
+  parameters: AnalyticsEventParameters = {},
 ): void {
   const { measurementId } = analyticsConfig;
   if (!analyticsEnabled || !measurementId) return;
-  gtag("event", eventName, { send_to: measurementId });
+  gtag("event", eventName, { ...parameters, send_to: measurementId });
 }

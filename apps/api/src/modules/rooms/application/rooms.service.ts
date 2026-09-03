@@ -29,7 +29,12 @@ import type {
   PublicRoomState,
 } from "../contracts/room.contracts";
 import { assignAvailableName, normalizeDisplayName } from "../domain/name-policy";
-import { calculateFinalRotation } from "../domain/wheel-engine";
+import {
+  calculateFinalRotation,
+  normalizeChanceWeights,
+  redistributeChanceWeights,
+  selectWeightedIndex,
+} from "../domain/wheel-engine";
 
 const sessionParticipantSelect = {
   id: true,
@@ -409,9 +414,10 @@ export class RoomsService {
           roomParticipant.role === ParticipantRole.HOST || roomParticipant.canSpin,
         online: onlineParticipantIds.has(roomParticipant.id),
       })),
-      options: room.options.map(({ id, label, position, excludedAt }) => ({
+      options: room.options.map(({ id, label, weight, position, excludedAt }) => ({
         id,
         label,
+        weight: Number(weight),
         position,
         excluded: Boolean(excludedAt),
       })),
@@ -540,6 +546,7 @@ export class RoomsService {
       if (restored.count !== 1) {
         throw new NotFoundException("OPTION_NOT_FOUND");
       }
+      await this.normalizeOptionChances(tx, participant.roomId);
       await tx.room.update({
         where: { id: participant.roomId },
         data: { version: { increment: 1 }, ...this.activityData() },
@@ -556,6 +563,7 @@ export class RoomsService {
         where: { roomId: participant.roomId, excludedAt: { not: null } },
         data: { excludedAt: null },
       });
+      await this.normalizeOptionChances(tx, participant.roomId);
       await tx.room.update({
         where: { id: participant.roomId },
         data: { version: { increment: 1 }, ...this.activityData() },
@@ -573,6 +581,52 @@ export class RoomsService {
       await tx.option.create({
         data: { roomId: participant.roomId, label, position: count },
       });
+      await this.normalizeOptionChances(tx, participant.roomId);
+      await tx.room.update({
+        where: { id: participant.roomId },
+        data: { version: { increment: 1 }, ...this.activityData() },
+      });
+    });
+  }
+
+  async updateOptionChance(
+    participant: SessionParticipant,
+    optionId: string,
+    chance: number,
+  ): Promise<void> {
+    this.assertHost(participant);
+    await this.assertEditable(participant.roomId);
+    await this.prisma.$transaction(async (tx) => {
+      await this.lockRoom(tx, participant.roomId, RoomStatus.LOBBY);
+      const options = await tx.option.findMany({
+        where: { roomId: participant.roomId, excludedAt: null },
+        orderBy: { position: "asc" },
+        select: { id: true, weight: true },
+      });
+      if (!options.some((option) => option.id === optionId)) {
+        throw new NotFoundException("Слот не найден");
+      }
+
+      let distribution: Array<{ id: string; weight: number }>;
+      try {
+        distribution = redistributeChanceWeights(
+          options.map((option) => ({ id: option.id, weight: Number(option.weight) })),
+          optionId,
+          chance,
+        );
+      } catch (error) {
+        if (error instanceof RangeError) {
+          throw new BadRequestException("CHANCE_OUT_OF_RANGE");
+        }
+        throw error;
+      }
+
+      for (const option of distribution) {
+        await tx.option.update({
+          where: { id: option.id },
+          data: { weight: option.weight },
+        });
+      }
       await tx.room.update({
         where: { id: participant.roomId },
         data: { version: { increment: 1 }, ...this.activityData() },
@@ -725,6 +779,7 @@ export class RoomsService {
             position: count,
           },
         });
+        await this.normalizeOptionChances(tx, participant.roomId);
       }
       await tx.room.update({
         where: { id: participant.roomId },
@@ -834,18 +889,20 @@ export class RoomsService {
       if (eligibleOptions.length < 2) {
         throw new BadRequestException("NOT_ENOUGH_AVAILABLE_OPTIONS");
       }
-      const winnerIndex = randomInt(eligibleOptions.length);
+      const optionWeights = eligibleOptions.map((option) => Number(option.weight ?? 1));
+      const winnerIndex = selectWeightedIndex(optionWeights);
       const winner = eligibleOptions[winnerIndex];
       const finalRotation = calculateFinalRotation({
-        optionCount: eligibleOptions.length,
+        optionWeights,
         winnerIndex,
         currentRotation: room.currentRotation,
         durationMs,
       });
       const startedAt = new Date(Date.now() + 350);
-      const snapshot = eligibleOptions.map(({ id, label, position }) => ({
+      const snapshot = eligibleOptions.map(({ id, label, weight, position }) => ({
         id,
         label,
+        weight: Number(weight ?? 1),
         position,
         excluded: false,
       }));
@@ -1054,6 +1111,27 @@ export class RoomsService {
     }
     if (requiredStatus && room.status !== requiredStatus) {
       throw new BadRequestException("Дождитесь окончания вращения");
+    }
+  }
+
+  private async normalizeOptionChances(
+    tx: Prisma.TransactionClient,
+    roomId: string,
+  ): Promise<void> {
+    const options = await tx.option.findMany({
+      where: { roomId, excludedAt: null },
+      orderBy: { position: "asc" },
+      select: { id: true, weight: true },
+    });
+    const distribution = normalizeChanceWeights(
+      options.map((option) => ({ id: option.id, weight: Number(option.weight) })),
+    );
+
+    for (const option of distribution) {
+      await tx.option.update({
+        where: { id: option.id },
+        data: { weight: option.weight },
+      });
     }
   }
 

@@ -1,6 +1,7 @@
 export type Option = {
   id: string;
   label: string;
+  weight?: number;
   position: number;
   excluded?: boolean;
 };
@@ -85,4 +86,5 @@ export type Ack<T = Record<string, never>> =
 
 export type RoomNavigationState = {
   initialRoomState?: RoomState;
+  joinEntryType?: "shared_link" | "manual_code";
 };

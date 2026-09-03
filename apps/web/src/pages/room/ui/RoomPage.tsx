@@ -1,5 +1,22 @@
-import { type FormEvent, useEffect, useMemo, useState } from "react";
-import { type Ack, type RoomState, useRoom, Wheel } from "@/entities/room";
+import {
+  type CSSProperties,
+  type FormEvent,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import {
+  type Ack,
+  getOptionChanceMaximum,
+  getOptionProbability,
+  MIN_OPTION_CHANCE,
+  type Option,
+  type RoomState,
+  useRoom,
+  Wheel,
+} from "@/entities/room";
 import { trackAnalyticsEvent } from "@/shared/lib/analytics";
 import { readSavedRooms, removeSavedRoom, saveRoom } from "@/entities/saved-room";
 import { LanguageSwitcher } from "@/features/change-language";
@@ -126,10 +143,19 @@ export function RoomPage({
           <ShareRoomButton
             code={state.code}
             onCopied={() => {
-              trackAnalyticsEvent("share_room");
+              trackAnalyticsEvent("share_room", {
+                role: isHost ? "host" : "guest",
+                method: "copy_link",
+              });
               setNotice(t("copied"));
             }}
-            onCopyError={() => setNotice(t("copyFailed"))}
+            onCopyError={() => {
+              trackAnalyticsEvent("share_room_failed", {
+                role: isHost ? "host" : "guest",
+                method: "copy_link",
+              });
+              setNotice(t("copyFailed"));
+            }}
           />
         </div>
       </header>
@@ -245,6 +271,9 @@ export function RoomPage({
                 duration={duration}
                 setDuration={setDuration}
                 add={(label) => command("option.add", { label })}
+                updateChance={(optionId, chance) =>
+                  command("option.updateChance", { optionId, chance })
+                }
                 remove={(optionId) => command("option.remove", { optionId })}
                 restore={(optionId) => command("option.restore", { optionId })}
                 updateSelectionMode={updateSelectionMode}
@@ -330,6 +359,7 @@ function HostOptions({
   duration,
   setDuration,
   add,
+  updateChance,
   remove,
   restore,
   updateSelectionMode,
@@ -343,6 +373,7 @@ function HostOptions({
   duration: string;
   setDuration: (duration: string) => void;
   add: (label: string) => Promise<unknown>;
+  updateChance: (id: string, chance: number) => Promise<unknown>;
   remove: (id: string) => Promise<unknown>;
   restore: (id: string) => Promise<unknown>;
   updateSelectionMode: (mode: RoomState["selectionMode"]) => Promise<void>;
@@ -350,10 +381,17 @@ function HostOptions({
   spin: () => Promise<void>;
   cancelSpin: () => Promise<void>;
 }) {
-  const { localeTag, t } = useI18n();
+  const { t } = useI18n();
   const [label, setLabel] = useState("");
   const availableOptions = state.options.filter((option) => !option.excluded);
   const excludedCount = state.options.length - availableOptions.length;
+  const choiceCountLabel =
+    state.selectionMode === "ELIMINATION"
+      ? t("availableChoices", {
+          available: availableOptions.length,
+          total: state.options.length,
+        })
+      : t("slotCount", { count: state.options.length });
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     if (!label.trim()) return;
@@ -367,7 +405,11 @@ function HostOptions({
           <p className="step-label">{t("wheelLabel")}</p>
           <h2>{t("choices")}</h2>
         </div>
-        <span className="count-badge">
+        <span
+          className="count-badge"
+          aria-label={choiceCountLabel}
+          title={choiceCountLabel}
+        >
           {state.selectionMode === "ELIMINATION"
             ? `${availableOptions.length}/${state.options.length}`
             : state.options.length}
@@ -439,47 +481,66 @@ function HostOptions({
           +
         </button>
       </form>
-      <div className="options-list">
-        {state.options.map((option, index) => (
-          <div
-            className={`option-row ${option.excluded ? "excluded" : ""}`}
-            key={option.id}
-          >
-            <span className={`option-color color-${index % 7}`} />
-            <span className="option-name">{option.label}</span>
-            {option.excluded && (
-              <button
-                className="restore-option"
-                type="button"
-                disabled={disabled || !connected}
-                onClick={() => void restore(option.id)}
-                aria-label={t("restoreNamed", { name: option.label })}
-                title={t("restoreChoice")}
-              >
-                ↺
-              </button>
-            )}
-            <button
-              className="remove-option"
-              type="button"
-              disabled={disabled}
-              onClick={() => void remove(option.id)}
-              aria-label={t("removeNamed", { name: option.label })}
-            >
-              ×
-            </button>
-          </div>
-        ))}
-      </div>
-      <p className="probability">
-        {availableOptions.length >= 2
-          ? t("probability", {
-              value: (100 / availableOptions.length).toLocaleString(localeTag, {
-                maximumFractionDigits: 2,
-              }),
-            })
-          : t("addTwo")}
+      <p className="weight-chance-hint">
+        <span aria-hidden="true">i</span>
+        {t("weightChanceHint")}
       </p>
+      <div className="options-list">
+        {state.options.map((option, index) => {
+          const chance = option.excluded
+            ? 0
+            : getOptionProbability(option, availableOptions);
+
+          return (
+            <div
+              className={`option-row ${option.excluded ? "excluded" : ""}`}
+              key={option.id}
+            >
+              <span className={`option-color color-${index % 7}`} />
+              <div className="option-main">
+                <div className="option-heading">
+                  <span className="option-name">{option.label}</span>
+                </div>
+                <OptionChanceControl
+                  option={option}
+                  chance={chance}
+                  maxChance={getOptionChanceMaximum(availableOptions)}
+                  equalChance={
+                    availableOptions.length > 0 ? 100 / availableOptions.length : 100
+                  }
+                  disabled={disabled || !connected || availableOptions.length < 2}
+                  updateChance={updateChance}
+                />
+              </div>
+              <div className="option-actions">
+                {option.excluded && (
+                  <button
+                    className="restore-option"
+                    type="button"
+                    disabled={disabled || !connected}
+                    onClick={() => void restore(option.id)}
+                    aria-label={t("restoreNamed", { name: option.label })}
+                    title={t("restoreChoice")}
+                  >
+                    ↺
+                  </button>
+                )}
+                <button
+                  className="remove-option"
+                  type="button"
+                  disabled={disabled}
+                  onClick={() => void remove(option.id)}
+                  aria-label={t("removeNamed", { name: option.label })}
+                  title={t("removeNamed", { name: option.label })}
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      {availableOptions.length < 2 && <p className="probability">{t("addTwo")}</p>}
       <div className="panel-divider" />
       <SpinControls
         duration={duration}
@@ -491,6 +552,207 @@ function HostOptions({
         onCancel={() => void cancelSpin()}
       />
     </section>
+  );
+}
+
+export function OptionChanceControl({
+  option,
+  chance,
+  maxChance,
+  equalChance,
+  disabled,
+  updateChance,
+}: {
+  option: Option;
+  chance: number;
+  maxChance: number;
+  equalChance: number;
+  disabled: boolean;
+  updateChance: (id: string, chance: number) => Promise<unknown>;
+}) {
+  const { localeTag, t } = useI18n();
+  const formatChance = (value: number) =>
+    value.toLocaleString(localeTag, { maximumFractionDigits: 1 });
+  const roundChance = (value: number) => Math.round(value * 10) / 10;
+  const controlsId = useId();
+  const [expanded, setExpanded] = useState(false);
+  const [draft, setDraft] = useState(() => formatChance(chance));
+  const timerRef = useRef<number | null>(null);
+  const chanceDisabled =
+    disabled || option.excluded === true || maxChance <= MIN_OPTION_CHANCE;
+
+  useEffect(() => {
+    setDraft(formatChance(chance));
+  }, [chance, localeTag]);
+
+  useEffect(() => {
+    if (option.excluded) setExpanded(false);
+  }, [option.excluded]);
+
+  useEffect(
+    () => () => {
+      if (timerRef.current !== null) window.clearTimeout(timerRef.current);
+    },
+    [],
+  );
+
+  const parseChance = (value: string) => {
+    const normalized = value.trim().replace(",", ".");
+    if (!/^\d+(?:\.\d{0,1})?$/.test(normalized)) return null;
+    const valueAsNumber = Number(normalized);
+    return valueAsNumber >= MIN_OPTION_CHANCE && valueAsNumber <= maxChance
+      ? roundChance(valueAsNumber)
+      : null;
+  };
+
+  const commit = async (nextChance: number) => {
+    if (timerRef.current !== null) window.clearTimeout(timerRef.current);
+    timerRef.current = null;
+    setDraft(formatChance(nextChance));
+    if (Math.abs(nextChance - chance) < 0.05) return;
+    const result = (await updateChance(option.id, nextChance)) as { ok?: boolean };
+    if (result.ok === false) setDraft(formatChance(chance));
+  };
+
+  const scheduleCommit = (nextChance: number) => {
+    if (timerRef.current !== null) window.clearTimeout(timerRef.current);
+    timerRef.current = window.setTimeout(() => void commit(nextChance), 180);
+  };
+
+  const applySliderChance = (nextChance: number) => {
+    const clamped = Math.min(
+      maxChance,
+      Math.max(MIN_OPTION_CHANCE, roundChance(nextChance)),
+    );
+    setDraft(formatChance(clamped));
+    scheduleCommit(clamped);
+  };
+
+  const parsedDraft = parseChance(draft);
+  const sliderValue = parsedDraft ?? chance;
+  const sliderProgress =
+    maxChance === MIN_OPTION_CHANCE
+      ? 100
+      : ((sliderValue - MIN_OPTION_CHANCE) / (maxChance - MIN_OPTION_CHANCE)) * 100;
+  const label = t("chanceFor", {
+    name: option.label,
+    value: formatChance(chance),
+  });
+  const isEqualChance = Math.abs(chance - equalChance) < 0.05;
+
+  const chanceInput = (
+    <span className="option-chance-value">
+      <input
+        type="text"
+        inputMode="decimal"
+        value={draft}
+        disabled={chanceDisabled}
+        aria-label={label}
+        onChange={(event) => setDraft(event.target.value)}
+        onBlur={() => {
+          const nextChance = parseChance(draft);
+          if (nextChance === null) setDraft(formatChance(chance));
+          else void commit(nextChance);
+        }}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") event.currentTarget.blur();
+          if (event.key === "Escape") {
+            setDraft(formatChance(chance));
+            event.currentTarget.blur();
+          }
+        }}
+      />
+      <span aria-hidden="true">%</span>
+    </span>
+  );
+
+  return (
+    <div className={`option-chance-editor ${expanded ? "expanded" : ""}`}>
+      {expanded ? (
+        <div className="option-chance-direct-editor">
+          <label className="option-chance-input">
+            <span>{t("chanceShort")}</span>
+            {chanceInput}
+          </label>
+          <button
+            className="option-chance-collapse"
+            type="button"
+            disabled={chanceDisabled}
+            aria-expanded="true"
+            aria-controls={controlsId}
+            aria-label={t("hideWeightEditorFor", { name: option.label })}
+            onClick={() => setExpanded(false)}
+          >
+            <span className="option-chance-chevron" aria-hidden="true" />
+          </button>
+        </div>
+      ) : (
+        <button
+          className="option-chance-toggle"
+          type="button"
+          disabled={chanceDisabled}
+          aria-expanded="false"
+          aria-controls={controlsId}
+          aria-label={t("showWeightEditorFor", { name: option.label })}
+          onClick={() => setExpanded(true)}
+        >
+          <span>{t("chanceShort")}</span>
+          <strong>{formatChance(chance)}%</strong>
+          <span className="option-chance-chevron" aria-hidden="true" />
+        </button>
+      )}
+      {expanded && (
+        <div className="option-chance-control" id={controlsId}>
+          <input
+            className="option-chance-slider"
+            type="range"
+            min={MIN_OPTION_CHANCE}
+            max={maxChance}
+            step="0.1"
+            value={sliderValue}
+            style={
+              {
+                "--chance-progress": `${sliderProgress}%`,
+              } as CSSProperties
+            }
+            disabled={chanceDisabled}
+            aria-label={label}
+            onChange={(event) => applySliderChance(Number(event.target.value))}
+            onPointerUp={() => {
+              const value = parseChance(draft);
+              if (value !== null) void commit(value);
+            }}
+            onKeyDown={(event) => {
+              if (
+                !["ArrowLeft", "ArrowDown", "ArrowRight", "ArrowUp"].includes(event.key)
+              ) {
+                return;
+              }
+              event.preventDefault();
+              const direction = ["ArrowRight", "ArrowUp"].includes(event.key) ? 1 : -1;
+              const step = event.shiftKey ? 1 : 0.1;
+              applySliderChance(sliderValue + direction * step);
+            }}
+          />
+          <div className="option-chance-scale">
+            <span>
+              {t("chanceMinimum", { value: formatChance(MIN_OPTION_CHANCE) })}
+            </span>
+            <button
+              className="reset-option-chance"
+              type="button"
+              disabled={chanceDisabled || isEqualChance}
+              aria-label={t("resetWeightFor", { name: option.label })}
+              title={t("resetWeight")}
+              onClick={() => void commit(roundChance(equalChance))}
+            >
+              {t("equalChanceShort")}
+            </button>
+            <span>{t("chanceMaximum", { value: formatChance(maxChance) })}</span>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 

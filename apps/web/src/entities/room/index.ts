@@ -19,4 +19,12 @@ export type {
   RoomProposal,
   RoomState,
 } from "./model/types";
+export {
+  getOptionChanceMaximum,
+  getOptionProbability,
+  getOptionWeight,
+  getTotalOptionWeight,
+  MIN_OPTION_CHANCE,
+  MIN_OPTION_WEIGHT,
+} from "./model/wheel-weights";
 export { Wheel } from "./ui/Wheel";

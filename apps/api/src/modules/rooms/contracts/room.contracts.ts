@@ -22,6 +22,10 @@ export const passwordSchema = z.object({ password: z.string().max(72) });
 export const optionSchema = z.object({ label: cleanText(80) });
 export const optionRemoveSchema = z.object({ optionId: z.string().uuid() });
 export const optionRestoreSchema = z.object({ optionId: z.string().uuid() });
+export const optionChanceSchema = z.object({
+  optionId: z.string().uuid(),
+  chance: z.number().min(1).max(99).multipleOf(0.1),
+});
 export const selectionModeSchema = z.object({
   selectionMode: z.enum(["REPEAT", "ELIMINATION"]),
 });
@@ -71,6 +75,7 @@ export type PublicRoomState = {
   options: Array<{
     id: string;
     label: string;
+    weight: number;
     position: number;
     excluded: boolean;
   }>;
@@ -86,6 +91,7 @@ export type PublicRoomState = {
     optionsSnapshot: Array<{
       id: string;
       label: string;
+      weight?: number;
       position: number;
       excluded?: boolean;
     }>;

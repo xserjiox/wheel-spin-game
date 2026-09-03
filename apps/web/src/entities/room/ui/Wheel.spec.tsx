@@ -49,6 +49,7 @@ describe("Wheel", () => {
   let canvasContext: CanvasRenderingContext2D;
 
   beforeEach(() => {
+    window.localStorage.clear();
     canvasContext = mockCanvas();
     vi.stubGlobal("PointerEvent", MouseEvent);
     Object.defineProperty(window, "matchMedia", {
@@ -223,6 +224,26 @@ describe("Wheel", () => {
     expect(onSpin).toHaveBeenCalledOnce();
   });
 
+  it("persists the spin sound preference", () => {
+    render(
+      <I18nProvider>
+        <Wheel
+          options={options}
+          activeSpin={null}
+          canSpin={false}
+          isHost={false}
+          connected
+          onSpin={() => {}}
+        />
+      </I18nProvider>,
+    );
+
+    const toggle = screen.getByRole("checkbox", { name: "Spin sound" });
+    expect((toggle as HTMLInputElement).checked).toBe(true);
+    fireEvent.click(toggle);
+    expect(window.localStorage.getItem("gatherwheel-spin-sound")).toBe("off");
+  });
+
   it("shows the complete option label when a wheel segment is hovered", () => {
     const longLabel =
       "A complete option name that is intentionally longer than its wheel label";
@@ -257,7 +278,7 @@ describe("Wheel", () => {
       clientY: 173.5,
     });
 
-    expect(screen.getByRole("tooltip").textContent).toBe(longLabel);
+    expect(screen.getByRole("tooltip").textContent).toBe(`${longLabel}50%`);
   });
 
   it("replaces the host button with an opaque status while unavailable", () => {

@@ -22,12 +22,34 @@ type RoomView =
   | { kind: "room"; state: RoomState }
   | { kind: "missing"; message: string };
 
+function joinFailureReason(
+  error: unknown,
+):
+  | "validation"
+  | "unauthorized"
+  | "unavailable"
+  | "rate_limited"
+  | "network"
+  | "server"
+  | "unknown" {
+  if (error instanceof ApiRequestError) {
+    if ([401, 403].includes(error.status)) return "unauthorized";
+    if (error.status === 404) return "unavailable";
+    if (error.status === 429) return "rate_limited";
+    if (error.status >= 500) return "server";
+    if (error.status >= 400) return "validation";
+  }
+  if (error instanceof TypeError) return "network";
+  return "unknown";
+}
+
 export function RoomRoute() {
   const { code = "" } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
   const navigationState = location.state as RoomNavigationState | null;
   const initialRoomState = navigationState?.initialRoomState;
+  const joinEntryType = navigationState?.joinEntryType ?? "shared_link";
   const [view, setView] = useState<RoomView>(() =>
     initialRoomState?.code === code
       ? { kind: "room", state: initialRoomState }
@@ -91,9 +113,22 @@ export function RoomRoute() {
         meta={view.meta}
         onBack={goHome}
         onJoin={async (input) => {
-          const result = await joinRoom(code, input);
-          trackAnalyticsEvent("room_join");
-          setView({ kind: "room", state: result.state });
+          const parameters = {
+            entry_type: joinEntryType,
+            has_password: view.meta.requiresPassword,
+          } as const;
+          trackAnalyticsEvent("room_join_start", parameters);
+          try {
+            const result = await joinRoom(code, input);
+            trackAnalyticsEvent("room_join", parameters);
+            setView({ kind: "room", state: result.state });
+          } catch (error) {
+            trackAnalyticsEvent("room_join_failed", {
+              ...parameters,
+              reason: joinFailureReason(error),
+            });
+            throw error;
+          }
         }}
       />
     );

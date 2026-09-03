@@ -141,7 +141,7 @@ export class RateLimiterService {
   private handleRedisFailure<T>(error: unknown, fallback: () => T): T {
     if (this.redis.isRequired()) {
       if (error instanceof ServiceUnavailableException) throw error;
-      throw new ServiceUnavailableException("Rate limiting is unavailable");
+      throw new ServiceUnavailableException("REQUEST_FAILED");
     }
     return fallback();
   }

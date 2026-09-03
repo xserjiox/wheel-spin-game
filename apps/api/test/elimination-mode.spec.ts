@@ -55,8 +55,8 @@ describe("elimination mode", () => {
     const spin = await service.spin(host, crypto.randomUUID(), 5_000);
 
     expect(spin?.optionsSnapshot).toEqual([
-      { id: "one", label: "One", position: 0, excluded: false },
-      { id: "two", label: "Two", position: 2, excluded: false },
+      { id: "one", label: "One", weight: 1, position: 0, excluded: false },
+      { id: "two", label: "Two", weight: 1, position: 2, excluded: false },
     ]);
     expect(spin?.winnerLabel).not.toBe("Used");
   });

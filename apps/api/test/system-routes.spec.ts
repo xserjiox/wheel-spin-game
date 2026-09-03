@@ -67,6 +67,10 @@ describe("system route registration", () => {
     ["/uk", "/uk/"],
     ["/de", "/de/"],
     ["/zh", "/zh/"],
+    ["/zh-hant", "/zh-hant/"],
+    ["/es", "/es/"],
+    ["/pt", "/pt/"],
+    ["/ja", "/ja/"],
   ])("redirects %s to its canonical path", async (path, location) => {
     const response = await app
       .getHttpAdapter()
@@ -75,6 +79,25 @@ describe("system route registration", () => {
 
     expect(response.statusCode).toBe(308);
     expect(response.headers.location).toBe(location);
+  });
+
+  it("lists every localized home page and Chinese script in the sitemap", async () => {
+    const response = await app
+      .getHttpAdapter()
+      .getInstance()
+      .inject({
+        method: "GET",
+        url: "/sitemap.xml",
+        headers: { host: "gatherwheel.test" },
+      });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toContain('hreflang="zh-Hans"');
+    expect(response.body).toContain('hreflang="zh-Hant"');
+    expect(response.body).toContain("http://gatherwheel.test/zh-hant/");
+    expect(response.body).toContain("http://gatherwheel.test/es/");
+    expect(response.body).toContain("http://gatherwheel.test/pt/");
+    expect(response.body).toContain("http://gatherwheel.test/ja/");
   });
 
   it("keeps the noindex app head for Googlebot", async () => {

@@ -8,6 +8,7 @@ type Command =
   | "room.updatePassword"
   | "room.updateSelectionMode"
   | "option.add"
+  | "option.updateChance"
   | "option.remove"
   | "option.restore"
   | "round.reset"

@@ -1,4 +1,5 @@
 import type { Locale } from "@/shared/lib/i18n";
+import { additionalLegalDocuments } from "./additional-legal-content";
 
 type LegalLink = {
   label: string;
@@ -38,7 +39,7 @@ const googleLinks: LegalLink[] = [
   },
 ];
 
-const documents: Record<Locale, { privacy: LegalDocument; cookies: LegalDocument }> = {
+const documents = {
   en: {
     privacy: {
       eyebrow: "LEGAL",
@@ -64,7 +65,7 @@ const documents: Record<Locale, { privacy: LegalDocument; cookies: LegalDocument
           title: "3. Optional Google Analytics",
           items: [
             "Google Analytics 4 is not loaded and receives no analytics request until you actively allow analytics. Rejecting analytics does not restrict the service.",
-            "After consent, we send normalized page views and the parameter-free events room_create, room_join, spin_start, share_room, preset_select, template_select, template_save, elimination_enable, and round_reset. Room URLs are replaced with /r/:room; query strings, room codes, names, passwords, and wheel content are not sent.",
+            "After consent, we send normalized page views and the product events room_create, room_join_start, room_join, room_join_failed, spin_start, share_room, share_room_failed, preset_select, template_select, template_save, elimination_enable, and round_reset. Join events may include the fixed-category parameters entry_type, has_password, and reason; share events may include role and method. These parameters do not contain user-provided content. Room URLs are replaced with /r/:room; query strings, room codes, names, passwords, and wheel content are not sent.",
             "Google may process device/browser information, approximate location derived from the connection, IP address during transmission, referrer information, timestamps, and first-party analytics identifiers stored in _ga cookies.",
             "Advertising storage, ad user data, ad personalization, Google Signals, User-ID, and personalized advertising are disabled in our tag configuration.",
           ],
@@ -191,7 +192,7 @@ const documents: Record<Locale, { privacy: LegalDocument; cookies: LegalDocument
           title: "3. Необязательная Google Analytics",
           items: [
             "GA4 не загружается и не получает аналитических запросов до вашего явного согласия. Отказ не ограничивает сервис.",
-            "После согласия отправляются нормализованные просмотры и события без параметров: room_create, room_join, spin_start, share_room, preset_select, template_select, template_save, elimination_enable и round_reset. URL комнаты заменяется на /r/:room; параметры запроса, коды, имена, пароли и содержимое колеса не отправляются.",
+            "После согласия отправляются нормализованные просмотры и продуктовые события room_create, room_join_start, room_join, room_join_failed, spin_start, share_room, share_room_failed, preset_select, template_select, template_save, elimination_enable и round_reset. События присоединения могут содержать параметры с фиксированными категориями entry_type, has_password и reason, а события отправки ссылки — role и method. Эти параметры не содержат пользовательский контент. URL комнаты заменяется на /r/:room; параметры запроса, коды, имена, пароли и содержимое колеса не отправляются.",
             "Google может обработать данные устройства и браузера, приблизительное местоположение, IP при передаче, источник перехода, время и идентификаторы в first-party cookies _ga.",
             "Рекламное хранилище, рекламные пользовательские данные, персонализация рекламы, Google Signals, User-ID и персонализированная реклама отключены.",
           ],
@@ -317,7 +318,7 @@ const documents: Record<Locale, { privacy: LegalDocument; cookies: LegalDocument
           title: "3. Необов’язкова Google Analytics",
           items: [
             "GA4 не завантажується до активної згоди; відмова не обмежує сервіс.",
-            "Після згоди надсилаються нормалізовані перегляди та події без параметрів: room_create, room_join, spin_start, share_room, preset_select, template_select, template_save, elimination_enable і round_reset. URL кімнати стає /r/:room; коди, імена, паролі та вміст колеса не передаються.",
+            "Після згоди надсилаються нормалізовані перегляди та продуктові події room_create, room_join_start, room_join, room_join_failed, spin_start, share_room, share_room_failed, preset_select, template_select, template_save, elimination_enable і round_reset. Події приєднання можуть містити параметри з фіксованими категоріями entry_type, has_password і reason, а події надсилання посилання — role і method. Ці параметри не містять користувацького вмісту. URL кімнати стає /r/:room; коди, імена, паролі та вміст колеса не передаються.",
             "Google може обробити дані пристрою/браузера, приблизне місце, IP під час передачі, джерело, час та _ga-ідентифікатори. Рекламні режими, Google Signals, User-ID і персоналізацію вимкнено.",
           ],
         },
@@ -433,7 +434,7 @@ const documents: Record<Locale, { privacy: LegalDocument; cookies: LegalDocument
           title: "3. Optionales Google Analytics",
           items: [
             "GA4 wird erst nach aktiver Einwilligung geladen; Ablehnung schränkt den Dienst nicht ein.",
-            "Danach senden wir normalisierte Seitenaufrufe sowie die parameterfreien Ereignisse room_create, room_join, spin_start, share_room, preset_select, template_select, template_save, elimination_enable und round_reset. Raum-URLs werden /r/:room; Codes, Namen, Passwörter und Radinhalte werden nicht gesendet.",
+            "Danach senden wir normalisierte Seitenaufrufe sowie die Produktereignisse room_create, room_join_start, room_join, room_join_failed, spin_start, share_room, share_room_failed, preset_select, template_select, template_save, elimination_enable und round_reset. Beitrittsereignisse können die Parameter entry_type, has_password und reason mit festen Kategorien enthalten; Freigabeereignisse können role und method enthalten. Diese Parameter enthalten keine von Nutzern eingegebenen Inhalte. Raum-URLs werden /r/:room; Codes, Namen, Passwörter und Radinhalte werden nicht gesendet.",
             "Google kann Geräte-/Browserdaten, ungefähren Ort, IP bei Übertragung, Referrer, Zeit und _ga-Kennungen verarbeiten. Werbespeicher, Google Signals, User-ID und Personalisierung sind deaktiviert.",
           ],
         },
@@ -549,7 +550,7 @@ const documents: Record<Locale, { privacy: LegalDocument; cookies: LegalDocument
           title: "3. 可选 Google Analytics",
           items: [
             "你主动同意前不会加载 GA4，也不会发送分析请求；拒绝不会限制服务。",
-            "同意后仅发送标准化页面浏览及不含参数的 room_create、room_join、spin_start、share_room、preset_select、template_select、template_save、elimination_enable、round_reset 事件。房间路径改为 /r/:room；不发送房间代码、姓名、密码、转盘内容或查询参数。",
+            "同意后，我们会发送标准化页面浏览以及 room_create、room_join_start、room_join、room_join_failed、spin_start、share_room、share_room_failed、preset_select、template_select、template_save、elimination_enable 和 round_reset 产品事件。加入事件可能包含采用固定分类值的 entry_type、has_password 和 reason 参数；分享事件可能包含 role 和 method 参数。这些参数不含用户提供的内容。房间路径改为 /r/:room；不发送房间代码、姓名、密码、转盘内容或查询参数。",
             "Google 可能处理设备/浏览器、连接时 IP、推断的大致位置、来源、时间及 _ga 标识。广告存储、Google Signals、User-ID 和个性化均已关闭。",
           ],
         },
@@ -637,7 +638,8 @@ const documents: Record<Locale, { privacy: LegalDocument; cookies: LegalDocument
       ],
     },
   },
-};
+  ...additionalLegalDocuments,
+} satisfies Record<Locale, { privacy: LegalDocument; cookies: LegalDocument }>;
 
 export function getLegalDocument(
   locale: Locale,

@@ -7,6 +7,7 @@ import {
   useMemo,
   useState,
 } from "react";
+import { additionalDictionaries } from "./additional-translations";
 import { homePathForLocale, localeFromHomePath, type Locale } from "./locale";
 import { LOCALE_STORAGE_KEY } from "./storage";
 
@@ -460,6 +461,21 @@ const en = {
   addSlot: "Add slot",
   removeNamed: "Remove {name}",
   probability: "Chance for each: {value}%",
+  weightShort: "Weight",
+  weightFor: "Weight for {name}",
+  chanceShort: "Chance",
+  chanceFor: "Chance for {name}: {value}%",
+  chanceMinimum: "Min {value}%",
+  chanceMaximum: "Max {value}%",
+  equalChanceShort: "Equal",
+  weightChanceHint:
+    "Set a chance directly. The remaining percentage is shared between the other slots.",
+  showWeightEditorFor: "Adjust chance for {name}",
+  hideWeightEditorFor: "Hide chance controls for {name}",
+  resetWeight: "Reset chance to an equal share",
+  resetWeightFor: "Reset chance for {name} to an equal share",
+  spinSound: "Spin sound",
+  slotProbabilities: "Slot chances",
   addTwo: "Add at least two choices",
   spinDuration: "Spin duration",
   durationDescription: "Choose a preset or set your own time.",
@@ -535,6 +551,9 @@ const en = {
   errorNeedTwoSlots: "Add at least two slots",
   errorHostOnly: "Only the host can perform this action",
   errorWaitSpin: "Wait until the spin ends",
+  errorRateLimited: "Too many requests. Please try again shortly.",
+  errorChanceOutOfRange:
+    "That chance is no longer available. Refresh the room and try again.",
   errorNoActiveSpin: "There is no active spin",
   errorParticipantNotFound: "Participant not found",
   errorCannotRemoveHost: "The host cannot be removed",
@@ -704,6 +723,21 @@ const ru: Dictionary = {
   addSlot: "Добавить слот",
   removeNamed: "Удалить {name}",
   probability: "Шанс каждого: {value}%",
+  weightShort: "Вес",
+  weightFor: "Вес слота «{name}»",
+  chanceShort: "Шанс",
+  chanceFor: "Шанс слота «{name}»: {value}%",
+  chanceMinimum: "Мин. {value}%",
+  chanceMaximum: "Макс. {value}%",
+  equalChanceShort: "Поровну",
+  weightChanceHint:
+    "Задайте шанс напрямую. Оставшийся процент распределится между другими слотами.",
+  showWeightEditorFor: "Настроить шанс слота «{name}»",
+  hideWeightEditorFor: "Скрыть настройку шанса слота «{name}»",
+  resetWeight: "Вернуть равный шанс",
+  resetWeightFor: "Вернуть равный шанс для слота «{name}»",
+  spinSound: "Звук вращения",
+  slotProbabilities: "Шансы слотов",
   addTwo: "Добавьте хотя бы два варианта",
   spinDuration: "Время вращения",
   durationDescription: "Выберите готовый вариант или задайте своё время.",
@@ -779,6 +813,9 @@ const ru: Dictionary = {
   errorNeedTwoSlots: "Добавьте хотя бы два слота",
   errorHostOnly: "Это действие доступно только host",
   errorWaitSpin: "Дождитесь окончания вращения",
+  errorRateLimited: "Слишком много запросов. Повторите попытку чуть позже.",
+  errorChanceOutOfRange:
+    "Этот шанс больше нельзя установить. Обновите комнату и попробуйте снова.",
   errorNoActiveSpin: "Нет активного вращения",
   errorParticipantNotFound: "Участник не найден",
   errorCannotRemoveHost: "Хоста нельзя удалить",
@@ -943,6 +980,21 @@ const uk: Dictionary = {
   addSlot: "Додати слот",
   removeNamed: "Видалити {name}",
   probability: "Шанс кожного: {value}%",
+  weightShort: "Вага",
+  weightFor: "Вага слота «{name}»",
+  chanceShort: "Шанс",
+  chanceFor: "Шанс слота «{name}»: {value}%",
+  chanceMinimum: "Мін. {value}%",
+  chanceMaximum: "Макс. {value}%",
+  equalChanceShort: "Порівну",
+  weightChanceHint:
+    "Задайте шанс напряму. Решта відсотків розподілиться між іншими слотами.",
+  showWeightEditorFor: "Налаштувати шанс слота «{name}»",
+  hideWeightEditorFor: "Сховати налаштування шансу слота «{name}»",
+  resetWeight: "Повернути рівний шанс",
+  resetWeightFor: "Повернути рівний шанс для слота «{name}»",
+  spinSound: "Звук обертання",
+  slotProbabilities: "Шанси слотів",
   addTwo: "Додайте щонайменше два варіанти",
   spinDuration: "Час обертання",
   durationDescription: "Оберіть готовий варіант або задайте свій час.",
@@ -1018,6 +1070,9 @@ const uk: Dictionary = {
   errorNeedTwoSlots: "Додайте щонайменше два слоти",
   errorHostOnly: "Ця дія доступна лише ведучому",
   errorWaitSpin: "Дочекайтеся завершення обертання",
+  errorRateLimited: "Забагато запитів. Спробуйте ще раз трохи пізніше.",
+  errorChanceOutOfRange:
+    "Це значення шансу більше недоступне. Оновіть кімнату й спробуйте ще раз.",
   errorNoActiveSpin: "Немає активного обертання",
   errorParticipantNotFound: "Учасника не знайдено",
   errorCannotRemoveHost: "Хоста не можна видалити",
@@ -1183,6 +1238,21 @@ const de: Dictionary = {
   addSlot: "Feld hinzufügen",
   removeNamed: "{name} entfernen",
   probability: "Chance pro Option: {value}%",
+  weightShort: "Gewicht",
+  weightFor: "Gewicht für {name}",
+  chanceShort: "Chance",
+  chanceFor: "Chance für {name}: {value}%",
+  chanceMinimum: "Min. {value}%",
+  chanceMaximum: "Max. {value}%",
+  equalChanceShort: "Gleich",
+  weightChanceHint:
+    "Lege die Chance direkt fest. Der verbleibende Anteil wird auf die anderen Felder verteilt.",
+  showWeightEditorFor: "Chance für {name} anpassen",
+  hideWeightEditorFor: "Chanceneinstellungen für {name} ausblenden",
+  resetWeight: "Chance auf gleiche Verteilung zurücksetzen",
+  resetWeightFor: "Chance für {name} auf gleiche Verteilung zurücksetzen",
+  spinSound: "Drehrad-Sound",
+  slotProbabilities: "Chancen der Felder",
   addTwo: "Füge mindestens zwei Optionen hinzu",
   spinDuration: "Drehdauer",
   durationDescription: "Wähle eine Vorgabe oder eine eigene Zeit.",
@@ -1258,6 +1328,9 @@ const de: Dictionary = {
   errorNeedTwoSlots: "Füge mindestens zwei Felder hinzu",
   errorHostOnly: "Nur der Host kann diese Aktion ausführen",
   errorWaitSpin: "Warte, bis die Drehung beendet ist",
+  errorRateLimited: "Zu viele Anfragen. Bitte versuche es gleich noch einmal.",
+  errorChanceOutOfRange:
+    "Diese Wahrscheinlichkeit ist nicht mehr verfügbar. Lade den Raum neu und versuche es erneut.",
   errorNoActiveSpin: "Es gibt keine aktive Drehung",
   errorParticipantNotFound: "Teilnehmer nicht gefunden",
   errorCannotRemoveHost: "Der Host kann nicht entfernt werden",
@@ -1416,6 +1489,20 @@ const zh: Dictionary = {
   addSlot: "添加选项",
   removeNamed: "删除{name}",
   probability: "每项概率：{value}%",
+  weightShort: "权重",
+  weightFor: "{name}的权重",
+  chanceShort: "概率",
+  chanceFor: "{name}的概率：{value}%",
+  chanceMinimum: "最低 {value}%",
+  chanceMaximum: "最高 {value}%",
+  equalChanceShort: "均分",
+  weightChanceHint: "直接设置概率，其余百分比会分配给其他选项。",
+  showWeightEditorFor: "调整{name}的概率",
+  hideWeightEditorFor: "隐藏{name}的概率设置",
+  resetWeight: "将概率重置为平均分配",
+  resetWeightFor: "将{name}的概率重置为平均分配",
+  spinSound: "转盘声音",
+  slotProbabilities: "选项概率",
   addTwo: "请至少添加两个选项",
   spinDuration: "转动时长",
   durationDescription: "选择预设时长或自定义时间。",
@@ -1488,6 +1575,8 @@ const zh: Dictionary = {
   errorNeedTwoSlots: "请至少添加两个选项",
   errorHostOnly: "只有房主可以执行此操作",
   errorWaitSpin: "请等待转动结束",
+  errorRateLimited: "请求过于频繁，请稍后重试。",
+  errorChanceOutOfRange: "当前无法设置此概率。请刷新房间后重试。",
   errorNoActiveSpin: "当前没有正在进行的转动",
   errorParticipantNotFound: "找不到参与者",
   errorCannotRemoveHost: "无法移除主持人",
@@ -1495,7 +1584,17 @@ const zh: Dictionary = {
   errorCannotChangeHostSpinPermission: "房主始终拥有转动转盘的权限",
 };
 
-const dictionaries: Record<Locale, Dictionary> = { en, ru, uk, de, zh };
+const dictionaries: Record<Locale, Dictionary> = {
+  en,
+  ru,
+  uk,
+  de,
+  zh,
+  es: additionalDictionaries.es,
+  pt: additionalDictionaries.pt,
+  ja: additionalDictionaries.ja,
+  "zh-Hant": additionalDictionaries.zhHant,
+};
 
 // Build-time pre-rendering and the provider share the same typed dictionaries.
 // eslint-disable-next-line react-refresh/only-export-components
@@ -1515,6 +1614,10 @@ const localeTags: Record<Locale, string> = {
   uk: "uk-UA",
   de: "de-DE",
   zh: "zh-CN",
+  es: "es-419",
+  pt: "pt-BR",
+  ja: "ja-JP",
+  "zh-Hant": "zh-HK",
 };
 
 const defaultOptions: Record<Locale, string[]> = {
@@ -1523,6 +1626,10 @@ const defaultOptions: Record<Locale, string[]> = {
   uk: ["Піца", "Суші", "Бургери", "Паста", "Салат"],
   de: ["Pizza", "Sushi", "Burger", "Pasta", "Salat"],
   zh: ["披萨", "寿司", "汉堡", "意大利面", "沙拉"],
+  es: ["Pizza", "Sushi", "Hamburguesas", "Pasta", "Ensalada"],
+  pt: ["Pizza", "Sushi", "Hambúrgueres", "Massa", "Salada"],
+  ja: ["ピザ", "寿司", "ハンバーガー", "パスタ", "サラダ"],
+  "zh-Hant": ["薄餅", "壽司", "漢堡包", "意大利粉", "沙律"],
 };
 
 export type Translate = (
@@ -1601,8 +1708,7 @@ export function I18nProvider({
   }, []);
 
   useEffect(() => {
-    document.documentElement.lang =
-      locale === "uk" ? "uk" : locale === "zh" ? "zh-CN" : locale;
+    document.documentElement.lang = locale === "zh" ? "zh-Hans" : locale;
     const isLegalPage = ["/privacy", "/cookies"].includes(window.location.pathname);
     if (!isLegalPage) {
       document.title = t("metaTitle");
@@ -1652,6 +1758,8 @@ const errorKeys: Record<string, TranslationKey> = {
   REQUEST_FAILED: "requestFailed",
   INVALID_INPUT: "errorInvalidInput",
   NO_ROOM_CONNECTION: "noConnection",
+  RATE_LIMIT_EXCEEDED: "errorRateLimited",
+  CHANCE_OUT_OF_RANGE: "errorChanceOutOfRange",
   PROPOSAL_NOT_PENDING: "errorProposalHandled",
   PARTICIPANT_NOT_FOUND: "errorParticipantNotFound",
   CANNOT_REMOVE_HOST: "errorCannotRemoveHost",
@@ -1684,5 +1792,5 @@ const errorKeys: Record<string, TranslationKey> = {
 // eslint-disable-next-line react-refresh/only-export-components
 export function translateError(message: string, t: Translate): string {
   const key = errorKeys[message];
-  return key ? t(key) : message;
+  return key ? t(key) : t("requestFailed");
 }

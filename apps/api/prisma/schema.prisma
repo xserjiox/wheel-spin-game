@@ -72,6 +72,7 @@ model Option {
   roomId     String
   room       Room      @relation(fields: [roomId], references: [id], onDelete: Cascade)
   label      String
+  weight     Decimal   @default(1.00) @db.Decimal(7, 2)
   position   Int
   excludedAt DateTime?
   createdAt  DateTime  @default(now())

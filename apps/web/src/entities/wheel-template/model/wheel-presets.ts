@@ -39,6 +39,33 @@ const presetDefinitions: Array<{
         description: "不用争论太久，快速决定午餐或晚餐。",
         options: ["披萨", "寿司", "汉堡", "意面", "沙拉", "街头小吃"],
       },
+      es: {
+        name: "¿Dónde comemos?",
+        description: "Decidan el almuerzo o la cena sin discutir demasiado.",
+        options: [
+          "Pizza",
+          "Sushi",
+          "Hamburguesas",
+          "Pasta",
+          "Ensalada",
+          "Comida callejera",
+        ],
+      },
+      pt: {
+        name: "Onde vamos comer?",
+        description: "Decidam o almoço ou o jantar sem uma longa discussão.",
+        options: ["Pizza", "Sushi", "Hambúrgueres", "Massa", "Salada", "Comida de rua"],
+      },
+      ja: {
+        name: "どこで食べる？",
+        description: "長く悩まずにランチや夕食を決めましょう。",
+        options: ["ピザ", "寿司", "ハンバーガー", "パスタ", "サラダ", "屋台グルメ"],
+      },
+      "zh-Hant": {
+        name: "去哪裡吃？",
+        description: "不用長時間討論，快速決定午餐或晚餐。",
+        options: ["薄餅", "壽司", "漢堡包", "意大利粉", "沙律", "街頭小食"],
+      },
     },
   },
   {
@@ -98,6 +125,47 @@ const presetDefinitions: Array<{
         name: "游戏之夜",
         description: "一起选择下一轮的游戏形式。",
         options: ["桌游", "知识问答", "你演我猜", "电子游戏", "纸牌", "绘画游戏"],
+      },
+      es: {
+        name: "Noche de juegos",
+        description: "Elijan juntos el formato de la próxima ronda.",
+        options: [
+          "Juego de mesa",
+          "Preguntas y respuestas",
+          "Mímica",
+          "Videojuego",
+          "Cartas",
+          "Juego de dibujo",
+        ],
+      },
+      pt: {
+        name: "Noite de jogos",
+        description: "Escolham juntos o formato da próxima rodada.",
+        options: [
+          "Jogo de tabuleiro",
+          "Quiz",
+          "Mímica",
+          "Videogame",
+          "Cartas",
+          "Jogo de desenho",
+        ],
+      },
+      ja: {
+        name: "ゲームナイト",
+        description: "次のラウンドで遊ぶゲームをみんなで選びます。",
+        options: [
+          "ボードゲーム",
+          "クイズ",
+          "ジェスチャーゲーム",
+          "テレビゲーム",
+          "カードゲーム",
+          "お絵描きゲーム",
+        ],
+      },
+      "zh-Hant": {
+        name: "遊戲之夜",
+        description: "一起選擇下一輪的遊戲形式。",
+        options: ["桌上遊戲", "問答遊戲", "你做我猜", "電子遊戲", "紙牌", "繪畫遊戲"],
       },
     },
   },
@@ -164,6 +232,54 @@ const presetDefinitions: Array<{
           "完美休息日",
           "最近的新发现",
           "小小的个人成就",
+        ],
+      },
+      es: {
+        name: "Preguntas para romper el hielo",
+        description: "Elijan una pregunta nueva y sin repetir en cada ronda.",
+        options: [
+          "Un viaje soñado",
+          "Un talento inesperado",
+          "Una tradición favorita",
+          "Un día libre perfecto",
+          "Un descubrimiento reciente",
+          "Un pequeño logro personal",
+        ],
+      },
+      pt: {
+        name: "Perguntas para quebrar o gelo",
+        description: "Escolham uma pergunta nova a cada rodada, sem repetir.",
+        options: [
+          "Uma viagem dos sonhos",
+          "Um talento inesperado",
+          "Uma tradição favorita",
+          "Um dia de folga perfeito",
+          "Uma descoberta recente",
+          "Uma pequena conquista pessoal",
+        ],
+      },
+      ja: {
+        name: "アイスブレイクの質問",
+        description: "毎回、重複しない新しい質問を選びます。",
+        options: [
+          "いつか行きたい旅行先",
+          "意外な特技",
+          "お気に入りの習慣",
+          "理想の休日",
+          "最近発見したこと",
+          "最近の小さな成功",
+        ],
+      },
+      "zh-Hant": {
+        name: "破冰問題",
+        description: "每輪選擇一個不重複的新問題。",
+        options: [
+          "夢想旅程",
+          "意想不到的才能",
+          "最喜愛的傳統",
+          "完美的休息日",
+          "最近的新發現",
+          "小小的個人成就",
         ],
       },
     },
@@ -233,6 +349,54 @@ const presetDefinitions: Array<{
           "接下来尝试什么？",
         ],
       },
+      es: {
+        name: "Preguntas de retrospectiva",
+        description: "Recorran los temas de reflexión del equipo sin repetirlos.",
+        options: [
+          "¿Qué salió bien?",
+          "¿Qué nos frenó?",
+          "¿Qué deberíamos dejar de hacer?",
+          "¿Qué deberíamos empezar a hacer?",
+          "¿Quién nos ayudó esta semana?",
+          "¿Qué probaremos después?",
+        ],
+      },
+      pt: {
+        name: "Perguntas de retrospectiva",
+        description: "Percorram os temas de reflexão da equipe sem repeti-los.",
+        options: [
+          "O que deu certo?",
+          "O que nos atrasou?",
+          "O que devemos parar de fazer?",
+          "O que devemos começar a fazer?",
+          "Quem ajudou nesta semana?",
+          "O que vamos experimentar depois?",
+        ],
+      },
+      ja: {
+        name: "振り返りのテーマ",
+        description: "重複なしでチームの振り返りテーマを選びます。",
+        options: [
+          "うまくいったことは？",
+          "進行を妨げたことは？",
+          "やめるべきことは？",
+          "始めるべきことは？",
+          "今週助けてくれた人は？",
+          "次に試すことは？",
+        ],
+      },
+      "zh-Hant": {
+        name: "回顧問題",
+        description: "不重複地討論團隊回顧主題。",
+        options: [
+          "哪些方面做得好？",
+          "甚麼拖慢了我們？",
+          "我們應該停止甚麼？",
+          "我們應該開始甚麼？",
+          "本週誰提供了協助？",
+          "接下來要嘗試甚麼？",
+        ],
+      },
     },
   },
   {
@@ -293,16 +457,50 @@ const presetDefinitions: Array<{
         description: "当所有事情都很紧急时，选择第一个议题。",
         options: ["优先事项", "阻碍", "客户", "质量", "交付", "团队状态"],
       },
+      es: {
+        name: "Prioridad de la reunión",
+        description: "Elijan el primer tema cuando todo parece urgente.",
+        options: [
+          "Prioridades",
+          "Bloqueos",
+          "Clientes",
+          "Calidad",
+          "Entrega",
+          "Bienestar del equipo",
+        ],
+      },
+      pt: {
+        name: "Foco da reunião",
+        description: "Escolham o primeiro assunto quando tudo parece urgente.",
+        options: [
+          "Prioridades",
+          "Impedimentos",
+          "Clientes",
+          "Qualidade",
+          "Entrega",
+          "Bem-estar da equipe",
+        ],
+      },
+      ja: {
+        name: "ミーティングの優先事項",
+        description: "すべてが緊急に思えるとき、最初の議題を選びます。",
+        options: ["優先事項", "障害", "顧客", "品質", "リリース", "チームの状態"],
+      },
+      "zh-Hant": {
+        name: "會議重點",
+        description: "當所有事情都很緊急時，選擇第一個議題。",
+        options: ["優先事項", "阻礙", "客戶", "品質", "交付", "團隊狀態"],
+      },
     },
   },
   {
     id: "class-activity",
     category: "classroom",
-    selectionMode: "ELIMINATION",
+    selectionMode: "REPEAT",
     content: {
       en: {
         name: "Class activity",
-        description: "Rotate through lesson formats without using one twice.",
+        description: "Randomly choose a lesson format for each round.",
         options: [
           "Pair discussion",
           "Quick quiz",
@@ -314,7 +512,7 @@ const presetDefinitions: Array<{
       },
       ru: {
         name: "Задание для занятия",
-        description: "Чередуйте форматы урока без повторов.",
+        description: "Случайно выбирайте формат занятия для каждого раунда.",
         options: [
           "Обсуждение в парах",
           "Быстрый квиз",
@@ -326,7 +524,7 @@ const presetDefinitions: Array<{
       },
       uk: {
         name: "Завдання для заняття",
-        description: "Чергуйте формати уроку без повторів.",
+        description: "Випадково обирайте формат заняття для кожного раунду.",
         options: [
           "Обговорення в парах",
           "Швидкий квіз",
@@ -338,7 +536,7 @@ const presetDefinitions: Array<{
       },
       de: {
         name: "Unterrichtsaktivität",
-        description: "Wechselt Unterrichtsformate ohne Wiederholungen ab.",
+        description: "Wählt für jede Runde zufällig ein Unterrichtsformat.",
         options: [
           "Partnergespräch",
           "Schnelles Quiz",
@@ -350,7 +548,7 @@ const presetDefinitions: Array<{
       },
       zh: {
         name: "课堂活动",
-        description: "轮换课堂形式，避免重复。",
+        description: "每轮随机选择一种课堂形式。",
         options: [
           "两人讨论",
           "快速问答",
@@ -358,6 +556,54 @@ const presetDefinitions: Array<{
           "安静写作",
           "小组挑战",
           "讲解示例",
+        ],
+      },
+      es: {
+        name: "Actividad de clase",
+        description: "Elijan al azar un formato de clase para cada ronda.",
+        options: [
+          "Debate en parejas",
+          "Prueba rápida",
+          "Minipresentación",
+          "Escritura en silencio",
+          "Reto en grupo",
+          "Explicar un ejemplo",
+        ],
+      },
+      pt: {
+        name: "Atividade de aula",
+        description: "Escolham aleatoriamente um formato de aula para cada rodada.",
+        options: [
+          "Discussão em duplas",
+          "Quiz rápido",
+          "Minipresentação",
+          "Escrita silenciosa",
+          "Desafio em grupo",
+          "Explicar um exemplo",
+        ],
+      },
+      ja: {
+        name: "授業のアクティビティ",
+        description: "ラウンドごとに授業形式をランダムに選びます。",
+        options: [
+          "ペアで話し合う",
+          "クイッククイズ",
+          "ミニプレゼン",
+          "静かに書く",
+          "グループ課題",
+          "例を説明する",
+        ],
+      },
+      "zh-Hant": {
+        name: "課堂活動",
+        description: "每輪隨機選擇一種課堂形式。",
+        options: [
+          "二人討論",
+          "快速問答",
+          "迷你簡報",
+          "安靜寫作",
+          "小組挑戰",
+          "講解例子",
         ],
       },
     },
@@ -370,6 +616,10 @@ const categoryLabels: Record<Locale, Record<WheelPresetCategory, string>> = {
   uk: { friends: "Для друзів", team: "Для команди", classroom: "Для занять" },
   de: { friends: "Freunde", team: "Team", classroom: "Unterricht" },
   zh: { friends: "朋友", team: "团队", classroom: "课堂" },
+  es: { friends: "Amigos", team: "Equipo", classroom: "Clase" },
+  pt: { friends: "Amigos", team: "Equipe", classroom: "Sala de aula" },
+  ja: { friends: "友達", team: "チーム", classroom: "授業" },
+  "zh-Hant": { friends: "朋友", team: "團隊", classroom: "課堂" },
 };
 
 export function getWheelPresets(locale: Locale): WheelPreset[] {

@@ -23,6 +23,8 @@ describe("analytics privacy normalization", () => {
   it("uses generic titles that cannot contain room data", () => {
     expect(analyticsPageTitle("/r/SecretRoom123")).toBe("Shared room");
     expect(analyticsPageTitle("/cookies")).toBe("Cookie Policy");
+    expect(analyticsPageTitle("/es/")).toBe("Home");
+    expect(analyticsPageTitle("/zh-hant/")).toBe("Home");
     expect(analyticsPageTitle("/unknown")).toBe("Page");
   });
 });
@@ -57,6 +59,17 @@ describe("analytics consent application", () => {
     expect(testAnalyticsWindow()["ga-disable-G-TEST123"]).toBe(true);
   });
 
+  it("does not let page tracking enable analytics without consent", async () => {
+    vi.stubEnv("VITE_GA_MEASUREMENT_ID", "G-TEST123");
+    vi.resetModules();
+    const { trackAnalyticsPageView } = await import("./analytics");
+
+    trackAnalyticsPageView("/privacy");
+
+    expect(document.getElementById("gatherwheel-google-analytics")).toBeNull();
+    expect(testAnalyticsWindow().dataLayer).toBeUndefined();
+  });
+
   it("queues Google tag commands in the official arguments format", async () => {
     vi.stubEnv("VITE_GA_MEASUREMENT_ID", "G-TEST123");
     vi.resetModules();
@@ -65,7 +78,12 @@ describe("analytics consent application", () => {
 
     applyAnalyticsConsent(true);
     trackAnalyticsPageView("/privacy");
-    trackAnalyticsEvent("share_room");
+    trackAnalyticsEvent("share_room", { role: "host", method: "copy_link" });
+    trackAnalyticsEvent("room_join_failed", {
+      entry_type: "shared_link",
+      has_password: true,
+      reason: "unauthorized",
+    });
     trackAnalyticsEvent("template_save");
 
     const commands = (testAnalyticsWindow().dataLayer ?? []).map((command) =>
@@ -85,7 +103,21 @@ describe("analytics consent application", () => {
         send_to: "G-TEST123",
       }),
     ]);
-    expect(commands).toContainEqual(["event", "share_room", { send_to: "G-TEST123" }]);
+    expect(commands).toContainEqual([
+      "event",
+      "share_room",
+      { role: "host", method: "copy_link", send_to: "G-TEST123" },
+    ]);
+    expect(commands).toContainEqual([
+      "event",
+      "room_join_failed",
+      {
+        entry_type: "shared_link",
+        has_password: true,
+        reason: "unauthorized",
+        send_to: "G-TEST123",
+      },
+    ]);
     expect(commands).toContainEqual([
       "event",
       "template_save",

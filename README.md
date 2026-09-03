@@ -144,9 +144,16 @@ checklist so the property matches the code and legal notices:
    applicable.
 5. Configure internal-traffic and unwanted-referral filters if needed, then use
    Realtime/DebugView to confirm there is one normalized `page_view` per route
-   and the parameter-free events `room_create`, `room_join`, `spin_start`,
-   `share_room`, `preset_select`, `template_select`, `template_save`,
-   `elimination_enable`, and `round_reset`.
+   and the product events `room_create`, `room_join_start`, `room_join`,
+   `room_join_failed`, `spin_start`, `share_room`, `share_room_failed`,
+   `preset_select`, `template_select`, `template_save`, `elimination_enable`,
+   and `round_reset`. Verify the fixed-category parameters `entry_type`,
+   `has_password`, and `reason` on join events and `role` and `method` on share
+   events; none may contain room identifiers or user-provided content.
+6. Mark `room_join` and `share_room` as key events. Use the recommended
+   **Once per event** counting method, and register `entry_type`, `has_password`,
+   `reason`, `role`, and `method` as event-scoped custom dimensions when these
+   breakdowns are needed in reports.
 
 GatherWheel uses Basic Consent Mode: the Google tag is not loaded until a
 visitor allows analytics, advertising consent remains denied, and analytics
@@ -188,9 +195,9 @@ TTL. `/health` is a liveness endpoint; `/ready` verifies PostgreSQL and required
 Redis connectivity.
 
 The production build pre-renders the indexable home pages at `/`, `/ru/`,
-`/uk/`, `/de/`, and `/zh/`. Temporary room, API, Socket.IO, and health URLs are
-served with `X-Robots-Tag: noindex, nofollow`. The application also exposes
-`/robots.txt` and a localized `/sitemap.xml`.
+`/uk/`, `/de/`, `/zh/`, `/zh-hant/`, `/es/`, `/pt/`, and `/ja/`. Temporary room,
+API, Socket.IO, and health URLs are served with `X-Robots-Tag: noindex, nofollow`.
+The application also exposes `/robots.txt` and a localized `/sitemap.xml`.
 
 ## Project structure
 

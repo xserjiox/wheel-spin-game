@@ -7,20 +7,28 @@ const appDirectory = join(dirname(fileURLToPath(import.meta.url)), "..");
 const distDirectory = join(appDirectory, "dist");
 const templatePath = join(distDirectory, "index.html");
 const publicOrigin = "__PUBLIC_ORIGIN__";
-const locales = ["en", "ru", "uk", "de", "zh"];
+const locales = ["en", "ru", "uk", "de", "zh", "zh-Hant", "es", "pt", "ja"];
 const localePaths = {
   en: "/",
   ru: "/ru/",
   uk: "/uk/",
   de: "/de/",
   zh: "/zh/",
+  "zh-Hant": "/zh-hant/",
+  es: "/es/",
+  pt: "/pt/",
+  ja: "/ja/",
 };
 const htmlLanguages = {
   en: "en",
   ru: "ru",
   uk: "uk",
   de: "de",
-  zh: "zh-CN",
+  zh: "zh-Hans",
+  "zh-Hant": "zh-Hant",
+  es: "es",
+  pt: "pt",
+  ja: "ja",
 };
 const openGraphLocales = {
   en: "en_US",
@@ -28,6 +36,21 @@ const openGraphLocales = {
   uk: "uk_UA",
   de: "de_DE",
   zh: "zh_CN",
+  "zh-Hant": "zh_HK",
+  es: "es_MX",
+  pt: "pt_BR",
+  ja: "ja_JP",
+};
+const previewImageAlts = {
+  en: "The colorful GatherWheel logo",
+  ru: "Цветной логотип GatherWheel",
+  uk: "Кольоровий логотип GatherWheel",
+  de: "Das farbenfrohe GatherWheel-Logo",
+  zh: "彩色 GatherWheel 标志",
+  "zh-Hant": "彩色 GatherWheel 標誌",
+  es: "El colorido logotipo de GatherWheel",
+  pt: "O logotipo colorido do GatherWheel",
+  ja: "カラフルなGatherWheelのロゴ",
 };
 const outputFiles = {
   en: "index.html",
@@ -35,6 +58,10 @@ const outputFiles = {
   uk: "index.uk.html",
   de: "index.de.html",
   zh: "index.zh.html",
+  "zh-Hant": "index.zh-hant.html",
+  es: "index.es.html",
+  pt: "index.pt.html",
+  ja: "index.ja.html",
 };
 
 function escapeHtml(value) {
@@ -52,7 +79,7 @@ function absoluteUrl(path) {
 function alternateLinks() {
   return [
     ...locales.map((locale) => {
-      const hreflang = locale === "zh" ? "zh-CN" : locale;
+      const hreflang = htmlLanguages[locale];
       return `    <link rel="alternate" hreflang="${hreflang}" href="${absoluteUrl(localePaths[locale])}" />`;
     }),
     `    <link rel="alternate" hreflang="x-default" href="${absoluteUrl("/")}" />`,
@@ -63,6 +90,7 @@ function seoHead(locale, title, description) {
   const canonicalUrl = absoluteUrl(localePaths[locale]);
   const safeTitle = escapeHtml(title);
   const safeDescription = escapeHtml(description);
+  const safePreviewImageAlt = escapeHtml(previewImageAlts[locale]);
   const structuredData = JSON.stringify({
     "@context": "https://schema.org",
     "@type": "WebApplication",
@@ -93,12 +121,12 @@ ${alternateLinks()}
     <meta property="og:image" content="${absoluteUrl("/gatherwheel-preview.jpg")}" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="The colorful GatherWheel logo" />
+    <meta property="og:image:alt" content="${safePreviewImageAlt}" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="${safeTitle}" />
     <meta name="twitter:description" content="${safeDescription}" />
     <meta name="twitter:image" content="${absoluteUrl("/gatherwheel-preview.jpg")}" />
-    <meta name="twitter:image:alt" content="The colorful GatherWheel logo" />
+    <meta name="twitter:image:alt" content="${safePreviewImageAlt}" />
     <script type="application/ld+json">${structuredData}</script>
     <title>${safeTitle}</title>
     <!-- SEO_HEAD_END -->`;

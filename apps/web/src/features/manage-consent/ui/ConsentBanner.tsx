@@ -21,6 +21,8 @@ type ConsentCopy = {
   close: string;
   privacy: string;
   cookies: string;
+  legalInformation: string;
+  privacyEyebrow: string;
 };
 
 const copy: Record<Locale, ConsentCopy> = {
@@ -40,11 +42,13 @@ const copy: Record<Locale, ConsentCopy> = {
     alwaysOn: "Always on",
     analytics: "Analytics",
     analyticsDescription:
-      "Google Analytics page views and four feature events, without room codes, names, or wheel content.",
+      "Google Analytics page views and feature events, without room codes, names, or wheel content.",
     save: "Save choices",
     close: "Close",
     privacy: "Privacy Policy",
     cookies: "Cookie Policy",
+    legalInformation: "Legal information",
+    privacyEyebrow: "PRIVACY",
   },
   ru: {
     title: "Ваш выбор конфиденциальности",
@@ -62,11 +66,13 @@ const copy: Record<Locale, ConsentCopy> = {
     alwaysOn: "Всегда включены",
     analytics: "Аналитика",
     analyticsDescription:
-      "Просмотры страниц и четыре события функций в Google Analytics — без кодов комнат, имён и содержимого колеса.",
+      "Просмотры страниц и события функций в Google Analytics — без кодов комнат, имён и содержимого колеса.",
     save: "Сохранить выбор",
     close: "Закрыть",
     privacy: "Политика конфиденциальности",
     cookies: "Политика cookies",
+    legalInformation: "Правовая информация",
+    privacyEyebrow: "КОНФИДЕНЦИАЛЬНОСТЬ",
   },
   uk: {
     title: "Ваш вибір конфіденційності",
@@ -84,11 +90,13 @@ const copy: Record<Locale, ConsentCopy> = {
     alwaysOn: "Завжди ввімкнені",
     analytics: "Аналітика",
     analyticsDescription:
-      "Перегляди сторінок і чотири події функцій у Google Analytics — без кодів кімнат, імен і вмісту колеса.",
+      "Перегляди сторінок і події функцій у Google Analytics — без кодів кімнат, імен і вмісту колеса.",
     save: "Зберегти вибір",
     close: "Закрити",
     privacy: "Політика конфіденційності",
     cookies: "Політика cookies",
+    legalInformation: "Правова інформація",
+    privacyEyebrow: "КОНФІДЕНЦІЙНІСТЬ",
   },
   de: {
     title: "Deine Datenschutzauswahl",
@@ -107,11 +115,13 @@ const copy: Record<Locale, ConsentCopy> = {
     alwaysOn: "Immer aktiv",
     analytics: "Analytics",
     analyticsDescription:
-      "Google-Analytics-Seitenaufrufe und vier Funktionsereignisse, ohne Raumcodes, Namen oder Radinhalte.",
+      "Google-Analytics-Seitenaufrufe und Funktionsereignisse, ohne Raumcodes, Namen oder Radinhalte.",
     save: "Auswahl speichern",
     close: "Schließen",
     privacy: "Datenschutz",
     cookies: "Cookie-Richtlinie",
+    legalInformation: "Rechtliche Informationen",
+    privacyEyebrow: "DATENSCHUTZ",
   },
   zh: {
     title: "你的隐私选择",
@@ -128,11 +138,109 @@ const copy: Record<Locale, ConsentCopy> = {
     alwaysOn: "始终开启",
     analytics: "分析",
     analyticsDescription:
-      "Google Analytics 页面浏览和四项功能事件，不包含房间代码、姓名或转盘内容。",
+      "Google Analytics 页面浏览和功能事件，不包含房间代码、姓名或转盘内容。",
     save: "保存选择",
     close: "关闭",
     privacy: "隐私政策",
     cookies: "Cookie 政策",
+    legalInformation: "法律信息",
+    privacyEyebrow: "隐私",
+  },
+  es: {
+    title: "Tus opciones de privacidad",
+    description:
+      "Con tu permiso, Google Analytics nos ayuda a conocer las visitas y el uso de las funciones. No se carga antes de que aceptes.",
+    allow: "Permitir analítica",
+    reject: "Rechazar",
+    manage: "Administrar preferencias",
+    settings: "Configuración de cookies",
+    settingsTitle: "Preferencias de privacidad",
+    settingsDescription:
+      "Puedes cambiar esta elección en cualquier momento. El almacenamiento necesario no se puede desactivar porque el servicio lo necesita para funcionar.",
+    necessary: "Necesarias",
+    necessaryDescription:
+      "Sesiones de sala, idioma, elementos guardados y tu elección.",
+    alwaysOn: "Siempre activas",
+    analytics: "Analítica",
+    analyticsDescription:
+      "Vistas de página y eventos de funciones de Google Analytics, sin códigos de sala, nombres ni contenido de la ruleta.",
+    save: "Guardar preferencias",
+    close: "Cerrar",
+    privacy: "Política de privacidad",
+    cookies: "Política de cookies",
+    legalInformation: "Información legal",
+    privacyEyebrow: "PRIVACIDAD",
+  },
+  pt: {
+    title: "Suas escolhas de privacidade",
+    description:
+      "Com a sua permissão, o Google Analytics nos ajuda a entender as visitas e o uso dos recursos. Ele não é carregado antes do seu consentimento.",
+    allow: "Permitir análise",
+    reject: "Recusar",
+    manage: "Gerenciar preferências",
+    settings: "Configurações de cookies",
+    settingsTitle: "Preferências de privacidade",
+    settingsDescription:
+      "Você pode alterar esta escolha a qualquer momento. O armazenamento necessário não pode ser desativado porque o serviço precisa dele para funcionar.",
+    necessary: "Necessários",
+    necessaryDescription: "Sessões de sala, idioma, itens salvos e a sua escolha.",
+    alwaysOn: "Sempre ativos",
+    analytics: "Análise",
+    analyticsDescription:
+      "Visualizações de página e eventos de recursos do Google Analytics, sem códigos de sala, nomes ou conteúdo da roleta.",
+    save: "Salvar escolhas",
+    close: "Fechar",
+    privacy: "Política de Privacidade",
+    cookies: "Política de Cookies",
+    legalInformation: "Informações legais",
+    privacyEyebrow: "PRIVACIDADE",
+  },
+  ja: {
+    title: "プライバシーの選択",
+    description:
+      "許可いただいた場合、Google Analyticsを使って訪問数や機能の利用状況を把握します。同意前に読み込まれることはありません。",
+    allow: "分析を許可",
+    reject: "拒否",
+    manage: "設定を管理",
+    settings: "Cookie設定",
+    settingsTitle: "プライバシー設定",
+    settingsDescription:
+      "この選択はいつでも変更できます。サービスの動作に必要な保存領域は無効にできません。",
+    necessary: "必須",
+    necessaryDescription: "ルームセッション、言語、保存した項目、およびこの選択。",
+    alwaysOn: "常に有効",
+    analytics: "アクセス解析",
+    analyticsDescription:
+      "ルームコード、名前、ルーレットの内容を含まないGoogle Analyticsのページビューと機能イベント。",
+    save: "設定を保存",
+    close: "閉じる",
+    privacy: "プライバシーポリシー",
+    cookies: "Cookieポリシー",
+    legalInformation: "法的情報",
+    privacyEyebrow: "プライバシー",
+  },
+  "zh-Hant": {
+    title: "你的私隱選擇",
+    description:
+      "經你同意後，Google Analytics 可協助我們了解瀏覽量和功能使用情況。我們不會在你同意前載入它。",
+    allow: "允許分析",
+    reject: "拒絕",
+    manage: "管理偏好",
+    settings: "Cookie 設定",
+    settingsTitle: "私隱偏好",
+    settingsDescription: "你可以隨時變更此選擇。服務運作所需的必要儲存空間無法停用。",
+    necessary: "必要",
+    necessaryDescription: "房間工作階段、語言、已儲存項目和你的選擇。",
+    alwaysOn: "始終開啟",
+    analytics: "分析",
+    analyticsDescription:
+      "Google Analytics 頁面瀏覽和功能事件，不包含房間代碼、名稱或轉盤內容。",
+    save: "儲存選擇",
+    close: "關閉",
+    privacy: "私隱政策",
+    cookies: "Cookie 政策",
+    legalInformation: "法律資訊",
+    privacyEyebrow: "私隱",
   },
 };
 
@@ -170,7 +278,7 @@ export function ConsentBanner() {
           <div className="consent-copy">
             <h2 id="consent-title">{text.title}</h2>
             <p>{text.description}</p>
-            <nav aria-label="Legal information">
+            <nav aria-label={text.legalInformation}>
               <Link to="/privacy">{text.privacy}</Link>
               <Link to="/cookies">{text.cookies}</Link>
             </nav>
@@ -217,7 +325,7 @@ export function ConsentBanner() {
           >
             <header>
               <div>
-                <p className="eyebrow">PRIVACY</p>
+                <p className="eyebrow">{text.privacyEyebrow}</p>
                 <h2 id="consent-settings-title">{text.settingsTitle}</h2>
               </div>
               {choice !== null && (
@@ -253,7 +361,7 @@ export function ConsentBanner() {
             </label>
 
             <div className="consent-modal-footer">
-              <nav aria-label="Legal information">
+              <nav aria-label={text.legalInformation}>
                 <Link to="/privacy" onClick={closePreferences}>
                   {text.privacy}
                 </Link>

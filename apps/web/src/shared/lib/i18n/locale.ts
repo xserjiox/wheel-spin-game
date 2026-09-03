@@ -1,6 +1,16 @@
-export type Locale = "en" | "ru" | "uk" | "de" | "zh";
+export type Locale = "en" | "ru" | "uk" | "de" | "zh" | "es" | "pt" | "ja" | "zh-Hant";
 
-export const SUPPORTED_LOCALES: Locale[] = ["en", "ru", "uk", "de", "zh"];
+export const SUPPORTED_LOCALES: Locale[] = [
+  "en",
+  "ru",
+  "uk",
+  "de",
+  "zh",
+  "zh-Hant",
+  "es",
+  "pt",
+  "ja",
+];
 
 const HOME_PATHS: Record<Locale, string> = {
   en: "/",
@@ -8,6 +18,10 @@ const HOME_PATHS: Record<Locale, string> = {
   uk: "/uk/",
   de: "/de/",
   zh: "/zh/",
+  "zh-Hant": "/zh-hant/",
+  es: "/es/",
+  pt: "/pt/",
+  ja: "/ja/",
 };
 
 export function homePathForLocale(locale: Locale): string {

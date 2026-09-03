@@ -109,6 +109,12 @@ describe("own proposals", () => {
       option: {
         count: vi.fn().mockResolvedValue(2),
         create: optionCreate,
+        findMany: vi.fn().mockResolvedValue([
+          { id: "one", weight: 1 },
+          { id: "two", weight: 1 },
+          { id: "three", weight: 1 },
+        ]),
+        update: vi.fn().mockResolvedValue({}),
       },
       room: { update: vi.fn().mockResolvedValue({}) },
     };

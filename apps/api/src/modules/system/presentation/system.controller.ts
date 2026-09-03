@@ -14,7 +14,11 @@ const LOCALIZED_PAGES = [
   { language: "ru", path: "/ru/" },
   { language: "uk", path: "/uk/" },
   { language: "de", path: "/de/" },
-  { language: "zh-CN", path: "/zh/" },
+  { language: "zh-Hans", path: "/zh/" },
+  { language: "zh-Hant", path: "/zh-hant/" },
+  { language: "es", path: "/es/" },
+  { language: "pt", path: "/pt/" },
+  { language: "ja", path: "/ja/" },
 ] as const;
 
 @Controller()
@@ -116,6 +120,38 @@ export class SystemController {
       return this.redirectToCanonicalPath(reply, "/zh/");
     }
     return this.sendPage("index.zh.html", request, reply);
+  }
+
+  @Get("zh-hant")
+  traditionalChinese(@Req() request: FastifyRequest, @Res() reply: FastifyReply) {
+    if (!request.url.split("?")[0].endsWith("/")) {
+      return this.redirectToCanonicalPath(reply, "/zh-hant/");
+    }
+    return this.sendPage("index.zh-hant.html", request, reply);
+  }
+
+  @Get("es")
+  spanish(@Req() request: FastifyRequest, @Res() reply: FastifyReply) {
+    if (!request.url.split("?")[0].endsWith("/")) {
+      return this.redirectToCanonicalPath(reply, "/es/");
+    }
+    return this.sendPage("index.es.html", request, reply);
+  }
+
+  @Get("pt")
+  portuguese(@Req() request: FastifyRequest, @Res() reply: FastifyReply) {
+    if (!request.url.split("?")[0].endsWith("/")) {
+      return this.redirectToCanonicalPath(reply, "/pt/");
+    }
+    return this.sendPage("index.pt.html", request, reply);
+  }
+
+  @Get("ja")
+  japanese(@Req() request: FastifyRequest, @Res() reply: FastifyReply) {
+    if (!request.url.split("?")[0].endsWith("/")) {
+      return this.redirectToCanonicalPath(reply, "/ja/");
+    }
+    return this.sendPage("index.ja.html", request, reply);
   }
 
   @Get("r/:code")

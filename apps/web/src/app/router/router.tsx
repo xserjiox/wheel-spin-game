@@ -1,15 +1,12 @@
 import { createBrowserRouter } from "react-router-dom";
 import { AppShell } from "@/app/AppShell";
 import { HomePage } from "@/pages/home";
+import { LoadingScreen } from "@/shared/ui/loading-screen";
 
 export const router = createBrowserRouter([
   {
     element: <AppShell />,
-    hydrateFallbackElement: (
-      <main className="loading-screen" aria-live="polite">
-        Loading…
-      </main>
-    ),
+    hydrateFallbackElement: <LoadingScreen />,
     children: [
       {
         path: "/",
@@ -29,6 +26,22 @@ export const router = createBrowserRouter([
       },
       {
         path: "/zh/",
+        element: <HomePage />,
+      },
+      {
+        path: "/zh-hant/",
+        element: <HomePage />,
+      },
+      {
+        path: "/es/",
+        element: <HomePage />,
+      },
+      {
+        path: "/pt/",
+        element: <HomePage />,
+      },
+      {
+        path: "/ja/",
         element: <HomePage />,
       },
       {

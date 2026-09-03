@@ -8,6 +8,12 @@ import {
 import { useI18n } from "@/shared/lib/i18n";
 import { Confetti } from "@/shared/ui/confetti";
 import type { ActiveSpin, Option } from "../model/types";
+import {
+  getOptionIndexAtAngle,
+  getOptionProbability,
+  getOptionWeight,
+  getWheelSegments,
+} from "../model/wheel-weights";
 
 const COLORS = [
   "#ff7957",
@@ -18,12 +24,44 @@ const COLORS = [
   "#ef8eae",
   "#d7ff44",
 ];
+const SOUND_STORAGE_KEY = "gatherwheel-spin-sound";
 
 type OptionTooltip = {
   label: string;
+  probability: string;
   left: number;
   top: number;
 };
+
+function playWheelClick(context: AudioContext): void {
+  const oscillator = context.createOscillator();
+  const gain = context.createGain();
+  const now = context.currentTime;
+  oscillator.type = "triangle";
+  oscillator.frequency.setValueAtTime(210, now);
+  oscillator.frequency.exponentialRampToValueAtTime(115, now + 0.035);
+  gain.gain.setValueAtTime(0.025, now);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.04);
+  oscillator.connect(gain);
+  gain.connect(context.destination);
+  oscillator.start(now);
+  oscillator.stop(now + 0.045);
+}
+
+function playWheelStop(context: AudioContext): void {
+  const oscillator = context.createOscillator();
+  const gain = context.createGain();
+  const now = context.currentTime;
+  oscillator.type = "sine";
+  oscillator.frequency.setValueAtTime(330, now);
+  oscillator.frequency.exponentialRampToValueAtTime(520, now + 0.14);
+  gain.gain.setValueAtTime(0.04, now);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.2);
+  oscillator.connect(gain);
+  gain.connect(context.destination);
+  oscillator.start(now);
+  oscillator.stop(now + 0.21);
+}
 
 export function Wheel({
   options,
@@ -44,7 +82,7 @@ export function Wheel({
   connected: boolean;
   onSpin: () => void;
 }) {
-  const { t } = useI18n();
+  const { localeTag, t } = useI18n();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -58,11 +96,20 @@ export function Wheel({
   const beginTimer = useRef<number | null>(null);
   const finishTimer = useRef<number | null>(null);
   const animationFrame = useRef<number | null>(null);
+  const soundFrame = useRef<number | null>(null);
+  const audioContext = useRef<AudioContext | null>(null);
   const syncCurrentSpin = useRef<() => void>(() => {});
   const [rotation, setRotation] = useState(0);
   const [transition, setTransition] = useState("none");
   const [winner, setWinner] = useState("");
   const [optionTooltip, setOptionTooltip] = useState<OptionTooltip | null>(null);
+  const [soundEnabled, setSoundEnabled] = useState(() => {
+    try {
+      return window.localStorage.getItem(SOUND_STORAGE_KEY) !== "off";
+    } catch {
+      return true;
+    }
+  });
   const setCenterRef = useCallback((element: HTMLElement | null) => {
     centerRef.current = element;
   }, []);
@@ -124,10 +171,7 @@ export function Wheel({
     const unrotatedAngle = Math.atan2(y, x) - renderedRotation;
     const angleFromTop =
       (((unrotatedAngle + Math.PI / 2) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
-    const optionIndex = Math.min(
-      visibleOptions.length - 1,
-      Math.floor(angleFromTop / ((Math.PI * 2) / visibleOptions.length)),
-    );
+    const optionIndex = getOptionIndexAtAngle(visibleOptions, angleFromTop);
     const hoveredOption = visibleOptions[optionIndex];
     if (!hoveredOption) {
       setOptionTooltip(null);
@@ -139,12 +183,38 @@ export function Wheel({
 
     setOptionTooltip({
       label: hoveredOption.label,
+      probability: `${getOptionProbability(
+        hoveredOption,
+        visibleOptions,
+      ).toLocaleString(localeTag, { maximumFractionDigits: 2 })}%`,
       left: Math.max(
         tooltipHalfWidth,
         Math.min(bounds.width - tooltipHalfWidth, localX),
       ),
       top: Math.max(64, Math.min(bounds.height - 12, localY - 12)),
     });
+  };
+
+  const ensureAudioContext = useCallback(() => {
+    if (!soundEnabled || typeof window.AudioContext === "undefined") return null;
+    audioContext.current ??= new window.AudioContext();
+    if (audioContext.current.state === "suspended") {
+      void audioContext.current.resume();
+    }
+    return audioContext.current;
+  }, [soundEnabled]);
+
+  const handleSoundChange = (enabled: boolean) => {
+    setSoundEnabled(enabled);
+    try {
+      window.localStorage.setItem(SOUND_STORAGE_KEY, enabled ? "on" : "off");
+    } catch {
+      // Sound still works for this session when storage is unavailable.
+    }
+    if (enabled && typeof window.AudioContext !== "undefined") {
+      audioContext.current ??= new window.AudioContext();
+      void audioContext.current.resume();
+    }
   };
 
   const clearSpinSchedule = useCallback(() => {
@@ -165,9 +235,12 @@ export function Wheel({
       setRotation(spin.finalRotation);
       if (revealedSpin.current === spin.id) return;
       revealedSpin.current = spin.id;
+      if (soundEnabled && audioContext.current?.state === "running") {
+        playWheelStop(audioContext.current);
+      }
       setWinner(spin.winnerLabel);
     },
-    [clearSpinSchedule],
+    [clearSpinSchedule, soundEnabled],
   );
 
   const synchronizeSpin = useCallback(
@@ -237,6 +310,36 @@ export function Wheel({
   }, [activeSpin, clearSpinSchedule, synchronizeSpin]);
 
   useEffect(() => {
+    if (!activeSpin || !soundEnabled || !audioContext.current) return;
+    const context = audioContext.current;
+    const startAt = new Date(activeSpin.startedAt).getTime();
+    const endAt = startAt + activeSpin.durationMs;
+    let previousOptionIndex = -1;
+
+    const monitor = () => {
+      const now = Date.now();
+      if (now >= startAt && now <= endAt && context.state === "running") {
+        const renderedRotation = readRenderedRotation(wrapRef.current, rotation);
+        const optionIndex = getOptionIndexAtAngle(
+          activeSpin.optionsSnapshot,
+          (-renderedRotation * Math.PI) / 180,
+        );
+        if (previousOptionIndex >= 0 && optionIndex !== previousOptionIndex) {
+          playWheelClick(context);
+        }
+        previousOptionIndex = optionIndex;
+      }
+      if (now < endAt) soundFrame.current = window.requestAnimationFrame(monitor);
+    };
+
+    soundFrame.current = window.requestAnimationFrame(monitor);
+    return () => {
+      if (soundFrame.current !== null) cancelAnimationFrame(soundFrame.current);
+      soundFrame.current = null;
+    };
+  }, [activeSpin, rotation, soundEnabled]);
+
+  useEffect(() => {
     if (!canceledSpinId || handledSpin.current !== canceledSpinId) return;
     clearSpinSchedule();
     currentSpin.current = null;
@@ -256,6 +359,14 @@ export function Wheel({
       clearSpinSchedule();
     };
   }, [clearSpinSchedule]);
+
+  useEffect(
+    () => () => {
+      if (soundFrame.current !== null) cancelAnimationFrame(soundFrame.current);
+      void audioContext.current?.close();
+    },
+    [],
+  );
 
   useEffect(() => {
     if (!winner) return;
@@ -333,7 +444,8 @@ export function Wheel({
             role="tooltip"
             style={{ left: optionTooltip.left, top: optionTooltip.top }}
           >
-            {optionTooltip.label}
+            <span>{optionTooltip.label}</span>
+            <strong>{optionTooltip.probability}</strong>
           </div>
         )}
         {centerStatusLabel ? (
@@ -359,12 +471,42 @@ export function Wheel({
             type="button"
             aria-label={t("startSpin")}
             disabled={!canSpin}
-            onClick={onSpin}
+            onClick={() => {
+              ensureAudioContext();
+              onSpin();
+            }}
           >
             <span>{t("spinAction")}</span>
           </button>
         )}
       </div>
+      <label className="wheel-sound-toggle">
+        <input
+          type="checkbox"
+          checked={soundEnabled}
+          onChange={(event) => handleSoundChange(event.target.checked)}
+        />
+        <span className="sound-toggle-track" aria-hidden="true">
+          <span />
+        </span>
+        <span>{t("spinSound")}</span>
+      </label>
+      {!isHost && visibleOptions.length > 0 && (
+        <div className="wheel-public-weights" aria-label={t("slotProbabilities")}>
+          {visibleOptions.map((option) => (
+            <span key={option.id}>
+              {`${option.label} · ${t("weightShort")} ${getOptionWeight(
+                option,
+              ).toLocaleString(localeTag, {
+                maximumFractionDigits: 2,
+              })} · ${getOptionProbability(option, visibleOptions).toLocaleString(
+                localeTag,
+                { maximumFractionDigits: 2 },
+              )}%`}
+            </span>
+          ))}
+        </div>
+      )}
       {winner && (
         <div
           ref={modalRef}
@@ -452,15 +594,12 @@ function drawWheel(
     return;
   }
 
-  const arc = (Math.PI * 2) / options.length;
   const outerLabelRadius = radius * 0.83;
   const fallbackCenterSize = size <= 470 ? 86 : 108;
   const centerRadius = (centerSize || fallbackCenterSize) / 2;
   const centerGap = Math.max(8, Math.min(12, size * 0.02));
   const maxLabelWidth = Math.max(24, outerLabelRadius - centerRadius - centerGap);
-  options.forEach((option, index) => {
-    const start = -Math.PI / 2 + index * arc;
-    const end = start + arc;
+  getWheelSegments(options).forEach(({ option, index, start, end, arc }) => {
     context.beginPath();
     context.moveTo(center, center);
     context.arc(center, center, radius, start, end);
@@ -471,7 +610,9 @@ function drawWheel(
     context.lineWidth = Math.max(1, size * 0.003);
     context.stroke();
 
-    const angle = -Math.PI / 2 + (index + 0.5) * arc;
+    if (arc * outerLabelRadius < 18) return;
+
+    const angle = start + arc / 2;
     const normalizedAngle = (angle + Math.PI * 2) % (Math.PI * 2);
     const flipLabel =
       normalizedAngle > Math.PI / 2 && normalizedAngle < (Math.PI * 3) / 2;

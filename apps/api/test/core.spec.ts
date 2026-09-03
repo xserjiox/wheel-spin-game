@@ -2,6 +2,7 @@ import { BadRequestException } from "@nestjs/common";
 import { describe, expect, it } from "vitest";
 import {
   createRoomSchema,
+  optionChanceSchema,
   optionSchema,
   participantSpinPermissionSchema,
   proposalUpdateSchema,
@@ -12,7 +13,12 @@ import {
   assignAvailableName,
   normalizeDisplayName,
 } from "../src/modules/rooms/domain/name-policy";
-import { calculateFinalRotation } from "../src/modules/rooms/domain/wheel-engine";
+import {
+  calculateFinalRotation,
+  normalizeChanceWeights,
+  redistributeChanceWeights,
+  selectWeightedIndex,
+} from "../src/modules/rooms/domain/wheel-engine";
 import { roomCookieName } from "../src/shared/config/room.config";
 import { parseRequest } from "../src/shared/http/parse-request";
 import { SessionService } from "../src/shared/security/session.service";
@@ -29,17 +35,45 @@ describe("MVP room rules", () => {
   });
 
   it("selects the target segment under the pointer", () => {
-    const optionCount = 5;
+    const optionWeights = [1, 1, 1, 1, 1];
     const winnerIndex = 3;
     const finalRotation = calculateFinalRotation({
-      optionCount,
+      optionWeights,
       winnerIndex,
       currentRotation: 725,
       durationMs: 20_000,
     });
-    const target = (((-(winnerIndex + 0.5) * (360 / optionCount)) % 360) + 360) % 360;
+    const target =
+      (((-(winnerIndex + 0.5) * (360 / optionWeights.length)) % 360) + 360) % 360;
     expect(((finalRotation % 360) + 360) % 360).toBeCloseTo(target, 8);
     expect(finalRotation).toBeGreaterThan(725 + 5 * 360);
+  });
+
+  it("selects weighted options at exact integer boundaries", () => {
+    const weights = [1, 2, 3];
+    const pick = (value: number) =>
+      selectWeightedIndex(weights, (total) => {
+        expect(total).toBe(600);
+        return value;
+      });
+
+    expect(pick(0)).toBe(0);
+    expect(pick(99)).toBe(0);
+    expect(pick(100)).toBe(1);
+    expect(pick(299)).toBe(1);
+    expect(pick(300)).toBe(2);
+    expect(pick(599)).toBe(2);
+  });
+
+  it("centers the weighted winner segment under the pointer", () => {
+    const finalRotation = calculateFinalRotation({
+      optionWeights: [1, 2, 3],
+      winnerIndex: 1,
+      currentRotation: 0,
+      durationMs: 5_000,
+    });
+
+    expect(((finalRotation % 360) + 360) % 360).toBeCloseTo(240, 8);
   });
 
   it("validates room and spin limits", () => {
@@ -78,6 +112,89 @@ describe("MVP room rules", () => {
         label: "x".repeat(81),
       }).success,
     ).toBe(false);
+  });
+
+  it("accepts slot chances in tenths of a percent", () => {
+    const optionId = crypto.randomUUID();
+    expect(optionChanceSchema.parse({ optionId, chance: 91.8 })).toEqual({
+      optionId,
+      chance: 91.8,
+    });
+    expect(optionChanceSchema.safeParse({ optionId, chance: 0.9 }).success).toBe(false);
+    expect(optionChanceSchema.safeParse({ optionId, chance: 99.1 }).success).toBe(
+      false,
+    );
+    expect(optionChanceSchema.safeParse({ optionId, chance: 20.01 }).success).toBe(
+      false,
+    );
+  });
+
+  it("redistributes chance while keeping every other slot at one percent", () => {
+    const distribution = redistributeChanceWeights(
+      Array.from({ length: 5 }, (_, index) => ({ id: String(index), weight: 1 })),
+      "0",
+      96,
+    );
+
+    expect(distribution).toEqual([
+      { id: "0", weight: 96 },
+      { id: "1", weight: 1 },
+      { id: "2", weight: 1 },
+      { id: "3", weight: 1 },
+      { id: "4", weight: 1 },
+    ]);
+    expect(distribution.reduce((total, option) => total + option.weight, 0)).toBe(100);
+    expect(() =>
+      redistributeChanceWeights(
+        Array.from({ length: 6 }, (_, index) => ({ id: String(index), weight: 1 })),
+        "0",
+        96,
+      ),
+    ).toThrow(RangeError);
+  });
+
+  it("takes an increase only from slots that are above the one-percent floor", () => {
+    const raised = redistributeChanceWeights(
+      [
+        { id: "dominant", weight: 96 },
+        { id: "target", weight: 1 },
+        { id: "three", weight: 1 },
+        { id: "four", weight: 1 },
+        { id: "five", weight: 1 },
+      ],
+      "target",
+      2,
+    );
+
+    expect(raised).toEqual([
+      { id: "dominant", weight: 95 },
+      { id: "target", weight: 2 },
+      { id: "three", weight: 1 },
+      { id: "four", weight: 1 },
+      { id: "five", weight: 1 },
+    ]);
+    expect(redistributeChanceWeights(raised, "target", 1)).toEqual([
+      { id: "dominant", weight: 96 },
+      { id: "target", weight: 1 },
+      { id: "three", weight: 1 },
+      { id: "four", weight: 1 },
+      { id: "five", weight: 1 },
+    ]);
+  });
+
+  it("normalizes changed slot sets without dropping a slot below one percent", () => {
+    const distribution = normalizeChanceWeights([
+      { id: "dominant", weight: 96 },
+      { id: "two", weight: 1 },
+      { id: "three", weight: 1 },
+      { id: "four", weight: 1 },
+      { id: "five", weight: 1 },
+      { id: "new", weight: 1 },
+    ]);
+
+    expect(distribution.reduce((total, option) => total + option.weight, 0)).toBe(100);
+    expect(distribution.every((option) => option.weight >= 1)).toBe(true);
+    expect(distribution.every((option) => (option.weight * 10) % 1 === 0)).toBe(true);
   });
 
   it("validates spin permission updates", () => {
