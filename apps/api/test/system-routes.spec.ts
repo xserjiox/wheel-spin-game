@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { FastifyAdapter, NestFastifyApplication } from "@nestjs/platform-fastify";
+import { readFile } from "node:fs/promises";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { RoomsService } from "../src/modules/rooms/application/rooms.service";
 import { SystemController } from "../src/modules/system/presentation/system.controller";
@@ -71,6 +72,8 @@ describe("system route registration", () => {
     ["/es", "/es/"],
     ["/pt", "/pt/"],
     ["/ja", "/ja/"],
+    ["/vi", "/vi/"],
+    ["/ms", "/ms/"],
   ])("redirects %s to its canonical path", async (path, location) => {
     const response = await app
       .getHttpAdapter()
@@ -98,6 +101,24 @@ describe("system route registration", () => {
     expect(response.body).toContain("http://gatherwheel.test/es/");
     expect(response.body).toContain("http://gatherwheel.test/pt/");
     expect(response.body).toContain("http://gatherwheel.test/ja/");
+    expect(response.body).toContain('hreflang="vi"');
+    expect(response.body).toContain('hreflang="ms"');
+    expect(response.body).toContain("<loc>http://gatherwheel.test/vi/</loc>");
+    expect(response.body).toContain("<loc>http://gatherwheel.test/ms/</loc>");
+  });
+
+  it.each(["vi", "ms"])("serves the prerendered %s home page", async (locale) => {
+    const response = await app
+      .getHttpAdapter()
+      .getInstance()
+      .inject({ method: "GET", url: `/${locale}/` });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.headers["content-type"]).toContain("text/html");
+    expect(readFile).toHaveBeenCalledWith(
+      expect.stringMatching(new RegExp(`index\\.${locale}\\.html$`)),
+      "utf8",
+    );
   });
 
   it("keeps the noindex app head for Googlebot", async () => {

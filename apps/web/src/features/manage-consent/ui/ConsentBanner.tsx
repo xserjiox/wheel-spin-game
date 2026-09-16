@@ -26,6 +26,54 @@ type ConsentCopy = {
 };
 
 const copy: Record<Locale, ConsentCopy> = {
+  vi: {
+    title: "Lựa chọn quyền riêng tư của bạn",
+    description:
+      "Khi được bạn cho phép, Google Analytics giúp chúng tôi hiểu về lượt truy cập và việc sử dụng tính năng. Chúng tôi không tải công cụ này trước khi bạn đồng ý.",
+    allow: "Cho phép phân tích",
+    reject: "Từ chối",
+    manage: "Quản lý tùy chọn",
+    settings: "Cài đặt cookie",
+    settingsTitle: "Tùy chọn quyền riêng tư",
+    settingsDescription:
+      "Bạn có thể thay đổi lựa chọn này bất cứ lúc nào. Không thể tắt bộ nhớ lưu trữ cần thiết vì dịch vụ cần nó để hoạt động.",
+    necessary: "Cần thiết",
+    necessaryDescription: "Phiên phòng, ngôn ngữ, các mục đã lưu và lựa chọn của bạn.",
+    alwaysOn: "Luôn bật",
+    analytics: "Phân tích",
+    analyticsDescription:
+      "Lượt xem trang và sự kiện tính năng của Google Analytics, không bao gồm mã phòng, tên hoặc nội dung vòng quay.",
+    save: "Lưu lựa chọn",
+    close: "Đóng",
+    privacy: "Chính sách quyền riêng tư",
+    cookies: "Chính sách cookie",
+    legalInformation: "Thông tin pháp lý",
+    privacyEyebrow: "QUYỀN RIÊNG TƯ",
+  },
+  ms: {
+    title: "Pilihan privasi anda",
+    description:
+      "Dengan kebenaran anda, Google Analytics membantu kami memahami lawatan dan penggunaan ciri. Kami tidak memuatkannya sebelum anda bersetuju.",
+    allow: "Benarkan analitik",
+    reject: "Tolak",
+    manage: "Urus pilihan",
+    settings: "Tetapan kuki",
+    settingsTitle: "Pilihan privasi",
+    settingsDescription:
+      "Anda boleh mengubah pilihan ini pada bila-bila masa. Storan yang diperlukan tidak boleh dilumpuhkan kerana perkhidmatan memerlukannya untuk berfungsi.",
+    necessary: "Diperlukan",
+    necessaryDescription: "Sesi bilik, bahasa, item tersimpan dan pilihan anda.",
+    alwaysOn: "Sentiasa aktif",
+    analytics: "Analitik",
+    analyticsDescription:
+      "Paparan halaman dan peristiwa ciri Google Analytics, tanpa kod bilik, nama atau kandungan roda.",
+    save: "Simpan pilihan",
+    close: "Tutup",
+    privacy: "Dasar Privasi",
+    cookies: "Dasar Kuki",
+    legalInformation: "Maklumat undang-undang",
+    privacyEyebrow: "PRIVASI",
+  },
   en: {
     title: "Your privacy choices",
     description:

@@ -45,6 +45,14 @@ export const router = createBrowserRouter([
         element: <HomePage />,
       },
       {
+        path: "/vi/",
+        element: <HomePage />,
+      },
+      {
+        path: "/ms/",
+        element: <HomePage />,
+      },
+      {
         path: "/r/:code",
         lazy: async () => {
           const { RoomRoute } = await import("@/pages/room");

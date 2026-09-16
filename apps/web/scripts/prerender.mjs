@@ -7,7 +7,7 @@ const appDirectory = join(dirname(fileURLToPath(import.meta.url)), "..");
 const distDirectory = join(appDirectory, "dist");
 const templatePath = join(distDirectory, "index.html");
 const publicOrigin = "__PUBLIC_ORIGIN__";
-const locales = ["en", "ru", "uk", "de", "zh", "zh-Hant", "es", "pt", "ja"];
+const locales = ["en", "ru", "uk", "de", "zh", "zh-Hant", "es", "pt", "ja", "vi", "ms"];
 const localePaths = {
   en: "/",
   ru: "/ru/",
@@ -18,6 +18,8 @@ const localePaths = {
   es: "/es/",
   pt: "/pt/",
   ja: "/ja/",
+  vi: "/vi/",
+  ms: "/ms/",
 };
 const htmlLanguages = {
   en: "en",
@@ -29,6 +31,8 @@ const htmlLanguages = {
   es: "es",
   pt: "pt",
   ja: "ja",
+  vi: "vi",
+  ms: "ms",
 };
 const openGraphLocales = {
   en: "en_US",
@@ -40,6 +44,8 @@ const openGraphLocales = {
   es: "es_MX",
   pt: "pt_BR",
   ja: "ja_JP",
+  vi: "vi_VN",
+  ms: "ms_MY",
 };
 const previewImageAlts = {
   en: "The colorful GatherWheel logo",
@@ -51,6 +57,8 @@ const previewImageAlts = {
   es: "El colorido logotipo de GatherWheel",
   pt: "O logotipo colorido do GatherWheel",
   ja: "カラフルなGatherWheelのロゴ",
+  vi: "Biểu trưng GatherWheel đầy màu sắc",
+  ms: "Logo GatherWheel yang berwarna-warni",
 };
 const outputFiles = {
   en: "index.html",
@@ -62,6 +70,8 @@ const outputFiles = {
   es: "index.es.html",
   pt: "index.pt.html",
   ja: "index.ja.html",
+  vi: "index.vi.html",
+  ms: "index.ms.html",
 };
 
 function escapeHtml(value) {

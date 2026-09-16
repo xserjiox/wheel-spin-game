@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { I18nProvider, translateError, useI18n } from "./i18n";
 import type { Locale } from "./locale";
+import { LOCALE_STORAGE_KEY } from "./storage";
 
 const expectedMessages: Array<{
   locale: Locale;
@@ -11,6 +12,19 @@ const expectedMessages: Array<{
   chanceOutOfRange: string;
   requestFailed: string;
 }> = [
+  {
+    locale: "vi",
+    rateLimited: "Có quá nhiều yêu cầu. Vui lòng thử lại sau ít phút.",
+    chanceOutOfRange: "Không thể đặt xác suất này nữa. Hãy tải lại phòng và thử lại.",
+    requestFailed: "Không thể hoàn tất yêu cầu",
+  },
+  {
+    locale: "ms",
+    rateLimited: "Terlalu banyak permintaan. Sila cuba lagi sebentar lagi.",
+    chanceOutOfRange:
+      "Peluang itu tidak lagi boleh ditetapkan. Muat semula bilik dan cuba lagi.",
+    requestFailed: "Permintaan tidak dapat diselesaikan",
+  },
   {
     locale: "en",
     rateLimited: "Too many requests. Please try again shortly.",
@@ -89,7 +103,10 @@ function ErrorMessages() {
 }
 
 describe("error localization", () => {
-  afterEach(cleanup);
+  afterEach(() => {
+    cleanup();
+    window.history.replaceState(null, "", "/");
+  });
 
   it.each(expectedMessages)(
     "localizes known and unknown server errors in $locale",
@@ -107,4 +124,90 @@ describe("error localization", () => {
       expect(screen.getByTestId("unknown").textContent).toBe(requestFailed);
     },
   );
+});
+
+function LanguagePreference() {
+  const { locale, localeTag, t, setLocale } = useI18n();
+  return (
+    <div>
+      <span data-testid="locale">{locale}</span>
+      <span data-testid="locale-tag">{localeTag}</span>
+      <span data-testid="choices">{t("choiceCount", { count: 3 })}</span>
+      <button onClick={() => setLocale("en")}>English</button>
+    </div>
+  );
+}
+
+describe("automatic language selection", () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+    window.history.replaceState({ key: "initial" }, "", "/?invite=example#faq");
+    vi.spyOn(window.navigator, "languages", "get").mockReturnValue(["ms-MY", "en-US"]);
+  });
+
+  afterEach(() => {
+    cleanup();
+    vi.restoreAllMocks();
+    window.localStorage.clear();
+    window.history.replaceState(null, "", "/");
+  });
+
+  it("uses the detected locale and its formatting without saving a manual preference", () => {
+    render(
+      <I18nProvider>
+        <LanguagePreference />
+      </I18nProvider>,
+    );
+
+    expect(screen.getByTestId("locale").textContent).toBe("ms");
+    expect(screen.getByTestId("locale-tag").textContent).toBe("ms-MY");
+    expect(screen.getByTestId("choices").textContent).toBe("3 pilihan");
+    expect(document.documentElement.lang).toBe("ms");
+    expect(window.localStorage.getItem(LOCALE_STORAGE_KEY)).toBeNull();
+  });
+
+  it("retains an explicit English choice after reopening the default home", () => {
+    const view = render(
+      <I18nProvider>
+        <LanguagePreference />
+      </I18nProvider>,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "English" }));
+    expect(window.location.pathname).toBe("/");
+    expect(window.localStorage.getItem(LOCALE_STORAGE_KEY)).toBe("en");
+    view.unmount();
+
+    render(
+      <I18nProvider>
+        <LanguagePreference />
+      </I18nProvider>,
+    );
+    expect(screen.getByTestId("locale").textContent).toBe("en");
+    expect(window.location.pathname).toBe("/");
+  });
+
+  it("detects the language in a room without changing the invite URL", () => {
+    window.history.replaceState(null, "", "/r/Ab7xK2pQ?invite=true");
+    render(
+      <I18nProvider>
+        <LanguagePreference />
+      </I18nProvider>,
+    );
+    expect(screen.getByTestId("locale").textContent).toBe("ms");
+    expect(window.location.pathname).toBe("/r/Ab7xK2pQ");
+    expect(window.location.search).toBe("?invite=true");
+  });
+
+  it("allows a manual language change even when storage is blocked", () => {
+    vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new DOMException("Storage is blocked", "SecurityError");
+    });
+    render(
+      <I18nProvider>
+        <LanguagePreference />
+      </I18nProvider>,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "English" }));
+    expect(screen.getByTestId("locale").textContent).toBe("en");
+  });
 });

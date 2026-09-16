@@ -195,9 +195,16 @@ TTL. `/health` is a liveness endpoint; `/ready` verifies PostgreSQL and required
 Redis connectivity.
 
 The production build pre-renders the indexable home pages at `/`, `/ru/`,
-`/uk/`, `/de/`, `/zh/`, `/zh-hant/`, `/es/`, `/pt/`, and `/ja/`. Temporary room,
+`/uk/`, `/de/`, `/zh/`, `/zh-hant/`, `/es/`, `/pt/`, `/ja/`, `/vi/`, and `/ms/`. Temporary room,
 API, Socket.IO, and health URLs are served with `X-Robots-Tag: noindex, nofollow`.
 The application also exposes `/robots.txt` and a localized `/sitemap.xml`.
+
+Localized home URLs take priority over language preferences. On `/` and app
+routes, the saved language is used first, then the first supported language in
+the browser's preference list, with English as the fallback. Regional variants
+such as `vi-VN` and `ms-MY` are supported, including Simplified and Traditional
+Chinese. Automatic language selection on `/` replaces the URL with the matching
+localized home path without adding a browser history entry.
 
 ## Project structure
 

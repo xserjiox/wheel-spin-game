@@ -25,6 +25,8 @@ describe("analytics privacy normalization", () => {
     expect(analyticsPageTitle("/cookies")).toBe("Cookie Policy");
     expect(analyticsPageTitle("/es/")).toBe("Home");
     expect(analyticsPageTitle("/zh-hant/")).toBe("Home");
+    expect(analyticsPageTitle("/vi/")).toBe("Home");
+    expect(analyticsPageTitle("/ms/")).toBe("Home");
     expect(analyticsPageTitle("/unknown")).toBe("Page");
   });
 });

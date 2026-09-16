@@ -8,8 +8,11 @@ import {
   useState,
 } from "react";
 import { additionalDictionaries } from "./additional-translations";
+import { detectInitialLocale } from "./detect-locale";
 import { homePathForLocale, localeFromHomePath, type Locale } from "./locale";
 import { LOCALE_STORAGE_KEY } from "./storage";
+import { vi } from "./vietnamese-translations";
+import { ms } from "./malay-translations";
 
 const privacyUi = {
   en: {
@@ -1594,6 +1597,8 @@ const dictionaries: Record<Locale, Dictionary> = {
   pt: additionalDictionaries.pt,
   ja: additionalDictionaries.ja,
   "zh-Hant": additionalDictionaries.zhHant,
+  vi,
+  ms,
 };
 
 // Build-time pre-rendering and the provider share the same typed dictionaries.
@@ -1618,6 +1623,8 @@ const localeTags: Record<Locale, string> = {
   pt: "pt-BR",
   ja: "ja-JP",
   "zh-Hant": "zh-HK",
+  vi: "vi-VN",
+  ms: "ms-MY",
 };
 
 const defaultOptions: Record<Locale, string[]> = {
@@ -1630,6 +1637,8 @@ const defaultOptions: Record<Locale, string[]> = {
   pt: ["Pizza", "Sushi", "Hambúrgueres", "Massa", "Salada"],
   ja: ["ピザ", "寿司", "ハンバーガー", "パスタ", "サラダ"],
   "zh-Hant": ["薄餅", "壽司", "漢堡包", "意大利粉", "沙律"],
+  vi: ["Pizza", "Sushi", "Bánh mì kẹp thịt", "Mì Ý", "Rau trộn"],
+  ms: ["Piza", "Sushi", "Burger", "Pasta", "Salad"],
 };
 
 export type Translate = (
@@ -1646,17 +1655,6 @@ type I18nValue = {
 };
 
 const I18nContext = createContext<I18nValue | null>(null);
-function detectInitialLocale(preferredLocale?: Locale): Locale {
-  if (preferredLocale) return preferredLocale;
-  if (typeof window === "undefined") return "en";
-
-  const pathLocale = localeFromHomePath(window.location.pathname);
-  if (pathLocale) return pathLocale;
-
-  const stored = window.localStorage.getItem(LOCALE_STORAGE_KEY);
-  if (stored && stored in dictionaries) return stored as Locale;
-  return "en";
-}
 
 function setMetaContent(selector: string, content: string): void {
   document.querySelector(selector)?.setAttribute("content", content);
@@ -1669,8 +1667,8 @@ export function I18nProvider({
   children: ReactNode;
   initialLocale?: Locale;
 }) {
-  const [locale, setLocaleState] = useState<Locale>(() =>
-    detectInitialLocale(initialLocale),
+  const [locale, setLocaleState] = useState<Locale>(
+    () => initialLocale ?? detectInitialLocale(),
   );
   const t = useCallback<Translate>(
     (key, variables) => {
@@ -1684,7 +1682,11 @@ export function I18nProvider({
   );
 
   const setLocale = useCallback((nextLocale: Locale) => {
-    window.localStorage.setItem(LOCALE_STORAGE_KEY, nextLocale);
+    try {
+      window.localStorage.setItem(LOCALE_STORAGE_KEY, nextLocale);
+    } catch {
+      // Language switching must still work when browser storage is unavailable.
+    }
 
     if (localeFromHomePath(window.location.pathname)) {
       const nextPath = homePathForLocale(nextLocale);

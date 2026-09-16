@@ -41,11 +41,13 @@ const localeLabels: Record<Locale, string> = {
   es: "Español",
   pt: "Português",
   ja: "日本語",
+  vi: "Tiếng Việt",
+  ms: "Bahasa Melayu",
 };
 
 export function HomePage() {
   const navigate = useNavigate();
-  const { defaultRoomOptions, locale, t } = useI18n();
+  const { defaultRoomOptions, locale, setLocale, t } = useI18n();
   const localizedDefaultTitle = t("defaultTitle");
   const previousDefaultTitle = useRef(localizedDefaultTitle);
   const {
@@ -403,6 +405,13 @@ export function HomePage() {
               href={homePathForLocale(option)}
               hrefLang={option === "zh" ? "zh-Hans" : option}
               aria-current={option === locale ? "page" : undefined}
+              onClick={(event) => {
+                if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+                  return;
+                }
+                event.preventDefault();
+                setLocale(option);
+              }}
             >
               {localeLabels[option]}
             </a>

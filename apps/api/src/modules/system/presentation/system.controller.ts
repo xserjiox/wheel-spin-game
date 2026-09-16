@@ -19,6 +19,8 @@ const LOCALIZED_PAGES = [
   { language: "es", path: "/es/" },
   { language: "pt", path: "/pt/" },
   { language: "ja", path: "/ja/" },
+  { language: "vi", path: "/vi/" },
+  { language: "ms", path: "/ms/" },
 ] as const;
 
 @Controller()
@@ -152,6 +154,22 @@ export class SystemController {
       return this.redirectToCanonicalPath(reply, "/ja/");
     }
     return this.sendPage("index.ja.html", request, reply);
+  }
+
+  @Get("vi")
+  vietnamese(@Req() request: FastifyRequest, @Res() reply: FastifyReply) {
+    if (!request.url.split("?")[0].endsWith("/")) {
+      return this.redirectToCanonicalPath(reply, "/vi/");
+    }
+    return this.sendPage("index.vi.html", request, reply);
+  }
+
+  @Get("ms")
+  malay(@Req() request: FastifyRequest, @Res() reply: FastifyReply) {
+    if (!request.url.split("?")[0].endsWith("/")) {
+      return this.redirectToCanonicalPath(reply, "/ms/");
+    }
+    return this.sendPage("index.ms.html", request, reply);
   }
 
   @Get("r/:code")

@@ -11,6 +11,8 @@ const localeLabels: Record<Locale, string> = {
   es: "ES",
   pt: "PT",
   ja: "日本語",
+  vi: "VI",
+  ms: "MS",
 };
 
 const localeMenuCodes: Record<Locale, string> = {
@@ -23,6 +25,8 @@ const localeMenuCodes: Record<Locale, string> = {
   es: "ES",
   pt: "PT",
   ja: "JA",
+  vi: "VI",
+  ms: "MS",
 };
 
 const localeNames: Record<Locale, string> = {
@@ -35,6 +39,8 @@ const localeNames: Record<Locale, string> = {
   es: "Español",
   pt: "Português",
   ja: "日本語",
+  vi: "Tiếng Việt",
+  ms: "Bahasa Melayu",
 };
 
 export function LanguageSwitcher() {

@@ -1,5 +1,7 @@
 import type { Locale } from "@/shared/lib/i18n";
 import { additionalLegalDocuments } from "./additional-legal-content";
+import { vietnameseLegalDocuments } from "./vietnamese-legal-content";
+import { malayLegalDocuments } from "./malay-legal-content";
 
 type LegalLink = {
   label: string;
@@ -639,6 +641,8 @@ const documents = {
     },
   },
   ...additionalLegalDocuments,
+  vi: vietnameseLegalDocuments,
+  ms: malayLegalDocuments,
 } satisfies Record<Locale, { privacy: LegalDocument; cookies: LegalDocument }>;
 
 export function getLegalDocument(

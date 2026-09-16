@@ -81,9 +81,19 @@ export function analyticsPageTitle(pathname: string): string {
   if (normalized === "/privacy") return "Privacy Policy";
   if (normalized === "/cookies") return "Cookie Policy";
   if (
-    ["/", "/ru/", "/uk/", "/de/", "/zh/", "/zh-hant/", "/es/", "/pt/", "/ja/"].includes(
-      normalized,
-    )
+    [
+      "/",
+      "/ru/",
+      "/uk/",
+      "/de/",
+      "/zh/",
+      "/zh-hant/",
+      "/es/",
+      "/pt/",
+      "/ja/",
+      "/vi/",
+      "/ms/",
+    ].includes(normalized)
   )
     return "Home";
   return "Page";

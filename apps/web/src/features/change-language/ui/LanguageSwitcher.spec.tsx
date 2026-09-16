@@ -2,7 +2,7 @@
 
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { I18nProvider, SUPPORTED_LOCALES } from "@/shared/lib/i18n";
+import { I18nProvider, LOCALE_STORAGE_KEY, SUPPORTED_LOCALES } from "@/shared/lib/i18n";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 
 describe("LanguageSwitcher", () => {
@@ -61,5 +61,33 @@ describe("LanguageSwitcher", () => {
     fireEvent.keyDown(russian, { key: "Escape" });
     expect(screen.queryByRole("menu")).toBeNull();
     expect(document.activeElement).toBe(trigger);
+  });
+
+  it.each([
+    { locale: "vi", name: "VI Tiếng Việt", label: "Ngôn ngữ: Tiếng Việt" },
+    { locale: "ms", name: "MS Bahasa Melayu", label: "Bahasa: Bahasa Melayu" },
+  ])("persists $locale across home and room navigation", ({ locale, name, label }) => {
+    const firstRender = render(
+      <I18nProvider>
+        <LanguageSwitcher />
+      </I18nProvider>,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Language: English" }));
+    fireEvent.click(screen.getByRole("menuitemradio", { name }));
+
+    expect(window.location.pathname).toBe(`/${locale}/`);
+    expect(document.documentElement.lang).toBe(locale);
+    expect(window.localStorage.getItem(LOCALE_STORAGE_KEY)).toBe(locale);
+    expect(screen.getByRole("button", { name: label })).toBeTruthy();
+
+    firstRender.unmount();
+    window.history.replaceState(null, "", "/r/Ab7xK2pQ");
+    render(
+      <I18nProvider>
+        <LanguageSwitcher />
+      </I18nProvider>,
+    );
+    expect(screen.getByRole("button", { name: label })).toBeTruthy();
+    expect(window.location.pathname).toBe("/r/Ab7xK2pQ");
   });
 });

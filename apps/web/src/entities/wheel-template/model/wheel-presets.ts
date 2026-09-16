@@ -14,6 +14,24 @@ const presetDefinitions: Array<{
     category: "friends",
     selectionMode: "REPEAT",
     content: {
+      vi: {
+        name: "Ăn gì đây?",
+        description: "Chọn bữa trưa hoặc bữa tối mà không cần tranh luận lâu.",
+        options: [
+          "Pizza",
+          "Sushi",
+          "Bánh mì kẹp thịt",
+          "Mì Ý",
+          "Rau trộn",
+          "Đồ ăn đường phố",
+        ],
+      },
+      ms: {
+        name: "Kita nak makan di mana?",
+        description:
+          "Tentukan makan tengah hari atau malam tanpa perbincangan panjang.",
+        options: ["Piza", "Sushi", "Burger", "Pasta", "Salad", "Makanan jalanan"],
+      },
       en: {
         name: "Where should we eat?",
         description: "Settle lunch or dinner without a long debate.",
@@ -73,6 +91,30 @@ const presetDefinitions: Array<{
     category: "friends",
     selectionMode: "REPEAT",
     content: {
+      vi: {
+        name: "Đêm trò chơi",
+        description: "Cùng chọn loại trò chơi cho vòng tiếp theo.",
+        options: [
+          "Trò chơi bàn cờ",
+          "Đố vui",
+          "Đoán chữ qua hành động",
+          "Trò chơi điện tử",
+          "Bài",
+          "Trò chơi vẽ",
+        ],
+      },
+      ms: {
+        name: "Malam permainan",
+        description: "Pilih jenis permainan untuk pusingan seterusnya bersama-sama.",
+        options: [
+          "Permainan papan",
+          "Kuiz",
+          "Teka gaya",
+          "Permainan video",
+          "Kad",
+          "Permainan melukis",
+        ],
+      },
       en: {
         name: "Game night",
         description: "Pick the format for the next round together.",
@@ -174,6 +216,30 @@ const presetDefinitions: Array<{
     category: "friends",
     selectionMode: "ELIMINATION",
     content: {
+      vi: {
+        name: "Câu hỏi làm quen",
+        description: "Chọn câu hỏi mới cho mỗi vòng, không lặp lại.",
+        options: [
+          "Chuyến đi mơ ước",
+          "Tài năng bất ngờ",
+          "Truyền thống yêu thích",
+          "Ngày nghỉ hoàn hảo",
+          "Khám phá gần đây",
+          "Thành công nhỏ của bản thân",
+        ],
+      },
+      ms: {
+        name: "Soalan suai kenal",
+        description: "Pilih soalan baharu setiap pusingan tanpa ulangan.",
+        options: [
+          "Percutian impian",
+          "Bakat yang tidak dijangka",
+          "Tradisi kegemaran",
+          "Hari cuti yang sempurna",
+          "Penemuan terkini",
+          "Kejayaan kecil peribadi",
+        ],
+      },
       en: {
         name: "Icebreaker questions",
         description: "Choose a fresh question each round without repeats.",
@@ -289,6 +355,31 @@ const presetDefinitions: Array<{
     category: "team",
     selectionMode: "ELIMINATION",
     content: {
+      vi: {
+        name: "Câu hỏi nhìn lại",
+        description:
+          "Lần lượt thảo luận các chủ đề nhìn lại của nhóm mà không lặp lại.",
+        options: [
+          "Điều gì đã diễn ra tốt?",
+          "Điều gì đã làm chúng ta chậm lại?",
+          "Chúng ta nên dừng điều gì?",
+          "Chúng ta nên bắt đầu điều gì?",
+          "Ai đã giúp đỡ trong tuần này?",
+          "Tiếp theo chúng ta sẽ thử điều gì?",
+        ],
+      },
+      ms: {
+        name: "Soalan refleksi pasukan",
+        description: "Bincangkan topik refleksi pasukan tanpa mengulanginya.",
+        options: [
+          "Apa yang berjalan lancar?",
+          "Apa yang melambatkan kita?",
+          "Apa yang patut kita hentikan?",
+          "Apa yang patut kita mulakan?",
+          "Siapa yang membantu minggu ini?",
+          "Apa yang akan kita cuba seterusnya?",
+        ],
+      },
       en: {
         name: "Retrospective prompts",
         description: "Move through team reflection topics without repeating them.",
@@ -404,6 +495,30 @@ const presetDefinitions: Array<{
     category: "team",
     selectionMode: "REPEAT",
     content: {
+      vi: {
+        name: "Trọng tâm cuộc họp",
+        description: "Chọn chủ đề đầu tiên khi mọi việc đều có vẻ cấp bách.",
+        options: [
+          "Ưu tiên",
+          "Trở ngại",
+          "Khách hàng",
+          "Chất lượng",
+          "Bàn giao",
+          "Tình trạng của nhóm",
+        ],
+      },
+      ms: {
+        name: "Fokus mesyuarat",
+        description: "Pilih topik pertama apabila semua perkara terasa mendesak.",
+        options: [
+          "Keutamaan",
+          "Halangan",
+          "Pelanggan",
+          "Kualiti",
+          "Penyerahan",
+          "Kesejahteraan pasukan",
+        ],
+      },
       en: {
         name: "Meeting focus",
         description: "Choose the first topic when everything feels urgent.",
@@ -498,6 +613,30 @@ const presetDefinitions: Array<{
     category: "classroom",
     selectionMode: "REPEAT",
     content: {
+      vi: {
+        name: "Hoạt động trong lớp",
+        description: "Chọn ngẫu nhiên một hình thức học tập cho mỗi vòng.",
+        options: [
+          "Thảo luận theo cặp",
+          "Đố vui nhanh",
+          "Thuyết trình ngắn",
+          "Viết trong yên lặng",
+          "Thử thách nhóm",
+          "Giải thích một ví dụ",
+        ],
+      },
+      ms: {
+        name: "Aktiviti kelas",
+        description: "Pilih bentuk pembelajaran secara rawak untuk setiap pusingan.",
+        options: [
+          "Perbincangan berpasangan",
+          "Kuiz pantas",
+          "Pembentangan ringkas",
+          "Penulisan senyap",
+          "Cabaran kumpulan",
+          "Terangkan satu contoh",
+        ],
+      },
       en: {
         name: "Class activity",
         description: "Randomly choose a lesson format for each round.",
@@ -620,6 +759,8 @@ const categoryLabels: Record<Locale, Record<WheelPresetCategory, string>> = {
   pt: { friends: "Amigos", team: "Equipe", classroom: "Sala de aula" },
   ja: { friends: "友達", team: "チーム", classroom: "授業" },
   "zh-Hant": { friends: "朋友", team: "團隊", classroom: "課堂" },
+  vi: { friends: "Bạn bè", team: "Nhóm", classroom: "Lớp học" },
+  ms: { friends: "Rakan", team: "Pasukan", classroom: "Kelas" },
 };
 
 export function getWheelPresets(locale: Locale): WheelPreset[] {
