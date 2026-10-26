@@ -59,6 +59,7 @@ export function HomePage() {
   const [mode, setMode] = useState<"create" | "join" | "rooms">("create");
   const [hostName, setHostName] = useState("");
   const [title, setTitle] = useState(localizedDefaultTitle);
+  const [passwordEnabled, setPasswordEnabled] = useState(false);
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
   const [templateOptions, setTemplateOptions] = useState<string[] | null>(null);
@@ -88,15 +89,16 @@ export function HomePage() {
     event.preventDefault();
     setBusy(true);
     setError("");
+    const roomPassword = passwordEnabled ? password : "";
     try {
       const result = await createRoom({
         hostName,
         title,
-        password,
+        password: roomPassword,
         options: templateOptions ?? defaultRoomOptions,
         selectionMode,
       } satisfies CreateInput);
-      trackAnalyticsEvent("room_create");
+      trackAnalyticsEvent("room_create", { has_password: roomPassword !== "" });
       navigate(roomPath(result.code), {
         state: {
           initialRoomState: result.state,
@@ -249,20 +251,31 @@ export function HomePage() {
                 />
               </label>
               <WheelTemplatePicker onTemplateChange={applyWheelSetup} />
-              <label>
-                <span className="field-label-row">
-                  <span>{t("password")}</span>
-                  <span className="optional">{t("optional")}</span>
-                </span>
+              {/* Hidden by default so browser password managers cannot fill it unnoticed. */}
+              <label className="password-toggle">
                 <input
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  maxLength={72}
-                  type="password"
-                  placeholder={t("passwordOpenPlaceholder")}
-                  autoComplete="new-password"
+                  type="checkbox"
+                  checked={passwordEnabled}
+                  onChange={(event) => setPasswordEnabled(event.target.checked)}
                 />
+                <span className="sound-toggle-track" aria-hidden="true">
+                  <span />
+                </span>
+                <span>{t("passwordProtect")}</span>
               </label>
+              {passwordEnabled && (
+                <label>
+                  {t("password")}
+                  <input
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    maxLength={72}
+                    type="password"
+                    autoComplete="off"
+                    required
+                  />
+                </label>
+              )}
               {error && (
                 <p className="form-error" role="alert">
                   {error}

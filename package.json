@@ -23,7 +23,8 @@
     "db:migrate": "npm run db:migrate --workspace @gatherwheel/api",
     "db:deploy": "npm run db:deploy --workspace @gatherwheel/api",
     "db:cleanup-expired": "npm run db:cleanup-expired --workspace @gatherwheel/api --",
-    "db:cleanup-storage": "npm run db:cleanup-storage --workspace @gatherwheel/api --"
+    "db:cleanup-storage": "npm run db:cleanup-storage --workspace @gatherwheel/api --",
+    "stats:weekly": "npm run stats:weekly --workspace @gatherwheel/api --"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",

@@ -23,14 +23,22 @@ export class JoinLimiterService {
   }
 
   async assertJoinAllowed(ip: string, code: string): Promise<void> {
+    // A whole classroom often shares one school IP, so the main budget is per room.
     await this.rateLimiter.assertAllowed(
       "room-join",
-      ip,
-      positiveInteger("RATE_LIMIT_JOIN_REQUEST_MAX", 30),
+      `${ip}:${code}`,
+      positiveInteger("RATE_LIMIT_JOIN_REQUEST_MAX", 100),
       positiveInteger("RATE_LIMIT_JOIN_REQUEST_WINDOW_MS", 5 * 60_000),
     );
+    // A wider per-IP budget still slows down probing many rooms.
+    await this.rateLimiter.assertAllowed(
+      "room-join-ip",
+      ip,
+      positiveInteger("RATE_LIMIT_JOIN_IP_MAX", 300),
+      positiveInteger("RATE_LIMIT_JOIN_IP_WINDOW_MS", 5 * 60_000),
+    );
 
-    const failureLimit = positiveInteger("RATE_LIMIT_JOIN_FAILURE_MAX", 8);
+    const failureLimit = positiveInteger("RATE_LIMIT_JOIN_FAILURE_MAX", 30);
     const failure = await this.rateLimiter.check(
       "room-join-failure",
       `${ip}:${code}`,
@@ -45,7 +53,7 @@ export class JoinLimiterService {
     await this.rateLimiter.consume(
       "room-join-failure",
       `${ip}:${code}`,
-      positiveInteger("RATE_LIMIT_JOIN_FAILURE_MAX", 8),
+      positiveInteger("RATE_LIMIT_JOIN_FAILURE_MAX", 30),
       positiveInteger("RATE_LIMIT_JOIN_FAILURE_WINDOW_MS", 5 * 60_000),
     );
   }
@@ -58,7 +66,7 @@ export class JoinLimiterService {
     await this.rateLimiter.assertAllowed(
       "socket-join",
       `${ip}:${code}`,
-      positiveInteger("RATE_LIMIT_SOCKET_JOIN_MAX", 20),
+      positiveInteger("RATE_LIMIT_SOCKET_JOIN_MAX", 120),
       positiveInteger("RATE_LIMIT_SOCKET_JOIN_WINDOW_MS", 60_000),
     );
   }

@@ -40,7 +40,7 @@ export const vietnameseLegalDocuments = {
         title: "3. Google Analytics tùy chọn",
         items: [
           "Google Analytics 4 không được tải và không nhận yêu cầu phân tích nào cho đến khi bạn chủ động cho phép phân tích. Việc từ chối phân tích không hạn chế dịch vụ.",
-          "Sau khi có sự đồng ý, chúng tôi gửi lượt xem trang đã chuẩn hóa và các sự kiện sản phẩm room_create, room_join_start, room_join, room_join_failed, spin_start, share_room, share_room_failed, preset_select, template_select, template_save, elimination_enable và round_reset. Sự kiện tham gia có thể bao gồm các tham số phân loại cố định entry_type, has_password và reason; sự kiện chia sẻ có thể bao gồm role và method. Các tham số này không chứa nội dung do người dùng cung cấp. URL phòng được thay bằng /r/:room; chuỗi truy vấn, mã phòng, tên, mật khẩu và nội dung vòng quay không được gửi.",
+          "Sau khi có sự đồng ý, chúng tôi gửi lượt xem trang đã chuẩn hóa và các sự kiện sản phẩm room_create, room_join_start, room_join, room_join_failed, spin_start, share_room, share_room_failed, preset_select, template_select, template_save, elimination_enable và round_reset. Sự kiện tạo phòng và tham gia có thể bao gồm các tham số phân loại cố định entry_type, has_password và reason; sự kiện chia sẻ có thể bao gồm role và method. Các tham số này không chứa nội dung do người dùng cung cấp. URL phòng được thay bằng /r/:room trong mọi sự kiện; từ chuỗi truy vấn, chỉ giữ lại các thẻ chiến dịch utm_* cho biết liên kết nào đưa khách truy cập đến, còn mã phòng, tên, mật khẩu và nội dung vòng quay không được gửi.",
           "Google có thể xử lý thông tin thiết bị/trình duyệt, vị trí gần đúng suy ra từ kết nối, địa chỉ IP trong quá trình truyền, thông tin nguồn giới thiệu, dấu thời gian và mã định danh phân tích bên thứ nhất được lưu trong cookie _ga.",
           "Lưu trữ quảng cáo, dữ liệu người dùng quảng cáo, cá nhân hóa quảng cáo, Google Signals, User-ID và quảng cáo được cá nhân hóa đều bị tắt trong cấu hình thẻ của chúng tôi.",
         ],
@@ -66,7 +66,7 @@ export const vietnameseLegalDocuments = {
       {
         title: "6. Thời gian lưu giữ",
         items: [
-          "Phòng và các bản ghi cơ sở dữ liệu liên quan hết hạn sau bảy ngày không hoạt động và được xóa trong quy trình dọn dẹp hằng giờ; chủ phòng có thể xóa phòng sớm hơn. Cookie phiên phòng hết hạn sau bảy ngày.",
+          "Phòng và các bản ghi cơ sở dữ liệu liên quan hết hạn sau bảy ngày không hoạt động và được xóa trong quy trình dọn dẹp hằng giờ; chủ phòng có thể xóa phòng sớm hơn. Cookie phiên phòng hết hạn sau bảy ngày. Trước khi phòng hết hạn bị xóa, phòng được cộng vào số liệu tổng hợp ẩn danh theo ngày: ngày tạo, có đặt mật khẩu hay không, số người tham gia và vòng quay đã được quay hay chưa. Số liệu này không chứa mã phòng, tên hay nội dung vòng quay.",
           "Bản ghi tham gia thất bại chỉ tồn tại trong bộ nhớ máy chủ. Nhật ký lưu trữ và bản sao lưu tuân theo thời gian lưu giữ đã cấu hình của nhà cung cấp vận hành chính thức.",
           "Lối tắt phòng đã lưu, ngôn ngữ và mẫu vẫn nằm trên thiết bị cho đến khi bị xóa. Bản ghi đồng ý hết hạn sau 180 ngày, sau đó chúng tôi sẽ hỏi lại.",
           "Cookie phân tích được cấu hình để tồn tại không quá 180 ngày và không được gia hạn khi bạn truy cập lại. Khi bạn rút lại sự đồng ý, trình duyệt được yêu cầu xóa cookie _ga của GatherWheel.",

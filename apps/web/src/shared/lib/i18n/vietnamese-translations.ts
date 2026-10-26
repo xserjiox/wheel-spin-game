@@ -124,7 +124,7 @@ export const vi = {
   saveIdea: "Lưu ý tưởng",
   password: "Mật khẩu",
   optional: "không bắt buộc",
-  passwordOpenPlaceholder: "Để trống để tạo phòng mở",
+  passwordProtect: "Bảo vệ bằng mật khẩu",
   creating: "Đang tạo…",
   createRoom: "Tạo phòng",
   haveInvite: "BẠN CÓ LỜI MỜI?",

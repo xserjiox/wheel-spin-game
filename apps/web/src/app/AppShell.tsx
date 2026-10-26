@@ -10,8 +10,8 @@ function AnalyticsPageTracker() {
   useEffect(() => {
     if (choice !== "granted") return;
     applyAnalyticsConsent(true);
-    trackAnalyticsPageView(location.pathname);
-  }, [choice, location.pathname]);
+    trackAnalyticsPageView(location.pathname, location.search);
+  }, [choice, location.pathname, location.search]);
 
   return null;
 }

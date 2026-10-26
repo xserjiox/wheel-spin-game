@@ -10,6 +10,15 @@ type AnalyticsWindow = Window &
 
 const SCRIPT_ID = "gatherwheel-google-analytics";
 const GA_COOKIE_MAX_AGE_SECONDS = 180 * 24 * 60 * 60;
+const CAMPAIGN_PARAMETERS = [
+  "utm_source",
+  "utm_medium",
+  "utm_campaign",
+  "utm_term",
+  "utm_content",
+  "utm_id",
+] as const;
+const MAX_CAMPAIGN_VALUE_LENGTH = 100;
 
 let analyticsEnabled = false;
 let consentDefaultsQueued = false;
@@ -99,6 +108,22 @@ export function analyticsPageTitle(pathname: string): string {
   return "Page";
 }
 
+// Only campaign tags survive, so traffic sources stay measurable without leaking other query data.
+export function analyticsCampaignQuery(search: string): string {
+  const source = new URLSearchParams(search);
+  const kept = new URLSearchParams();
+  for (const name of CAMPAIGN_PARAMETERS) {
+    const value = source.get(name)?.trim();
+    if (value) kept.set(name, value.slice(0, MAX_CAMPAIGN_VALUE_LENGTH));
+  }
+  const query = kept.toString();
+  return query ? `?${query}` : "";
+}
+
+function analyticsLocation(pathname: string, search: string): string {
+  return `${window.location.origin}${normalizeAnalyticsPath(pathname)}${analyticsCampaignQuery(search)}`;
+}
+
 function sanitizedReferrer(): string {
   if (!document.referrer) return "";
 
@@ -145,6 +170,11 @@ export function applyAnalyticsConsent(granted: boolean): void {
     analyticsEnabled = true;
     gtag("js", new Date());
     gtag("config", measurementId, {
+      page_location: analyticsLocation(
+        window.location.pathname,
+        window.location.search,
+      ),
+      page_referrer: sanitizedReferrer(),
       send_page_view: false,
       allow_google_signals: false,
       allow_ad_personalization_signals: false,
@@ -155,7 +185,7 @@ export function applyAnalyticsConsent(granted: boolean): void {
   }
 }
 
-export function trackAnalyticsPageView(pathname: string): void {
+export function trackAnalyticsPageView(pathname: string, search = ""): void {
   const { measurementId } = analyticsConfig;
   if (!analyticsEnabled || !measurementId) return;
 
@@ -163,11 +193,16 @@ export function trackAnalyticsPageView(pathname: string): void {
   if (lastPageKey === pagePath) return;
   lastPageKey = pagePath;
 
-  gtag("event", "page_view", {
-    page_location: `${window.location.origin}${pagePath}`,
-    page_path: pagePath,
+  const pageContext = {
+    page_location: analyticsLocation(pagePath, search),
     page_title: analyticsPageTitle(pagePath),
     page_referrer: sanitizedReferrer(),
+  };
+  // Automatic events such as user_engagement otherwise report the raw URL with the room code.
+  gtag("set", pageContext);
+  gtag("event", "page_view", {
+    ...pageContext,
+    page_path: pagePath,
     send_to: measurementId,
   });
 }
@@ -189,8 +224,10 @@ type ShareAnalyticsParameters = {
   role: "host" | "guest";
   method: "copy_link";
 };
+type CreateAnalyticsParameters = {
+  has_password: boolean;
+};
 type ParameterlessAnalyticsEventName =
-  | "room_create"
   | "spin_start"
   | "preset_select"
   | "template_select"
@@ -199,6 +236,7 @@ type ParameterlessAnalyticsEventName =
   | "round_reset";
 type AnalyticsEventName =
   | ParameterlessAnalyticsEventName
+  | "room_create"
   | "room_join_start"
   | "room_join"
   | "room_join_failed"
@@ -207,6 +245,10 @@ type AnalyticsEventName =
 type AnalyticsEventParameters = Record<string, string | number | boolean>;
 
 export function trackAnalyticsEvent(eventName: ParameterlessAnalyticsEventName): void;
+export function trackAnalyticsEvent(
+  eventName: "room_create",
+  parameters: CreateAnalyticsParameters,
+): void;
 export function trackAnalyticsEvent(
   eventName: "room_join_start" | "room_join",
   parameters: JoinAnalyticsParameters,

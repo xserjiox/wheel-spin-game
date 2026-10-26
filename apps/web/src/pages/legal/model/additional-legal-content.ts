@@ -57,7 +57,7 @@ const es: LegalPair = {
         title: "3. Google Analytics opcional",
         items: [
           "Google Analytics 4 no se carga ni recibe solicitudes de analítica hasta que lo permites expresamente. Rechazar la analítica no limita el servicio.",
-          "Después del consentimiento enviamos vistas de página normalizadas y los eventos de producto room_create, room_join_start, room_join, room_join_failed, spin_start, share_room, share_room_failed, preset_select, template_select, template_save, elimination_enable y round_reset. Los eventos de acceso pueden incluir los parámetros de categorías fijas entry_type, has_password y reason; los eventos de compartir pueden incluir role y method. Estos parámetros no contienen contenido proporcionado por el usuario. Las URL de las salas se sustituyen por /r/:room; no se envían cadenas de consulta, códigos, nombres, contraseñas ni contenido de la ruleta.",
+          "Después del consentimiento enviamos vistas de página normalizadas y los eventos de producto room_create, room_join_start, room_join, room_join_failed, spin_start, share_room, share_room_failed, preset_select, template_select, template_save, elimination_enable y round_reset. Los eventos de creación de sala y de acceso pueden incluir los parámetros de categorías fijas entry_type, has_password y reason; los eventos de compartir pueden incluir role y method. Estos parámetros no contienen contenido proporcionado por el usuario. Las URL de las salas se sustituyen por /r/:room en todos los eventos; de las cadenas de consulta solo se conservan las etiquetas de campaña utm_*, que indican qué enlace trajo a la visita, y no se envían códigos, nombres, contraseñas ni contenido de la ruleta.",
           "Google puede tratar información del dispositivo y navegador, ubicación aproximada derivada de la conexión, la dirección IP durante la transmisión, el referente, marcas de tiempo e identificadores analíticos propios almacenados en cookies _ga.",
           "El almacenamiento publicitario, los datos de usuario para anuncios, la personalización de anuncios, Google Signals, User-ID y la publicidad personalizada están desactivados en nuestra configuración.",
         ],
@@ -83,7 +83,7 @@ const es: LegalPair = {
       {
         title: "6. Conservación",
         items: [
-          "Las salas y sus registros de base de datos caducan después de siete días sin actividad y una tarea horaria los elimina; el anfitrión puede eliminar una sala antes. Las cookies de sesión de sala caducan después de siete días.",
+          "Las salas y sus registros de base de datos caducan después de siete días sin actividad y una tarea horaria los elimina; el anfitrión puede eliminar una sala antes. Las cookies de sesión de sala caducan después de siete días. Antes de eliminar una sala caducada, se añade a totales diarios anónimos: día de creación, si tenía contraseña, número de participantes y si se giró la ruleta. Estos totales no contienen códigos, nombres ni contenido de la ruleta.",
           "Los registros de accesos fallidos solo permanecen en la memoria del servidor. Los registros y las copias de seguridad del alojamiento siguen los periodos configurados por el proveedor de producción.",
           "Los accesos a salas, el idioma y las plantillas permanecen en el dispositivo hasta que se eliminan. El registro de consentimiento caduca después de 180 días y entonces volvemos a solicitarlo.",
           "Las cookies de analítica están configuradas para un máximo de 180 días y su vencimiento no se prolonga en visitas posteriores. Al retirar el consentimiento, se solicita al navegador que elimine las cookies _ga de GatherWheel.",
@@ -185,7 +185,7 @@ const pt: LegalPair = {
         title: "3. Google Analytics opcional",
         items: [
           "O Google Analytics 4 não é carregado nem recebe solicitações de análise até que você permita expressamente. Recusar a análise não restringe o serviço.",
-          "Após o consentimento, enviamos visualizações de página normalizadas e os eventos de produto room_create, room_join_start, room_join, room_join_failed, spin_start, share_room, share_room_failed, preset_select, template_select, template_save, elimination_enable e round_reset. Eventos de entrada podem incluir os parâmetros de categorias fixas entry_type, has_password e reason; eventos de compartilhamento podem incluir role e method. Esses parâmetros não contêm conteúdo fornecido pelo usuário. URLs de salas são substituídas por /r/:room; parâmetros de consulta, códigos, nomes, senhas e conteúdo da roleta não são enviados.",
+          "Após o consentimento, enviamos visualizações de página normalizadas e os eventos de produto room_create, room_join_start, room_join, room_join_failed, spin_start, share_room, share_room_failed, preset_select, template_select, template_save, elimination_enable e round_reset. Eventos de criação de sala e de entrada podem incluir os parâmetros de categorias fixas entry_type, has_password e reason; eventos de compartilhamento podem incluir role e method. Esses parâmetros não contêm conteúdo fornecido pelo usuário. URLs de salas são substituídas por /r/:room em todos os eventos; dos parâmetros de consulta, mantemos apenas as etiquetas de campanha utm_*, que indicam qual link trouxe a visita, e códigos, nomes, senhas e conteúdo da roleta não são enviados.",
           "O Google pode tratar informações do dispositivo e navegador, localização aproximada derivada da conexão, endereço IP durante a transmissão, referenciador, datas e horários e identificadores analíticos próprios armazenados em cookies _ga.",
           "Armazenamento de publicidade, dados de usuário para anúncios, personalização de anúncios, Google Signals, User-ID e publicidade personalizada estão desativados na configuração da nossa tag.",
         ],
@@ -211,7 +211,7 @@ const pt: LegalPair = {
       {
         title: "6. Retenção",
         items: [
-          "Salas e registros relacionados no banco de dados expiram após sete dias sem atividade e são removidos por uma limpeza executada a cada hora; o anfitrião pode excluir a sala antes. Cookies de sessão da sala expiram após sete dias.",
+          "Salas e registros relacionados no banco de dados expiram após sete dias sem atividade e são removidos por uma limpeza executada a cada hora; o anfitrião pode excluir a sala antes. Cookies de sessão da sala expiram após sete dias. Antes de uma sala expirada ser removida, ela é somada a totais diários anônimos: dia de criação, se havia senha, número de participantes e se a roleta foi girada. Esses totais não contêm códigos, nomes nem conteúdo da roleta.",
           "Registros de entradas malsucedidas permanecem somente na memória do servidor. Logs e backups de hospedagem seguem os prazos de retenção configurados pelo provedor de produção.",
           "Atalhos de salas, idioma e modelos permanecem no dispositivo até serem removidos. O registro de consentimento expira após 180 dias; depois disso, solicitamos a escolha novamente.",
           "Cookies de análise são configurados para no máximo 180 dias e sua validade não é prorrogada em visitas posteriores. A retirada do consentimento solicita ao navegador que exclua os cookies _ga do GatherWheel.",
@@ -328,7 +328,7 @@ const ja: LegalPair = {
         title: "3. 任意のGoogle Analytics",
         items: [
           "アクセス解析を明示的に許可するまで、Google Analytics 4は読み込まれず、解析リクエストも受信しません。拒否してもサービスの利用は制限されません。",
-          "同意後、正規化したページビューと、room_create、room_join_start、room_join、room_join_failed、spin_start、share_room、share_room_failed、preset_select、template_select、template_save、elimination_enable、round_resetの各プロダクトイベントを送信します。参加イベントには固定カテゴリのentry_type、has_password、reasonが、共有イベントにはroleとmethodが含まれる場合があります。これらのパラメーターにユーザーが入力した内容は含まれません。ルームURLは/r/:roomに置き換えられ、クエリ文字列、ルームコード、名前、パスワード、ルーレットの内容は送信されません。",
+          "同意後、正規化したページビューと、room_create、room_join_start、room_join、room_join_failed、spin_start、share_room、share_room_failed、preset_select、template_select、template_save、elimination_enable、round_resetの各プロダクトイベントを送信します。ルーム作成イベントと参加イベントには固定カテゴリのentry_type、has_password、reasonが、共有イベントにはroleとmethodが含まれる場合があります。これらのパラメーターにユーザーが入力した内容は含まれません。すべてのイベントでルームURLは/r/:roomに置き換えられます。クエリ文字列は、どのリンクから訪問したかを示すutm_*キャンペーンパラメーターのみを残し、ルームコード、名前、パスワード、ルーレットの内容は送信されません。",
           "Googleは、端末やブラウザーの情報、接続から推定したおおよその地域、通信中のIPアドレス、参照元情報、日時情報、および_ga Cookieに保存されるファーストパーティーの解析識別子を取り扱う場合があります。",
           "広告ストレージ、広告用ユーザーデータ、広告のパーソナライズ、Google Signals、User-ID、パーソナライズ広告はタグ設定で無効にしています。",
         ],
@@ -354,7 +354,7 @@ const ja: LegalPair = {
       {
         title: "6. 保存期間",
         items: [
-          "ルームと関連するデータベース記録は、操作がない状態で7日経過すると期限切れとなり、1時間ごとのクリーンアップで削除されます。ホストはそれ以前にルームを削除できます。ルームセッションCookieの有効期間は7日です。",
+          "ルームと関連するデータベース記録は、操作がない状態で7日経過すると期限切れとなり、1時間ごとのクリーンアップで削除されます。ホストはそれ以前にルームを削除できます。ルームセッションCookieの有効期間は7日です。期限切れのルームは削除前に匿名の日次集計に加算されます（作成日、パスワードの有無、参加者数、ルーレットを回したかどうか）。この集計にルームコード、名前、ルーレットの内容は含まれません。",
           "参加失敗の記録はサーバーのメモリー内だけに残ります。ホスティングログとバックアップには、本番環境の事業者に設定された保存期間が適用されます。",
           "保存したルームのショートカット、言語、テンプレートは削除されるまで端末に残ります。同意記録は180日後に期限切れとなり、再度選択を求めます。",
           "解析Cookieの有効期間は最長180日に設定され、再訪問時に延長されません。同意を撤回すると、GatherWheelの_ga Cookieを削除するようブラウザーに要求します。",
@@ -471,7 +471,7 @@ const zhHant: LegalPair = {
         title: "3. 選用的 Google Analytics",
         items: [
           "在你主動允許分析前，Google Analytics 4 不會載入，也不會收到任何分析要求。拒絕分析不會限制服務功能。",
-          "取得同意後，我們會傳送標準化的頁面瀏覽，以及 room_create、room_join_start、room_join、room_join_failed、spin_start、share_room、share_room_failed、preset_select、template_select、template_save、elimination_enable 和 round_reset 產品事件。加入事件可能包含採用固定分類值的 entry_type、has_password 和 reason 參數；分享事件可能包含 role 和 method。這些參數不含使用者提供的內容。房間網址會替換為 /r/:room；查詢字串、房間代碼、名稱、密碼和轉盤內容均不會傳送。",
+          "取得同意後，我們會傳送標準化的頁面瀏覽，以及 room_create、room_join_start、room_join、room_join_failed、spin_start、share_room、share_room_failed、preset_select、template_select、template_save、elimination_enable 和 round_reset 產品事件。建立房間和加入事件可能包含採用固定分類值的 entry_type、has_password 和 reason 參數；分享事件可能包含 role 和 method。這些參數不含使用者提供的內容。所有事件中的房間網址都會替換為 /r/:room；查詢字串僅保留用於辨識來源連結的 utm_* 活動參數，房間代碼、名稱、密碼和轉盤內容均不會傳送。",
           "Google 可能處理裝置和瀏覽器資料、根據連線推算的大概位置、傳輸期間的 IP 位址、來源頁面資料、時間戳記，以及儲存在 _ga Cookie 中的第一方分析識別碼。",
           "我們的標籤設定已停用廣告儲存、廣告使用者資料、廣告個人化、Google Signals、User-ID 和個人化廣告。",
         ],
@@ -497,7 +497,7 @@ const zhHant: LegalPair = {
       {
         title: "6. 保留期限",
         items: [
-          "房間和相關資料庫記錄在七天沒有活動後到期，並由每小時執行的清理工作移除；主持人也可提早刪除房間。房間工作階段 Cookie 在七天後到期。",
+          "房間和相關資料庫記錄在七天沒有活動後到期，並由每小時執行的清理工作移除；主持人也可提早刪除房間。房間工作階段 Cookie 在七天後到期。過期房間刪除前會計入匿名每日彙總：建立日期、是否設定密碼、參與人數以及是否轉動過轉盤。彙總不含房間代碼、名稱或轉盤內容。",
           "加入失敗記錄只會保留在伺服器記憶體中。託管記錄和備份會按照正式環境供應商設定的保留期限保存。",
           "已儲存的房間捷徑、語言和範本會保留在裝置上，直到被移除。同意記錄在 180 天後到期，屆時我們會再次詢問。",
           "分析 Cookie 的有效期設定為不超過 180 天，日後再次瀏覽也不會延長。撤回同意時，系統會要求瀏覽器刪除 GatherWheel 的 _ga Cookie。",

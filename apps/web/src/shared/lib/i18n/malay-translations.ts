@@ -126,7 +126,7 @@ export const ms = {
   saveIdea: "Simpan idea",
   password: "Kata laluan",
   optional: "pilihan",
-  passwordOpenPlaceholder: "Biarkan kosong untuk bilik terbuka",
+  passwordProtect: "Lindungi dengan kata laluan",
   creating: "Mencipta…",
   createRoom: "Cipta bilik",
   haveInvite: "ADA JEMPUTAN?",

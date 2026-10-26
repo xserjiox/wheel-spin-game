@@ -1,7 +1,11 @@
 // @vitest-environment jsdom
 
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { analyticsPageTitle, normalizeAnalyticsPath } from "./analytics";
+import {
+  analyticsCampaignQuery,
+  analyticsPageTitle,
+  normalizeAnalyticsPath,
+} from "./analytics";
 
 type TestAnalyticsWindow = Window & {
   dataLayer?: unknown[];
@@ -28,6 +32,19 @@ describe("analytics privacy normalization", () => {
     expect(analyticsPageTitle("/vi/")).toBe("Home");
     expect(analyticsPageTitle("/ms/")).toBe("Home");
     expect(analyticsPageTitle("/unknown")).toBe("Page");
+  });
+
+  it("keeps only campaign tags from query strings", () => {
+    expect(
+      analyticsCampaignQuery(
+        "?utm_source=alternativeto&invite=SecretRoom123&utm_medium=referral&name=Alex",
+      ),
+    ).toBe("?utm_source=alternativeto&utm_medium=referral");
+    expect(analyticsCampaignQuery("?utm_campaign=" + "x".repeat(150))).toBe(
+      `?utm_campaign=${"x".repeat(100)}`,
+    );
+    expect(analyticsCampaignQuery("?utm_source=%20%20")).toBe("");
+    expect(analyticsCampaignQuery("")).toBe("");
   });
 });
 
@@ -125,5 +142,40 @@ describe("analytics consent application", () => {
       "template_save",
       { send_to: "G-TEST123" },
     ]);
+  });
+
+  it("applies the normalized room location to every later event", async () => {
+    vi.stubEnv("VITE_GA_MEASUREMENT_ID", "G-TEST123");
+    vi.resetModules();
+    const { applyAnalyticsConsent, trackAnalyticsEvent, trackAnalyticsPageView } =
+      await import("./analytics");
+
+    applyAnalyticsConsent(true);
+    trackAnalyticsPageView("/r/SecretRoom123", "?utm_source=telegram&invite=yes");
+    trackAnalyticsEvent("room_create", { has_password: false });
+
+    const commands = (testAnalyticsWindow().dataLayer ?? []).map((command) =>
+      Array.from(command as ArrayLike<unknown>),
+    );
+    const roomLocation = `${window.location.origin}/r/:room?utm_source=telegram`;
+
+    expect(commands).toContainEqual([
+      "set",
+      expect.objectContaining({
+        page_location: roomLocation,
+        page_title: "Shared room",
+      }),
+    ]);
+    expect(commands).toContainEqual([
+      "event",
+      "page_view",
+      expect.objectContaining({ page_location: roomLocation, page_path: "/r/:room" }),
+    ]);
+    expect(commands).toContainEqual([
+      "event",
+      "room_create",
+      { has_password: false, send_to: "G-TEST123" },
+    ]);
+    expect(JSON.stringify(commands)).not.toContain("SecretRoom123");
   });
 });

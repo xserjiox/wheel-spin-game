@@ -4,6 +4,6 @@ const privacyEmail = import.meta.env.VITE_PRIVACY_EMAIL?.trim() ?? "";
 export const legalConfig = {
   controllerName,
   privacyEmail,
-  effectiveDate: "2026-09-02",
+  effectiveDate: "2026-10-26",
   isConfigured: Boolean(controllerName && privacyEmail),
 } as const;

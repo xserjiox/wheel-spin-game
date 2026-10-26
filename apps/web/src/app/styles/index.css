@@ -914,6 +914,17 @@ input::placeholder {
   color: #9a9c96;
 }
 
+.entry-form .password-toggle {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  justify-self: start;
+  gap: 10px;
+  color: var(--ink);
+  cursor: pointer;
+  font-size: 12px;
+}
+
 .optional {
   color: #9a9c96;
   font-weight: 500;
@@ -1708,7 +1719,8 @@ input::placeholder {
   font-weight: 800;
 }
 
-.wheel-sound-toggle input {
+.wheel-sound-toggle input,
+.password-toggle input {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -1737,15 +1749,18 @@ input::placeholder {
   transition: transform 150ms ease;
 }
 
-.wheel-sound-toggle input:checked + .sound-toggle-track {
+.wheel-sound-toggle input:checked + .sound-toggle-track,
+.password-toggle input:checked + .sound-toggle-track {
   background: var(--acid);
 }
 
-.wheel-sound-toggle input:checked + .sound-toggle-track > span {
+.wheel-sound-toggle input:checked + .sound-toggle-track > span,
+.password-toggle input:checked + .sound-toggle-track > span {
   transform: translateX(14px);
 }
 
-.wheel-sound-toggle input:focus-visible + .sound-toggle-track {
+.wheel-sound-toggle input:focus-visible + .sound-toggle-track,
+.password-toggle input:focus-visible + .sound-toggle-track {
   outline: 2px solid var(--purple);
   outline-offset: 2px;
 }

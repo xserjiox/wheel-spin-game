@@ -97,6 +97,28 @@ model Proposal {
   @@index([participantId, status])
 }
 
+/// Anonymous totals of expired rooms, grouped by the UTC day they were created.
+/// Rows are added right before expired rooms are deleted, so history survives cleanup.
+model DailyRoomStat {
+  day                DateTime @db.Date
+  hasPassword        Boolean
+  rooms              Int      @default(0)
+  roomsWithGuests    Int      @default(0)
+  liveRooms          Int      @default(0)
+  soloSpunRooms      Int      @default(0)
+  abandonedRooms     Int      @default(0)
+  guests             Int      @default(0)
+  maxGuests          Int      @default(0)
+  participants1      Int      @default(0)
+  participants2to4   Int      @default(0)
+  participants5to11  Int      @default(0)
+  participants12to31 Int      @default(0)
+  participants32to49 Int      @default(0)
+  participants50plus Int      @default(0)
+
+  @@id([day, hasPassword])
+}
+
 model Spin {
   id              String   @id @default(uuid())
   roomId          String
