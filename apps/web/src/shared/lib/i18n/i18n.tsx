@@ -319,7 +319,7 @@ const en = {
   heroLine2: "Decide easily.",
   lead: "Create a room, send the link to friends, and run one wheel for everyone.",
   features: "Features",
-  featureGuests: "✦ Up to 50 guests",
+  featureGuests: "✦ Up to 100 guests",
   featureAnonymous: "✦ Author hidden from the group",
   featureResult: "✦ One shared result",
   howItWorks: "How the shared wheel works",
@@ -337,6 +337,16 @@ const en = {
   useCasesTitle: "Built for group decisions",
   useCasesCopy:
     "Choose where to eat, pick a game, assign a task, select a classroom activity, or settle the next team discussion fairly.",
+  aboutTitle: "What is GatherWheel?",
+  aboutCopy:
+    "GatherWheel is a free online multiplayer wheel spinner. A host creates a room and shares a link or QR code; up to 100 people join from their own phones without an account, suggest options anonymously, and watch the same live spin and result on their screens. It works in 11 languages and is used for classroom name picking, team decisions, giveaways, and game nights.",
+  faqCompareQuestion:
+    "How is GatherWheel different from Wheel of Names or Picker Wheel?",
+  faqCompareAnswer:
+    "Classic wheel spinners run on one screen. In GatherWheel every participant joins the same room from their own device, sees the same synchronized spin, and can suggest options; the host approves them and controls the spin.",
+  faqClassQuestion: "Can a whole class join one wheel?",
+  faqClassAnswer:
+    "Yes. Show the room's QR code on a projector: up to 100 students can join from their phones, even on the same school Wi-Fi, and see who was picked in real time.",
   faqTitle: "Frequently asked questions",
   faqFreeQuestion: "Is GatherWheel free?",
   faqFreeAnswer:
@@ -437,6 +447,17 @@ const en = {
   removedFromRoomCopy:
     "You can return home or join this room again using an invite link.",
   share: "Share",
+  roomReady: "Room is ready",
+  inviteTitle: "Invite your group",
+  inviteCopy:
+    "Everyone joins from their own phone — no sign-up. Show the QR code on a screen or send the link.",
+  scanToJoin: "Point a phone camera here to join",
+  roomLinkLabel: "Room link",
+  copyLink: "Copy link",
+  guestsJoined: "Joined: {count}",
+  spinSolo: "Spin by myself",
+  goToWheel: "Go to the wheel",
+  closeInvite: "Close invitation",
   saveSlots: "Save slots",
   templateName: "Template name",
   saving: "Saving…",
@@ -581,7 +602,7 @@ const ru: Dictionary = {
   heroLine2: "Решайте легко.",
   lead: "Создайте комнату, отправьте ссылку друзьям и запустите одно колесо для всех участников.",
   features: "Возможности",
-  featureGuests: "✦ До 50 гостей",
+  featureGuests: "✦ До 100 гостей",
   featureAnonymous: "✦ Автор скрыт от участников",
   featureResult: "✦ Один результат",
   howItWorks: "Как работает общее колесо",
@@ -599,6 +620,15 @@ const ru: Dictionary = {
   useCasesTitle: "Для совместных решений",
   useCasesCopy:
     "Выберите, где поесть, во что играть, кому достанется задача, какое упражнение провести на уроке или какую тему обсудить команде.",
+  aboutTitle: "Что такое GatherWheel?",
+  aboutCopy:
+    "GatherWheel — бесплатное онлайн-колесо фортуны для нескольких человек. Организатор создаёт комнату и делится ссылкой или QR-кодом; до 100 участников заходят со своих телефонов без регистрации, анонимно предлагают варианты и видят одно и то же вращение и результат в реальном времени. Сервис работает на 11 языках: им выбирают учеников в классе, принимают решения в команде, проводят розыгрыши и игровые вечера.",
+  faqCompareQuestion: "Чем GatherWheel отличается от Wheel of Names или Picker Wheel?",
+  faqCompareAnswer:
+    "Обычные колёса фортуны работают на одном экране. В GatherWheel каждый участник заходит в одну комнату со своего устройства, видит одно синхронное вращение и может предлагать варианты; организатор одобряет их и управляет запуском.",
+  faqClassQuestion: "Может ли к одному колесу подключиться весь класс?",
+  faqClassAnswer:
+    "Да. Выведите QR-код комнаты на проектор: до 100 учеников подключатся со своих телефонов, даже через общий школьный Wi-Fi, и в реальном времени увидят, на кого выпал выбор.",
   faqTitle: "Частые вопросы",
   faqFreeQuestion: "GatherWheel бесплатный?",
   faqFreeAnswer:
@@ -699,6 +729,17 @@ const ru: Dictionary = {
   removedFromRoomCopy:
     "Вы можете вернуться на главную или снова войти по ссылке-приглашению.",
   share: "Поделиться",
+  roomReady: "Комната готова",
+  inviteTitle: "Позовите участников",
+  inviteCopy:
+    "Каждый заходит со своего телефона, без регистрации. Покажите QR-код на экране или отправьте ссылку.",
+  scanToJoin: "Наведите камеру телефона, чтобы войти",
+  roomLinkLabel: "Ссылка на комнату",
+  copyLink: "Скопировать ссылку",
+  guestsJoined: "Подключились: {count}",
+  spinSolo: "Крутить самому",
+  goToWheel: "Перейти к колесу",
+  closeInvite: "Закрыть приглашение",
   saveSlots: "Сохранить слоты",
   templateName: "Название шаблона",
   saving: "Сохранение…",
@@ -839,7 +880,7 @@ const uk: Dictionary = {
   heroLine2: "Вирішуйте легко.",
   lead: "Створіть кімнату, надішліть посилання друзям і запустіть одне колесо для всіх.",
   features: "Можливості",
-  featureGuests: "✦ До 50 гостей",
+  featureGuests: "✦ До 100 гостей",
   featureAnonymous: "✦ Автор прихований від учасників",
   featureResult: "✦ Один результат",
   howItWorks: "Як працює спільне колесо",
@@ -857,6 +898,16 @@ const uk: Dictionary = {
   useCasesTitle: "Для спільних рішень",
   useCasesCopy:
     "Оберіть, де поїсти, у що грати, кому дати завдання, яку вправу провести на уроці або яку тему обговорити команді.",
+  aboutTitle: "Що таке GatherWheel?",
+  aboutCopy:
+    "GatherWheel — безкоштовне онлайн-колесо фортуни для кількох людей. Організатор створює кімнату й ділиться посиланням або QR-кодом; до 100 учасників заходять зі своїх телефонів без реєстрації, анонімно пропонують варіанти й бачать одне й те саме обертання та результат у реальному часі. Сервіс працює 11 мовами: ним обирають учнів у класі, ухвалюють рішення в команді, проводять розіграші та ігрові вечори.",
+  faqCompareQuestion:
+    "Чим GatherWheel відрізняється від Wheel of Names або Picker Wheel?",
+  faqCompareAnswer:
+    "Звичайні колеса фортуни працюють на одному екрані. У GatherWheel кожен учасник заходить в одну кімнату зі свого пристрою, бачить одне синхронне обертання й може пропонувати варіанти; організатор схвалює їх і керує запуском.",
+  faqClassQuestion: "Чи може до одного колеса під’єднатися весь клас?",
+  faqClassAnswer:
+    "Так. Виведіть QR-код кімнати на проєктор: до 100 учнів під’єднаються зі своїх телефонів, навіть через спільний шкільний Wi-Fi, і в реальному часі побачать, на кого випав вибір.",
   faqTitle: "Поширені запитання",
   faqFreeQuestion: "GatherWheel безкоштовний?",
   faqFreeAnswer:
@@ -956,6 +1007,17 @@ const uk: Dictionary = {
   removedFromRoomCopy:
     "Ви можете повернутися на головну або знову увійти за посиланням-запрошенням.",
   share: "Поділитися",
+  roomReady: "Кімната готова",
+  inviteTitle: "Покличте учасників",
+  inviteCopy:
+    "Кожен заходить зі свого телефона, без реєстрації. Покажіть QR-код на екрані або надішліть посилання.",
+  scanToJoin: "Наведіть камеру телефона, щоб увійти",
+  roomLinkLabel: "Посилання на кімнату",
+  copyLink: "Скопіювати посилання",
+  guestsJoined: "Приєдналися: {count}",
+  spinSolo: "Крутити самому",
+  goToWheel: "Перейти до колеса",
+  closeInvite: "Закрити запрошення",
   saveSlots: "Зберегти слоти",
   templateName: "Назва шаблону",
   saving: "Збереження…",
@@ -1096,7 +1158,7 @@ const de: Dictionary = {
   heroLine2: "Einfach entscheiden.",
   lead: "Erstelle einen Raum, sende den Link an Freunde und starte ein Rad für alle.",
   features: "Funktionen",
-  featureGuests: "✦ Bis zu 50 Gäste",
+  featureGuests: "✦ Bis zu 100 Gäste",
   featureAnonymous: "✦ Autor für die Gruppe verborgen",
   featureResult: "✦ Ein gemeinsames Ergebnis",
   howItWorks: "So funktioniert das gemeinsame Rad",
@@ -1114,6 +1176,16 @@ const de: Dictionary = {
   useCasesTitle: "Für Entscheidungen in der Gruppe",
   useCasesCopy:
     "Wählt ein Restaurant oder Spiel, verteilt eine Aufgabe, bestimmt eine Aktivität im Unterricht oder entscheidet fair über das nächste Teamthema.",
+  aboutTitle: "Was ist GatherWheel?",
+  aboutCopy:
+    "GatherWheel ist ein kostenloses Online-Glücksrad für mehrere Personen. Der Gastgeber erstellt einen Raum und teilt einen Link oder QR-Code; bis zu 100 Personen treten ohne Konto mit dem eigenen Handy bei, schlagen anonym Optionen vor und sehen live dieselbe Drehung und dasselbe Ergebnis. Der Dienst ist in 11 Sprachen verfügbar und wird für die Namensauswahl im Unterricht, Teamentscheidungen, Verlosungen und Spieleabende genutzt.",
+  faqCompareQuestion:
+    "Was unterscheidet GatherWheel von Wheel of Names oder Picker Wheel?",
+  faqCompareAnswer:
+    "Klassische Glücksräder laufen auf einem Bildschirm. Bei GatherWheel tritt jede Person mit dem eigenen Gerät demselben Raum bei, sieht dieselbe synchrone Drehung und kann Optionen vorschlagen; der Gastgeber bestätigt sie und startet das Rad.",
+  faqClassQuestion: "Kann eine ganze Klasse einem Rad beitreten?",
+  faqClassAnswer:
+    "Ja. Zeig den QR-Code des Raums am Beamer: Bis zu 100 Schülerinnen und Schüler treten mit dem Handy bei, auch über dasselbe Schul-WLAN, und sehen in Echtzeit, wer ausgewählt wurde.",
   faqTitle: "Häufig gestellte Fragen",
   faqFreeQuestion: "Ist GatherWheel kostenlos?",
   faqFreeAnswer:
@@ -1214,6 +1286,17 @@ const de: Dictionary = {
   removedFromRoomCopy:
     "Du kannst zur Startseite zurückkehren oder über einen Einladungslink erneut beitreten.",
   share: "Teilen",
+  roomReady: "Raum ist bereit",
+  inviteTitle: "Lade deine Gruppe ein",
+  inviteCopy:
+    "Alle treten mit dem eigenen Handy bei – ohne Anmeldung. Zeig den QR-Code auf einem Bildschirm oder teile den Link.",
+  scanToJoin: "Richte die Handykamera auf den Code, um beizutreten",
+  roomLinkLabel: "Raumlink",
+  copyLink: "Link kopieren",
+  guestsJoined: "Beigetreten: {count}",
+  spinSolo: "Selbst drehen",
+  goToWheel: "Zum Rad",
+  closeInvite: "Einladung schließen",
   saveSlots: "Felder speichern",
   templateName: "Name der Vorlage",
   saving: "Wird gespeichert…",
@@ -1354,7 +1437,7 @@ const zh: Dictionary = {
   heroLine2: "轻松决定。",
   lead: "创建房间，把链接发给好友，让所有人共享同一个转盘。",
   features: "功能",
-  featureGuests: "✦ 最多 50 位参与者",
+  featureGuests: "✦ 最多 100 位参与者",
   featureAnonymous: "✦ 不向房间成员显示作者",
   featureResult: "✦ 共享同一结果",
   howItWorks: "共享转盘如何使用",
@@ -1370,6 +1453,15 @@ const zh: Dictionary = {
   useCasesTitle: "适合共同做决定",
   useCasesCopy:
     "可以用来选择餐厅或游戏、分配任务、挑选课堂活动，或公平决定团队的下一个讨论主题。",
+  aboutTitle: "GatherWheel 是什么？",
+  aboutCopy:
+    "GatherWheel 是一款免费的多人在线转盘。主持人创建房间并分享链接或二维码；最多 100 人无需注册即可用自己的手机加入，匿名提议选项，并实时看到同一次转动和同一个结果。它支持 11 种语言，常用于课堂点名、团队决策、抽奖和游戏聚会。",
+  faqCompareQuestion: "GatherWheel 和 Wheel of Names、Picker Wheel 有什么不同？",
+  faqCompareAnswer:
+    "普通转盘只在一个屏幕上运行。在 GatherWheel 中，每位参与者用自己的设备进入同一个房间，看到同步的转动，还可以提议选项；由主持人审核并控制转动。",
+  faqClassQuestion: "整个班级可以加入同一个转盘吗？",
+  faqClassAnswer:
+    "可以。把房间二维码投到投影仪上：最多 100 名学生可以用手机加入，即使使用同一个校园 Wi-Fi，也能实时看到抽中了谁。",
   faqTitle: "常见问题",
   faqFreeQuestion: "GatherWheel 免费吗？",
   faqFreeAnswer: "免费。创建和加入共享转盘都不需要账号或付费。",
@@ -1465,6 +1557,16 @@ const zh: Dictionary = {
   removedFromRoomTitle: "你已被移除",
   removedFromRoomCopy: "你可以返回首页，或通过邀请链接重新加入此房间。",
   share: "分享",
+  roomReady: "房间已就绪",
+  inviteTitle: "邀请大家加入",
+  inviteCopy: "每个人用自己的手机加入，无需注册。把二维码投到屏幕上，或发送链接。",
+  scanToJoin: "用手机相机扫码加入",
+  roomLinkLabel: "房间链接",
+  copyLink: "复制链接",
+  guestsJoined: "已加入：{count}",
+  spinSolo: "自己转",
+  goToWheel: "前往转盘",
+  closeInvite: "关闭邀请",
   saveSlots: "保存选项",
   templateName: "模板名称",
   saving: "正在保存…",

@@ -55,20 +55,20 @@ const es = {
   restoreChoice: "Devolver a la ronda",
   errorNeedAvailableOptions:
     "Devuelve una opción o inicia una nueva ronda para seguir girando",
-  metaTitle: "Ruleta online compartida para grupos | GatherWheel",
+  metaTitle: "Ruleta online gratis para grupos y clases | GatherWheel",
   metaDescription:
-    "Crea una sala compartida, invita a amigos o compañeros y giren juntos una ruleta aleatoria sincronizada.",
+    "Ruleta online gratis para grupos: crea una sala, comparte el enlace o un código QR y giren juntos la misma ruleta aleatoria en vivo, cada uno desde su celular.",
   language: "Idioma",
   tagline: "Una elección justa para tu grupo",
-  landingEyebrow: "RULETA DE LA FORTUNA COMPARTIDA",
-  heroLine1: "Giren juntos.",
-  heroLine2: "Decidan fácilmente.",
+  landingEyebrow: "RULETA ONLINE COMPARTIDA",
+  heroLine1: "Ruleta online",
+  heroLine2: "para girar juntos.",
   lead: "Crea una sala, envía el enlace a tus amigos y usa una misma ruleta para todos.",
   features: "Funciones",
-  featureGuests: "✦ Hasta 50 invitados",
+  featureGuests: "✦ Hasta 100 invitados",
   featureAnonymous: "✦ Autor oculto para el grupo",
   featureResult: "✦ Un resultado compartido",
-  howItWorks: "Cómo funciona la ruleta compartida",
+  howItWorks: "Cómo funciona la ruleta online compartida",
   howItWorksCopy:
     "Crea una sala en segundos. Todos entran desde su propio dispositivo y ven la misma ruleta y el mismo resultado.",
   stepInviteTitle: "Invita a tu grupo",
@@ -77,12 +77,22 @@ const es = {
   stepSpinTitle: "Giren juntos",
   stepSpinCopy:
     "El anfitrión o un líder asignado inicia la ruleta y todos los participantes ven el resultado sincronizado.",
-  whySharedTitle: "Más que una ruleta individual",
+  whySharedTitle: "Más que una ruleta aleatoria individual",
   whySharedCopy:
     "Los invitados pueden sugerir ideas sin mostrar su nombre al grupo, mientras el anfitrión mantiene el control de la lista final. Una contraseña opcional restringe los nuevos accesos.",
   useCasesTitle: "Creada para decisiones en grupo",
   useCasesCopy:
-    "Elijan dónde comer, qué juego jugar, quién recibe una tarea, qué actividad hacer en clase o cuál será el próximo tema del equipo.",
+    "Elijan dónde comer, qué juego jugar o a quién le toca una tarea, sorteen nombres en clase o decidan el próximo tema del equipo con una ruleta aleatoria justa.",
+  aboutTitle: "¿Qué es GatherWheel?",
+  aboutCopy:
+    "GatherWheel es una ruleta online gratuita y multijugador. El anfitrión crea una sala y comparte un enlace o un código QR; hasta 100 personas entran desde su propio celular sin crear una cuenta, proponen opciones de forma anónima y ven en vivo el mismo giro y el mismo resultado. Funciona en 11 idiomas y se usa para sortear nombres en clase, tomar decisiones en equipo, hacer sorteos y noches de juegos.",
+  faqCompareQuestion:
+    "¿En qué se diferencia GatherWheel de Wheel of Names o Picker Wheel?",
+  faqCompareAnswer:
+    "Las ruletas clásicas funcionan en una sola pantalla. En GatherWheel cada participante entra a la misma sala desde su dispositivo, ve el mismo giro sincronizado y puede proponer opciones; el anfitrión las aprueba y controla el giro.",
+  faqClassQuestion: "¿Puede unirse toda una clase a una misma ruleta?",
+  faqClassAnswer:
+    "Sí. Proyecta el código QR de la sala: hasta 100 alumnos pueden entrar desde su celular, incluso con el mismo wifi de la escuela, y ver en tiempo real a quién le tocó.",
   faqTitle: "Preguntas frecuentes",
   faqFreeQuestion: "¿GatherWheel es gratis?",
   faqFreeAnswer:
@@ -182,6 +192,17 @@ const es = {
   removedFromRoomCopy:
     "Puedes volver al inicio o entrar de nuevo mediante un enlace de invitación.",
   share: "Compartir",
+  roomReady: "La sala está lista",
+  inviteTitle: "Invita a tu grupo",
+  inviteCopy:
+    "Cada persona entra desde su propio celular, sin registro. Muestra el código QR en una pantalla o envía el enlace.",
+  scanToJoin: "Apunta la cámara del celular aquí para entrar",
+  roomLinkLabel: "Enlace de la sala",
+  copyLink: "Copiar enlace",
+  guestsJoined: "Se unieron: {count}",
+  spinSolo: "Girar por mi cuenta",
+  goToWheel: "Ir a la ruleta",
+  closeInvite: "Cerrar invitación",
   saveSlots: "Guardar opciones",
   templateName: "Nombre de la plantilla",
   saving: "Guardando…",
@@ -378,7 +399,7 @@ const pt = {
   heroLine2: "Decidam com facilidade.",
   lead: "Crie uma sala, envie o link aos amigos e use uma única roleta para todos.",
   features: "Recursos",
-  featureGuests: "✦ Até 50 convidados",
+  featureGuests: "✦ Até 100 convidados",
   featureAnonymous: "✦ Autor oculto para o grupo",
   featureResult: "✦ Um resultado compartilhado",
   howItWorks: "Como funciona a roleta compartilhada",
@@ -396,6 +417,16 @@ const pt = {
   useCasesTitle: "Feita para decisões em grupo",
   useCasesCopy:
     "Escolham onde comer, qual jogo jogar, quem recebe uma tarefa, qual atividade fazer em aula ou qual será o próximo assunto da equipe.",
+  aboutTitle: "O que é o GatherWheel?",
+  aboutCopy:
+    "O GatherWheel é uma roleta online gratuita e multijogador. O anfitrião cria uma sala e compartilha um link ou um QR code; até 100 pessoas entram pelo próprio celular, sem cadastro, sugerem opções de forma anônima e veem ao vivo o mesmo giro e o mesmo resultado. Funciona em 11 idiomas e é usado para sortear nomes em sala de aula, decidir em equipe, fazer sorteios e noites de jogos.",
+  faqCompareQuestion:
+    "Qual a diferença entre o GatherWheel e o Wheel of Names ou o Picker Wheel?",
+  faqCompareAnswer:
+    "As roletas comuns funcionam em uma única tela. No GatherWheel, cada participante entra na mesma sala pelo próprio dispositivo, vê o mesmo giro sincronizado e pode sugerir opções; o anfitrião aprova as sugestões e controla o giro.",
+  faqClassQuestion: "Uma turma inteira pode entrar na mesma roleta?",
+  faqClassAnswer:
+    "Sim. Projete o QR code da sala: até 100 alunos podem entrar pelo celular, mesmo usando o mesmo Wi-Fi da escola, e ver em tempo real quem foi sorteado.",
   faqTitle: "Perguntas frequentes",
   faqFreeQuestion: "O GatherWheel é gratuito?",
   faqFreeAnswer:
@@ -495,6 +526,17 @@ const pt = {
   removedFromRoomCopy:
     "Você pode voltar ao início ou entrar novamente usando um link de convite.",
   share: "Compartilhar",
+  roomReady: "A sala está pronta",
+  inviteTitle: "Convide seu grupo",
+  inviteCopy:
+    "Cada pessoa entra pelo próprio celular, sem cadastro. Mostre o QR code em uma tela ou envie o link.",
+  scanToJoin: "Aponte a câmera do celular aqui para entrar",
+  roomLinkLabel: "Link da sala",
+  copyLink: "Copiar link",
+  guestsJoined: "Entraram: {count}",
+  spinSolo: "Girar sozinho",
+  goToWheel: "Ir para a roleta",
+  closeInvite: "Fechar convite",
   saveSlots: "Salvar opções",
   templateName: "Nome do modelo",
   saving: "Salvando…",
@@ -689,7 +731,7 @@ const ja = {
   heroLine2: "かんたんに決定。",
   lead: "ルームを作って友達にリンクを送り、全員で同じルーレットを使いましょう。",
   features: "特長",
-  featureGuests: "✦ 最大50人まで参加可能",
+  featureGuests: "✦ 最大100人まで参加可能",
   featureAnonymous: "✦ 提案者の名前はグループに非表示",
   featureResult: "✦ 全員に同じ結果を表示",
   howItWorks: "共有ルーレットの使い方",
@@ -707,6 +749,15 @@ const ja = {
   useCasesTitle: "グループでの意思決定に",
   useCasesCopy:
     "食事場所、ゲーム、担当者、授業の活動、次のミーティング議題などを公平に決められます。",
+  aboutTitle: "GatherWheelとは？",
+  aboutCopy:
+    "GatherWheelは、複数人で使える無料のオンラインルーレットです。ホストがルームを作成してリンクまたはQRコードを共有すると、最大100人が登録なしで自分のスマホから参加し、匿名で候補を提案し、同じ回転と結果をリアルタイムで見られます。11言語に対応し、授業での指名、チームの意思決定、抽選会、ゲームナイトなどに使われています。",
+  faqCompareQuestion: "Wheel of NamesやPicker Wheelとの違いは？",
+  faqCompareAnswer:
+    "一般的なルーレットは1つの画面で動きます。GatherWheelでは参加者全員が自分の端末から同じルームに入り、同期した回転を見ながら候補を提案できます。提案の承認と回転の操作はホストが行います。",
+  faqClassQuestion: "クラス全員で1つのルーレットに参加できますか？",
+  faqClassAnswer:
+    "はい。ルームのQRコードをプロジェクターに映せば、学校の同じWi-Fiからでも最大100人の生徒がスマホで参加でき、誰が選ばれたかをリアルタイムで確認できます。",
   faqTitle: "よくある質問",
   faqFreeQuestion: "GatherWheelは無料ですか？",
   faqFreeAnswer:
@@ -804,6 +855,17 @@ const ja = {
   removedFromRoomTitle: "ルームから退出しました",
   removedFromRoomCopy: "ホームに戻るか、招待リンクからこのルームに再び参加できます。",
   share: "共有",
+  roomReady: "ルームの準備ができました",
+  inviteTitle: "参加者を招待しましょう",
+  inviteCopy:
+    "各自のスマホから登録なしで参加できます。QRコードを画面に映すか、リンクを送ってください。",
+  scanToJoin: "スマホのカメラをかざして参加",
+  roomLinkLabel: "ルームのリンク",
+  copyLink: "リンクをコピー",
+  guestsJoined: "参加済み：{count}",
+  spinSolo: "自分で回す",
+  goToWheel: "ルーレットへ",
+  closeInvite: "招待を閉じる",
   saveSlots: "項目を保存",
   templateName: "テンプレート名",
   saving: "保存中…",
@@ -989,7 +1051,7 @@ const zhHant = {
   heroLine2: "輕鬆決定。",
   lead: "建立房間，把連結傳給朋友，讓所有人一起使用同一個轉盤。",
   features: "功能",
-  featureGuests: "✦ 最多 50 位來賓",
+  featureGuests: "✦ 最多 100 位來賓",
   featureAnonymous: "✦ 不向團體顯示作者",
   featureResult: "✦ 所有人共享同一結果",
   howItWorks: "共享轉盤的使用方式",
@@ -1005,6 +1067,15 @@ const zhHant = {
   useCasesTitle: "專為團體決策而設",
   useCasesCopy:
     "決定去哪裡吃飯、玩哪個遊戲、由誰負責工作、進行哪項課堂活動，或公平選出團隊下一個討論主題。",
+  aboutTitle: "GatherWheel 是什麼？",
+  aboutCopy:
+    "GatherWheel 是免費的多人線上輪盤。主持人建立房間並分享連結或 QR 碼；最多 100 人免註冊即可用自己的手機加入，匿名提議選項，並即時看到同一次轉動與同一個結果。支援 11 種語言，常用於課堂點名、團隊決策、抽獎和遊戲聚會。",
+  faqCompareQuestion: "GatherWheel 和 Wheel of Names、Picker Wheel 有什麼不同？",
+  faqCompareAnswer:
+    "一般轉盤只在一個螢幕上運作。在 GatherWheel 中，每位參與者用自己的裝置進入同一個房間，看到同步的轉動，還能提議選項；由主持人審核並控制轉動。",
+  faqClassQuestion: "整個班級可以加入同一個轉盤嗎？",
+  faqClassAnswer:
+    "可以。把房間 QR 碼投影出來：最多 100 名學生能用手機加入，即使連同一個校園 Wi-Fi，也能即時看到抽中了誰。",
   faqTitle: "常見問題",
   faqFreeQuestion: "GatherWheel 可以免費使用嗎？",
   faqFreeAnswer: "可以。你無需帳戶或付款即可建立及加入共享轉盤。",
@@ -1100,6 +1171,16 @@ const zhHant = {
   removedFromRoomTitle: "你已被移除",
   removedFromRoomCopy: "你可以返回首頁，或使用邀請連結再次加入此房間。",
   share: "分享",
+  roomReady: "房間已準備好",
+  inviteTitle: "邀請大家加入",
+  inviteCopy: "每個人用自己的手機加入，免註冊。將 QR 碼投影到螢幕上，或傳送連結。",
+  scanToJoin: "用手機相機掃描即可加入",
+  roomLinkLabel: "房間連結",
+  copyLink: "複製連結",
+  guestsJoined: "已加入：{count}",
+  spinSolo: "自己轉",
+  goToWheel: "前往轉盤",
+  closeInvite: "關閉邀請",
   saveSlots: "儲存選項",
   templateName: "範本名稱",
   saving: "正在儲存…",

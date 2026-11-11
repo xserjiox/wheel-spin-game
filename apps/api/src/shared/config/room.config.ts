@@ -1,5 +1,5 @@
 export const ROOM_TTL_MS = 7 * 24 * 60 * 60 * 1000;
-export const MAX_PARTICIPANTS = 50;
+export const MAX_PARTICIPANTS = 100;
 export const MAX_OPTIONS = 100;
 export const MAX_PENDING_PROPOSALS = 10;
 export const HISTORY_LIMIT = 10;

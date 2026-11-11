@@ -64,7 +64,7 @@ export const vi = {
   heroLine2: "Dễ dàng quyết định.",
   lead: "Tạo phòng, gửi liên kết cho bạn bè và dùng một vòng quay cho tất cả mọi người.",
   features: "Tính năng",
-  featureGuests: "✦ Tối đa 50 khách",
+  featureGuests: "✦ Tối đa 100 khách",
   featureAnonymous: "✦ Ẩn tên tác giả với nhóm",
   featureResult: "✦ Một kết quả chung",
   howItWorks: "Cách hoạt động của vòng quay chung",
@@ -82,6 +82,15 @@ export const vi = {
   useCasesTitle: "Dành cho các quyết định của nhóm",
   useCasesCopy:
     "Chọn nơi ăn, trò chơi, người nhận nhiệm vụ, hoạt động trong lớp hoặc chủ đề thảo luận tiếp theo của nhóm một cách công bằng.",
+  aboutTitle: "GatherWheel là gì?",
+  aboutCopy:
+    "GatherWheel là vòng quay may mắn trực tuyến miễn phí dành cho nhiều người. Chủ phòng tạo phòng và chia sẻ liên kết hoặc mã QR; tối đa 100 người tham gia bằng điện thoại của mình mà không cần tài khoản, đề xuất lựa chọn ẩn danh và cùng xem một lượt quay, một kết quả theo thời gian thực. Dịch vụ hỗ trợ 11 ngôn ngữ và được dùng để gọi tên học sinh, ra quyết định nhóm, bốc thăm và chơi trò chơi.",
+  faqCompareQuestion: "GatherWheel khác gì Wheel of Names hay Picker Wheel?",
+  faqCompareAnswer:
+    "Các vòng quay thông thường chạy trên một màn hình. Với GatherWheel, mỗi người tham gia vào cùng một phòng từ thiết bị của mình, xem cùng một lượt quay đồng bộ và có thể đề xuất lựa chọn; chủ phòng duyệt đề xuất và điều khiển lượt quay.",
+  faqClassQuestion: "Cả lớp có thể cùng tham gia một vòng quay không?",
+  faqClassAnswer:
+    "Có. Chiếu mã QR của phòng lên máy chiếu: tối đa 100 học sinh có thể tham gia bằng điện thoại, kể cả khi dùng chung Wi-Fi của trường, và xem ngay ai được chọn.",
   faqTitle: "Câu hỏi thường gặp",
   faqFreeQuestion: "GatherWheel có miễn phí không?",
   faqFreeAnswer:
@@ -182,6 +191,17 @@ export const vi = {
   removedFromRoomCopy:
     "Bạn có thể về trang chủ hoặc tham gia lại phòng này bằng liên kết mời.",
   share: "Chia sẻ",
+  roomReady: "Phòng đã sẵn sàng",
+  inviteTitle: "Mời nhóm của bạn",
+  inviteCopy:
+    "Mọi người tham gia bằng điện thoại của mình, không cần đăng ký. Chiếu mã QR lên màn hình hoặc gửi liên kết.",
+  scanToJoin: "Hướng camera điện thoại vào đây để tham gia",
+  roomLinkLabel: "Liên kết phòng",
+  copyLink: "Sao chép liên kết",
+  guestsJoined: "Đã tham gia: {count}",
+  spinSolo: "Tự quay",
+  goToWheel: "Đến vòng quay",
+  closeInvite: "Đóng lời mời",
   saveSlots: "Lưu các ô",
   templateName: "Tên mẫu",
   saving: "Đang lưu…",

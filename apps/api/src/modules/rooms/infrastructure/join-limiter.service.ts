@@ -27,14 +27,14 @@ export class JoinLimiterService {
     await this.rateLimiter.assertAllowed(
       "room-join",
       `${ip}:${code}`,
-      positiveInteger("RATE_LIMIT_JOIN_REQUEST_MAX", 100),
+      positiveInteger("RATE_LIMIT_JOIN_REQUEST_MAX", 200),
       positiveInteger("RATE_LIMIT_JOIN_REQUEST_WINDOW_MS", 5 * 60_000),
     );
     // A wider per-IP budget still slows down probing many rooms.
     await this.rateLimiter.assertAllowed(
       "room-join-ip",
       ip,
-      positiveInteger("RATE_LIMIT_JOIN_IP_MAX", 300),
+      positiveInteger("RATE_LIMIT_JOIN_IP_MAX", 400),
       positiveInteger("RATE_LIMIT_JOIN_IP_WINDOW_MS", 5 * 60_000),
     );
 
@@ -66,7 +66,7 @@ export class JoinLimiterService {
     await this.rateLimiter.assertAllowed(
       "socket-join",
       `${ip}:${code}`,
-      positiveInteger("RATE_LIMIT_SOCKET_JOIN_MAX", 120),
+      positiveInteger("RATE_LIMIT_SOCKET_JOIN_MAX", 300),
       positiveInteger("RATE_LIMIT_SOCKET_JOIN_WINDOW_MS", 60_000),
     );
   }

@@ -87,4 +87,5 @@ export type Ack<T = Record<string, never>> =
 export type RoomNavigationState = {
   initialRoomState?: RoomState;
   joinEntryType?: "shared_link" | "manual_code";
+  showInvite?: boolean;
 };

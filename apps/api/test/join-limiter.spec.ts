@@ -18,7 +18,7 @@ describe("join limiter", () => {
   it("lets a classroom behind one IP join the same room", async () => {
     const limiter = createLimiter();
 
-    for (let student = 0; student < 60; student += 1) {
+    for (let student = 0; student < 100; student += 1) {
       await expect(limiter.assertJoinAllowed("10.0.0.1", "CLASS001")).resolves.toBe(
         undefined,
       );
@@ -31,7 +31,7 @@ describe("join limiter", () => {
   it("keeps a separate join budget for each room", async () => {
     const limiter = createLimiter();
 
-    for (let attempt = 0; attempt < 100; attempt += 1) {
+    for (let attempt = 0; attempt < 200; attempt += 1) {
       await limiter.assertJoinAllowed("10.0.0.1", "ROOM0001");
     }
     await expect(

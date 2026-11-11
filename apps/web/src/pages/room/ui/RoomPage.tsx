@@ -1,6 +1,7 @@
 import {
   type CSSProperties,
   type FormEvent,
+  useCallback,
   useEffect,
   useId,
   useMemo,
@@ -22,6 +23,11 @@ import { readSavedRooms, removeSavedRoom, saveRoom } from "@/entities/saved-room
 import { LanguageSwitcher } from "@/features/change-language";
 import { SpinControls } from "@/features/control-spin";
 import {
+  type InviteDialogVariant,
+  InviteRoomDialog,
+  type InviteShareMethod,
+} from "@/features/invite-room";
+import {
   ParticipantsPanel,
   RemovedFromRoomScreen,
 } from "@/features/manage-participants";
@@ -39,10 +45,14 @@ type Tab = "options" | "proposals" | "participants" | "history" | "settings";
 export function RoomPage({
   code,
   initialState,
+  showInvite = false,
+  onInviteClosed,
   onExit,
 }: {
   code: string;
   initialState: RoomState;
+  showInvite?: boolean;
+  onInviteClosed?: () => void;
   onExit: () => void;
 }) {
   const { t } = useI18n();
@@ -55,7 +65,17 @@ export function RoomPage({
     readSavedRooms(window.localStorage).some((room) => room.code === code),
   );
   const [savePromptDismissed, setSavePromptDismissed] = useState(false);
+  const [inviteVariant, setInviteVariant] = useState<InviteDialogVariant | null>(() =>
+    showInvite && initialState.role === "HOST" ? "created" : null,
+  );
   const isHost = state.role === "HOST";
+  const guestCount = state.participants.filter(
+    (participant) => participant.role === "GUEST",
+  ).length;
+  const closeInvite = useCallback(() => {
+    if (inviteVariant === "created") onInviteClosed?.();
+    setInviteVariant(null);
+  }, [inviteVariant, onInviteClosed]);
   const isSpinning = state.status === "SPINNING";
   const availableOptions = useMemo(
     () => state.options.filter((option) => !option.excluded),
@@ -116,6 +136,17 @@ export function RoomPage({
     if (result.ok) trackAnalyticsEvent("round_reset");
   };
 
+  const trackInviteShared = (method: InviteShareMethod) => {
+    trackAnalyticsEvent("share_room", { role: isHost ? "host" : "guest", method });
+  };
+
+  const trackInviteShareFailed = () => {
+    trackAnalyticsEvent("share_room_failed", {
+      role: isHost ? "host" : "guest",
+      method: "copy_link",
+    });
+  };
+
   return (
     <main className="room-shell">
       <header className="room-topbar">
@@ -140,23 +171,7 @@ export function RoomPage({
               <b>{isHost ? t("hostBadge") : t("spinnerBadge")}</b>
             )}
           </span>
-          <ShareRoomButton
-            code={state.code}
-            onCopied={() => {
-              trackAnalyticsEvent("share_room", {
-                role: isHost ? "host" : "guest",
-                method: "copy_link",
-              });
-              setNotice(t("copied"));
-            }}
-            onCopyError={() => {
-              trackAnalyticsEvent("share_room_failed", {
-                role: isHost ? "host" : "guest",
-                method: "copy_link",
-              });
-              setNotice(t("copyFailed"));
-            }}
-          />
+          <ShareRoomButton onOpen={() => setInviteVariant("share")} />
         </div>
       </header>
 
@@ -165,6 +180,17 @@ export function RoomPage({
           <span>{error || notice}</span>
           {error && <button onClick={clearError}>×</button>}
         </div>
+      )}
+
+      {inviteVariant && (
+        <InviteRoomDialog
+          code={state.code}
+          variant={inviteVariant}
+          guestCount={guestCount}
+          onClose={closeInvite}
+          onShared={trackInviteShared}
+          onShareFailed={trackInviteShareFailed}
+        />
       )}
 
       {!isSaved && !savePromptDismissed && (

@@ -207,7 +207,7 @@ export function trackAnalyticsPageView(pathname: string, search = ""): void {
   });
 }
 
-type JoinEntryType = "shared_link" | "manual_code";
+type JoinEntryType = "shared_link" | "manual_code" | "qr_code";
 type JoinFailureReason =
   | "validation"
   | "unauthorized"
@@ -222,7 +222,7 @@ type JoinAnalyticsParameters = {
 };
 type ShareAnalyticsParameters = {
   role: "host" | "guest";
-  method: "copy_link";
+  method: "copy_link" | "system_share";
 };
 type CreateAnalyticsParameters = {
   has_password: boolean;

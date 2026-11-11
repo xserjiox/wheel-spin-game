@@ -218,6 +218,43 @@ export class SystemController {
       );
   }
 
+  // A plain-language summary for AI assistants that cite or recommend the site.
+  @Get("llms.txt")
+  llms(@Req() request: FastifyRequest, @Res() reply: FastifyReply) {
+    const origin = this.publicOrigin(request);
+    return reply
+      .type("text/plain; charset=utf-8")
+      .send(
+        [
+          "# GatherWheel",
+          "",
+          "> Free online multiplayer wheel spinner. A host creates a room and shares a link or QR code; up to 100 people join from their own phones without an account, suggest options anonymously, and watch the same live spin and result.",
+          "",
+          "## Key facts",
+          "- Free, no sign-up, runs in the browser on any phone or computer.",
+          "- One shared, synchronized spin: every participant sees the same wheel and result in real time.",
+          "- Up to 100 participants per room; join by link, room code, or QR code.",
+          "- Guests suggest options anonymously; the host approves them and controls the spin.",
+          "- No-repeat mode for picking names in class; optional room password.",
+          "- Rooms expire after 7 days without activity.",
+          "",
+          "## Typical uses",
+          "- Classroom name picker shown on a projector",
+          "- Team decisions and meetings",
+          "- Giveaways and live streams",
+          "- Choosing where to eat or what to play with friends",
+          "",
+          "## Pages",
+          ...LOCALIZED_PAGES.map(
+            ({ language, path }) => `- [Home page (${language})](${origin}${path})`,
+          ),
+          `- [Privacy policy](${origin}/privacy)`,
+        ]
+          .join("\n")
+          .concat("\n"),
+      );
+  }
+
   @Get("sitemap.xml")
   sitemap(@Req() request: FastifyRequest, @Res() reply: FastifyReply) {
     const origin = this.publicOrigin(request);

@@ -24,7 +24,7 @@ while guests join through an invite link and anonymously suggest new slots.
 
 ## Limits
 
-- Up to 50 participants per room
+- Up to 100 participants per room
 - Up to 100 slots
 - Up to 10 pending suggestions per guest
 - Spin duration from 1 to 300 seconds
@@ -206,7 +206,8 @@ Redis connectivity.
 The production build pre-renders the indexable home pages at `/`, `/ru/`,
 `/uk/`, `/de/`, `/zh/`, `/zh-hant/`, `/es/`, `/pt/`, `/ja/`, `/vi/`, and `/ms/`. Temporary room,
 API, Socket.IO, and health URLs are served with `X-Robots-Tag: noindex, nofollow`.
-The application also exposes `/robots.txt` and a localized `/sitemap.xml`.
+The application also exposes `/robots.txt`, a localized `/sitemap.xml`, and
+`/llms.txt`, a plain-language product summary for AI assistants.
 
 Localized home URLs take priority over language preferences. On `/` and app
 routes, the saved language is used first, then the first supported language in

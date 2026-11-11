@@ -66,7 +66,7 @@ export const ms = {
   heroLine2: "Buat keputusan dengan mudah.",
   lead: "Cipta bilik, hantar pautan kepada rakan dan gunakan satu roda untuk semua orang.",
   features: "Ciri",
-  featureGuests: "✦ Sehingga 50 tetamu",
+  featureGuests: "✦ Sehingga 100 tetamu",
   featureAnonymous: "✦ Nama pencadang disembunyikan daripada kumpulan",
   featureResult: "✦ Satu keputusan bersama",
   howItWorks: "Cara roda bersama berfungsi",
@@ -84,6 +84,16 @@ export const ms = {
   useCasesTitle: "Direka untuk keputusan berkumpulan",
   useCasesCopy:
     "Pilih tempat makan, permainan, penerima tugasan, aktiviti kelas atau topik perbincangan pasukan seterusnya secara adil.",
+  aboutTitle: "Apakah GatherWheel?",
+  aboutCopy:
+    "GatherWheel ialah roda putar dalam talian percuma untuk ramai pemain. Hos mencipta bilik dan berkongsi pautan atau kod QR; sehingga 100 orang menyertai dari telefon sendiri tanpa akaun, mencadangkan pilihan secara tanpa nama dan menonton putaran serta keputusan yang sama secara langsung. Ia tersedia dalam 11 bahasa dan digunakan untuk memilih nama di kelas, membuat keputusan pasukan, cabutan bertuah dan malam permainan.",
+  faqCompareQuestion:
+    "Apakah beza GatherWheel dengan Wheel of Names atau Picker Wheel?",
+  faqCompareAnswer:
+    "Roda putar biasa berjalan pada satu skrin. Dalam GatherWheel, setiap peserta menyertai bilik yang sama dari peranti sendiri, melihat putaran yang diselaraskan dan boleh mencadangkan pilihan; hos meluluskannya dan mengawal putaran.",
+  faqClassQuestion: "Bolehkah seluruh kelas menyertai satu roda?",
+  faqClassAnswer:
+    "Boleh. Paparkan kod QR bilik pada projektor: sehingga 100 pelajar boleh menyertai dari telefon, walaupun menggunakan Wi-Fi sekolah yang sama, dan melihat siapa yang terpilih secara langsung.",
   faqTitle: "Soalan lazim",
   faqFreeQuestion: "Adakah GatherWheel percuma?",
   faqFreeAnswer:
@@ -185,6 +195,17 @@ export const ms = {
   removedFromRoomCopy:
     "Anda boleh kembali ke laman utama atau menyertai bilik ini semula melalui pautan jemputan.",
   share: "Kongsi",
+  roomReady: "Bilik sudah sedia",
+  inviteTitle: "Jemput kumpulan anda",
+  inviteCopy:
+    "Semua orang menyertai dari telefon sendiri, tanpa pendaftaran. Paparkan kod QR pada skrin atau hantar pautan.",
+  scanToJoin: "Halakan kamera telefon ke sini untuk menyertai",
+  roomLinkLabel: "Pautan bilik",
+  copyLink: "Salin pautan",
+  guestsJoined: "Telah menyertai: {count}",
+  spinSolo: "Putar sendiri",
+  goToWheel: "Pergi ke roda",
+  closeInvite: "Tutup jemputan",
   saveSlots: "Simpan petak",
   templateName: "Nama templat",
   saving: "Menyimpan…",

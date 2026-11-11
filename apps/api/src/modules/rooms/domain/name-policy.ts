@@ -1,3 +1,5 @@
+import { MAX_PARTICIPANTS } from "../../../shared/config/room.config";
+
 export function normalizeDisplayName(name: string): string {
   return name.trim().replace(/\s+/g, " ").toLocaleLowerCase("ru");
 }
@@ -5,7 +7,7 @@ export function normalizeDisplayName(name: string): string {
 export function assignAvailableName(
   base: string,
   normalizedNames: string[],
-  maxParticipants = 50,
+  maxParticipants = MAX_PARTICIPANTS,
 ): string {
   const cleanBase = base.trim().replace(/\s+/g, " ");
   const taken = new Set(normalizedNames);

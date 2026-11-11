@@ -102,6 +102,7 @@ export function HomePage() {
       navigate(roomPath(result.code), {
         state: {
           initialRoomState: result.state,
+          showInvite: true,
         } satisfies RoomNavigationState,
       });
     } catch (submitError) {
@@ -385,6 +386,12 @@ export function HomePage() {
             <p>{t("useCasesCopy")}</p>
           </article>
         </div>
+
+        {/* A self-contained summary that search engines and AI assistants can quote as is. */}
+        <article className="seo-about" aria-labelledby="about-title">
+          <h2 id="about-title">{t("aboutTitle")}</h2>
+          <p>{t("aboutCopy")}</p>
+        </article>
       </section>
 
       <section className="seo-faq" aria-labelledby="faq-title">
@@ -397,6 +404,14 @@ export function HomePage() {
           <details>
             <summary>{t("faqAccountQuestion")}</summary>
             <p>{t("faqAccountAnswer")}</p>
+          </details>
+          <details>
+            <summary>{t("faqCompareQuestion")}</summary>
+            <p>{t("faqCompareAnswer")}</p>
+          </details>
+          <details>
+            <summary>{t("faqClassQuestion")}</summary>
+            <p>{t("faqClassAnswer")}</p>
           </details>
           <details>
             <summary>{t("faqLifetimeQuestion")}</summary>

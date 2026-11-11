@@ -31,7 +31,7 @@ function readableRow(row: WeeklyRoomStats) {
     "p:5-11": row.participants5to11,
     "p:12-31": row.participants12to31,
     "p:32-49": row.participants32to49,
-    "p:50": row.participants50plus,
+    "p:50+": row.participants50plus,
   };
 }
 

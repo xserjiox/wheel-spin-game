@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   getRoomMeta,
@@ -49,7 +49,12 @@ export function RoomRoute() {
   const navigate = useNavigate();
   const navigationState = location.state as RoomNavigationState | null;
   const initialRoomState = navigationState?.initialRoomState;
-  const joinEntryType = navigationState?.joinEntryType ?? "shared_link";
+  const joinEntryType =
+    navigationState?.joinEntryType ??
+    (new URLSearchParams(location.search).get("via") === "qr"
+      ? "qr_code"
+      : "shared_link");
+  const showInvite = navigationState?.showInvite === true;
   const [view, setView] = useState<RoomView>(() =>
     initialRoomState?.code === code
       ? { kind: "room", state: initialRoomState }
@@ -101,6 +106,13 @@ export function RoomRoute() {
   }, [code, initialRoomState]);
 
   const goHome = () => navigate("/");
+  // Clearing the flag keeps a page reload from opening the invitation again.
+  const clearInviteFlag = useCallback(() => {
+    navigate(`${location.pathname}${location.search}`, {
+      replace: true,
+      state: { ...navigationState, showInvite: false } satisfies RoomNavigationState,
+    });
+  }, [location.pathname, location.search, navigate, navigationState]);
 
   if (view.kind === "loading") return <LoadingScreen />;
   if (view.kind === "missing") {
@@ -134,5 +146,13 @@ export function RoomRoute() {
     );
   }
 
-  return <RoomPage code={code} initialState={view.state} onExit={goHome} />;
+  return (
+    <RoomPage
+      code={code}
+      initialState={view.state}
+      showInvite={showInvite}
+      onInviteClosed={clearInviteFlag}
+      onExit={goHome}
+    />
+  );
 }

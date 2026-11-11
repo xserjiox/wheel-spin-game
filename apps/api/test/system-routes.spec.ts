@@ -107,6 +107,23 @@ describe("system route registration", () => {
     expect(response.body).toContain("<loc>http://gatherwheel.test/ms/</loc>");
   });
 
+  it("describes the product for AI assistants in llms.txt", async () => {
+    const response = await app
+      .getHttpAdapter()
+      .getInstance()
+      .inject({
+        method: "GET",
+        url: "/llms.txt",
+        headers: { host: "gatherwheel.test" },
+      });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.headers["content-type"]).toContain("text/plain");
+    expect(response.body).toContain("# GatherWheel");
+    expect(response.body).toContain("up to 100 people");
+    expect(response.body).toContain("(http://gatherwheel.test/es/)");
+  });
+
   it.each(["vi", "ms"])("serves the prerendered %s home page", async (locale) => {
     const response = await app
       .getHttpAdapter()

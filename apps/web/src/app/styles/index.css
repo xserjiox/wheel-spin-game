@@ -3248,6 +3248,122 @@ input::placeholder {
   box-shadow: 12px 12px 0 var(--orange);
 }
 
+.invite-card {
+  width: min(100%, 440px);
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  padding: 34px 30px 28px;
+}
+
+.invite-card h2 {
+  font-size: 21px;
+}
+
+.invite-description {
+  margin: 10px auto 18px;
+  max-width: 34ch;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.invite-qr {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  margin: 0 0 18px;
+  padding: 16px 16px 12px;
+  background: white;
+  border: 1.5px solid var(--ink);
+}
+
+.qr-code {
+  display: block;
+  width: min(100%, 240px);
+  height: auto;
+  aspect-ratio: 1;
+}
+
+.invite-qr figcaption {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.invite-link {
+  display: grid;
+  gap: 7px;
+  margin-bottom: 12px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  text-align: left;
+}
+
+.invite-link-row {
+  display: flex;
+  gap: 8px;
+}
+
+.invite-link-row input {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+}
+
+.invite-copy-button {
+  flex: 0 0 auto;
+  min-height: 48px;
+  padding: 0 14px;
+  background: var(--acid);
+  border: 1.5px solid var(--ink);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.invite-share-button {
+  min-height: 46px;
+  margin-bottom: 4px;
+  font-size: 12px;
+}
+
+.invite-joined {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 12px 0 16px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.invite-joined .status-dot {
+  background: var(--line);
+}
+
+.invite-joined.active {
+  color: var(--ink);
+}
+
+.invite-joined.active .status-dot {
+  background: #83c256;
+  animation: blink 0.8s ease-in-out infinite alternate;
+}
+
+@media (max-width: 600px) {
+  .invite-card {
+    padding: 28px 18px 20px;
+    box-shadow: 6px 6px 0 var(--acid);
+  }
+
+  .qr-code {
+    width: min(100%, 200px);
+  }
+}
+
 .kick-symbol,
 .delete-data-symbol {
   display: grid;
@@ -3430,6 +3546,30 @@ input::placeholder {
 .seo-benefit-grid p {
   max-width: 520px;
   font-size: 15px;
+}
+
+.seo-about {
+  margin-top: 20px;
+  padding: 42px;
+  background: var(--panel);
+  border: 1.5px solid var(--ink);
+  box-shadow: 7px 7px 0 var(--ink);
+}
+
+.seo-about h2 {
+  margin: 0;
+  font-family: "Unbounded", sans-serif;
+  font-size: clamp(24px, 3vw, 37px);
+  letter-spacing: -0.045em;
+  line-height: 1.15;
+}
+
+.seo-about p {
+  max-width: 860px;
+  margin: 15px 0 0;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.7;
 }
 
 .seo-faq {
@@ -3984,7 +4124,8 @@ input::placeholder {
     margin-top: 52px;
   }
 
-  .seo-benefit-grid article {
+  .seo-benefit-grid article,
+  .seo-about {
     min-height: auto;
     padding: 30px 25px;
   }
