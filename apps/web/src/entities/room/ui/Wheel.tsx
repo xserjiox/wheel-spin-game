@@ -1,5 +1,6 @@
 import {
   type PointerEvent as ReactPointerEvent,
+  type ReactNode,
   useCallback,
   useEffect,
   useRef,
@@ -72,6 +73,8 @@ export function Wheel({
   canControlSpin = isHost,
   connected,
   onSpin,
+  resultFooter,
+  onResultClose,
 }: {
   options: Option[];
   activeSpin: ActiveSpin | null;
@@ -81,6 +84,10 @@ export function Wheel({
   isHost: boolean;
   connected: boolean;
   onSpin: () => void;
+  // Extra content under the result, such as a hint for the host.
+  resultFooter?: ReactNode;
+  // Fires only when a person closes the result, not when a new spin replaces it.
+  onResultClose?: () => void;
 }) {
   const { localeTag, t } = useI18n();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -102,6 +109,14 @@ export function Wheel({
   const [rotation, setRotation] = useState(0);
   const [transition, setTransition] = useState("none");
   const [winner, setWinner] = useState("");
+  const onResultCloseRef = useRef(onResultClose);
+  useEffect(() => {
+    onResultCloseRef.current = onResultClose;
+  });
+  const closeResult = useCallback(() => {
+    setWinner("");
+    onResultCloseRef.current?.();
+  }, []);
   const [optionTooltip, setOptionTooltip] = useState<OptionTooltip | null>(null);
   const [soundEnabled, setSoundEnabled] = useState(() => {
     try {
@@ -383,7 +398,7 @@ export function Wheel({
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         event.preventDefault();
-        setWinner("");
+        closeResult();
         return;
       }
 
@@ -420,7 +435,7 @@ export function Wheel({
       previousFocusRef.current?.focus();
       previousFocusRef.current = null;
     };
-  }, [winner]);
+  }, [closeResult, winner]);
 
   return (
     <>
@@ -519,7 +534,7 @@ export function Wheel({
             className="modal-backdrop"
             aria-hidden="true"
             tabIndex={-1}
-            onClick={() => setWinner("")}
+            onClick={closeResult}
           />
           <Confetti />
           <div className="result-card">
@@ -528,7 +543,7 @@ export function Wheel({
               className="modal-close"
               type="button"
               aria-label={t("closeResult")}
-              onClick={() => setWinner("")}
+              onClick={closeResult}
             >
               ×
             </button>
@@ -538,9 +553,10 @@ export function Wheel({
             </div>
             <h2 id="result-title">{t("winner")}</h2>
             <p className="result-name">{winner}</p>
-            <button className="secondary-button" onClick={() => setWinner("")}>
+            <button className="secondary-button" onClick={closeResult}>
               {t("returnRoom")}
             </button>
+            {resultFooter && <div className="result-footer">{resultFooter}</div>}
           </div>
         </div>
       )}

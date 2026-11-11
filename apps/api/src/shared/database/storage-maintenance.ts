@@ -39,15 +39,15 @@ export async function deleteExpiredRoomsBatch(
     -- Runs in the same snapshot as the DELETE, so participants and spins are still visible.
     recorded_stats AS (
       INSERT INTO "DailyRoomStat" (
-        day, "hasPassword", rooms, "roomsWithGuests", "liveRooms", "soloSpunRooms",
-        "abandonedRooms", guests, "maxGuests", "participants1", "participants2to4",
-        "participants5to11", "participants12to31", "participants32to49",
-        "participants50plus"
+        day, "hasPassword", experiment, rooms, "roomsWithGuests", "liveRooms",
+        "soloSpunRooms", "abandonedRooms", guests, "maxGuests", "participants1",
+        "participants2to4", "participants5to11", "participants12to31",
+        "participants32to49", "participants50plus", "untouchedRooms"
       )
-      SELECT day, has_password, ${roomTotalsColumns}
+      SELECT day, has_password, experiment, ${roomTotalsColumns}
       FROM summaries
-      GROUP BY day, has_password
-      ON CONFLICT (day, "hasPassword") DO UPDATE SET
+      GROUP BY day, has_password, experiment
+      ON CONFLICT (day, "hasPassword", experiment) DO UPDATE SET
         rooms = "DailyRoomStat".rooms + EXCLUDED.rooms,
         "roomsWithGuests" = "DailyRoomStat"."roomsWithGuests" + EXCLUDED."roomsWithGuests",
         "liveRooms" = "DailyRoomStat"."liveRooms" + EXCLUDED."liveRooms",
@@ -64,7 +64,8 @@ export async function deleteExpiredRoomsBatch(
         "participants32to49" =
           "DailyRoomStat"."participants32to49" + EXCLUDED."participants32to49",
         "participants50plus" =
-          "DailyRoomStat"."participants50plus" + EXCLUDED."participants50plus"
+          "DailyRoomStat"."participants50plus" + EXCLUDED."participants50plus",
+        "untouchedRooms" = "DailyRoomStat"."untouchedRooms" + EXCLUDED."untouchedRooms"
     )
     DELETE FROM "Room" AS room
     USING candidates

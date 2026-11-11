@@ -29,6 +29,13 @@ import type {
   PublicRoomState,
 } from "../contracts/room.contracts";
 import { assignAvailableName, normalizeDisplayName } from "../domain/name-policy";
+import { uniqueOptionLabels } from "../domain/option-labels";
+import {
+  assignStartingWheelExperiment,
+  type StartingWheelExperiment,
+  startingWheelFor,
+  starterOptionsHash,
+} from "../domain/starting-wheel-experiment";
 import {
   calculateFinalRotation,
   normalizeChanceWeights,
@@ -106,10 +113,18 @@ export class RoomsService {
     code: string;
     token: string;
     state: PublicRoomState;
+    experiment: StartingWheelExperiment | null;
   }> {
     const session = this.sessions.create();
     const passwordHash = input.password ? await hashPassword(input.password) : null;
-    const options = input.options ?? DEFAULT_OPTIONS;
+    // A template chosen by the host keeps the room out of the starting-wheel test.
+    const experiment =
+      !input.options && input.starterWheels ? assignStartingWheelExperiment() : null;
+    const options =
+      input.options ??
+      (experiment && input.starterWheels
+        ? startingWheelFor(experiment, input.starterWheels)
+        : DEFAULT_OPTIONS);
     const expiresAt = new Date(Date.now() + ROOM_TTL_MS);
 
     for (let attempt = 0; attempt < 5; attempt += 1) {
@@ -121,6 +136,8 @@ export class RoomsService {
             title: input.title,
             passwordHash,
             selectionMode: input.selectionMode,
+            experiment,
+            starterOptionsHash: experiment ? starterOptionsHash(options) : null,
             expiresAt,
             participants: {
               create: {
@@ -141,6 +158,7 @@ export class RoomsService {
           code,
           token: session.token,
           state: await this.getState(code, host),
+          experiment,
         };
       } catch (error) {
         if (
@@ -582,6 +600,37 @@ export class RoomsService {
         data: { roomId: participant.roomId, label, position: count },
       });
       await this.normalizeOptionChances(tx, participant.roomId);
+      await tx.room.update({
+        where: { id: participant.roomId },
+        data: { version: { increment: 1 }, ...this.activityData() },
+      });
+    });
+  }
+
+  // Swaps the whole wheel in one transaction so a pasted list never hits per-option rate limits.
+  async replaceOptions(
+    participant: SessionParticipant,
+    labels: string[],
+  ): Promise<void> {
+    this.assertHost(participant);
+    const uniqueLabels = uniqueOptionLabels(labels);
+    if (uniqueLabels.length < 2) {
+      throw new BadRequestException("Добавьте хотя бы два слота");
+    }
+    if (uniqueLabels.length > MAX_OPTIONS) {
+      throw new BadRequestException("Достигнут лимит слотов");
+    }
+    await this.assertEditable(participant.roomId);
+    await this.prisma.$transaction(async (tx) => {
+      await this.lockRoom(tx, participant.roomId, RoomStatus.LOBBY);
+      await tx.option.deleteMany({ where: { roomId: participant.roomId } });
+      await tx.option.createMany({
+        data: uniqueLabels.map((label, position) => ({
+          roomId: participant.roomId,
+          label,
+          position,
+        })),
+      });
       await tx.room.update({
         where: { id: participant.roomId },
         data: { version: { increment: 1 }, ...this.activityData() },

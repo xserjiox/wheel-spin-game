@@ -30,22 +30,26 @@ enum SelectionMode {
 }
 
 model Room {
-  id              String        @id @default(uuid())
-  code            String        @unique
-  title           String
-  passwordHash    String?
-  selectionMode   SelectionMode @default(REPEAT)
-  status          RoomStatus    @default(LOBBY)
-  version         Int           @default(1)
-  currentRotation Float         @default(0)
-  activeSpinId    String?
-  createdAt       DateTime      @default(now())
-  lastActivityAt  DateTime      @default(now())
-  expiresAt       DateTime
-  participants    Participant[]
-  options         Option[]
-  proposals       Proposal[]
-  spins           Spin[]
+  id                 String        @id @default(uuid())
+  code               String        @unique
+  title              String
+  passwordHash       String?
+  selectionMode      SelectionMode @default(REPEAT)
+  status             RoomStatus    @default(LOBBY)
+  version            Int           @default(1)
+  currentRotation    Float         @default(0)
+  activeSpinId       String?
+  /// Starting-wheel A/B group: "A" standard options, "B" neutral placeholders; null when a template was used.
+  experiment         String?
+  /// md5 of the starting option labels joined by newlines, so stats can tell whether the wheel was changed.
+  starterOptionsHash String?
+  createdAt          DateTime      @default(now())
+  lastActivityAt     DateTime      @default(now())
+  expiresAt          DateTime
+  participants       Participant[]
+  options            Option[]
+  proposals          Proposal[]
+  spins              Spin[]
 
   @@index([expiresAt])
 }
@@ -102,6 +106,8 @@ model Proposal {
 model DailyRoomStat {
   day                DateTime @db.Date
   hasPassword        Boolean
+  /// Room.experiment, or "none" for rooms outside the starting-wheel test.
+  experiment         String   @default("none")
   rooms              Int      @default(0)
   roomsWithGuests    Int      @default(0)
   liveRooms          Int      @default(0)
@@ -115,8 +121,10 @@ model DailyRoomStat {
   participants12to31 Int      @default(0)
   participants32to49 Int      @default(0)
   participants50plus Int      @default(0)
+  /// Rooms whose options still matched the starting set when they expired.
+  untouchedRooms     Int      @default(0)
 
-  @@id([day, hasPassword])
+  @@id([day, hasPassword, experiment])
 }
 
 model Spin {

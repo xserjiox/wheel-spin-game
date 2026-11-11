@@ -147,15 +147,18 @@ checklist so the property matches the code and legal notices:
    and the product events `room_create`, `room_join_start`, `room_join`,
    `room_join_failed`, `spin_start`, `share_room`, `share_room_failed`,
    `preset_select`, `template_select`, `template_save`, `elimination_enable`,
-   and `round_reset`. Verify the fixed-category parameters `has_password` on
-   `room_create`, `entry_type`, `has_password`, and `reason` on join events, and
-   `role` and `method` on share events; none may contain room identifiers or
-   user-provided content. Every event reports `/r/:room` instead of the room URL;
-   only `utm_*` campaign tags are kept from query strings.
+   `round_reset`, and `feature_interest`. Verify the fixed-category parameters
+   `has_password` and `experiment` (`A`, `B`, or `none`) on `room_create`,
+   `entry_type`, `has_password`, and `reason` on join events, `role` and
+   `method` on share events, and `feature` (`saved_group`, `permanent_room`,
+   `split_teams`, `projector_mode`, `pro`) and `source` (`settings`, `history`,
+   `after_spin`, `survey`) on `feature_interest`; none may contain room
+   identifiers or user-provided content. Every event reports `/r/:room` instead
+   of the room URL; only `utm_*` campaign tags are kept from query strings.
 6. Mark `room_join` and `share_room` as key events. Use the recommended
    **Once per event** counting method, and register `entry_type`, `has_password`,
-   `reason`, `role`, and `method` as event-scoped custom dimensions when these
-   breakdowns are needed in reports.
+   `reason`, `role`, `method`, `experiment`, `feature`, and `source` as
+   event-scoped custom dimensions when these breakdowns are needed in reports.
 
 GatherWheel uses Basic Consent Mode: the Google tag is not loaded until a
 visitor allows analytics, advertising consent remains denied, and analytics
@@ -178,11 +181,22 @@ needed. A separate Railway Cron service requires its own config-as-code file so
 that the web service's start command and healthcheck are not inherited.
 
 Right before an expired room is deleted, the cleanup adds it to the anonymous
-`DailyRoomStat` totals: creation day, password presence, guest and participant
-counts, and whether the wheel was spun. Run `npm run build` and then
-`npm run stats:weekly` (optionally `-- --weeks=12` or `-- --json`) with the
-production `DATABASE_URL` to combine those totals with rooms that still exist
-into a weekly report.
+`DailyRoomStat` totals: creation day, password presence, starting-wheel test
+group, guest and participant counts, whether the wheel was spun, and whether
+the starting options were never changed (`untouchedRooms`). Run `npm run build`
+and then `npm run stats:weekly` (optionally `-- --weeks=12` or `-- --json`) with
+the production `DATABASE_URL` to combine those totals with rooms that still
+exist into a weekly report.
+
+Starting-wheel A/B test: when the host does not pick a template, the server
+assigns each new room to group `A` (the usual sample options for the host's
+language) or `B` (neutral "Option 1…" placeholders) at random and stores it in
+`Room.experiment`. `stats:weekly` prints a second table with rooms, rooms with
+guests, live rooms, abandoned rooms, and untouched rooms per group, plus a
+total per group. Untouched is decided by comparing an md5 fingerprint of the
+starting labels with the room's current labels, so no wheel content is copied
+into the statistics. With `--json`, the output is
+`{ "weeks": [...], "startingWheelTest": [...] }`.
 
 Before the first deployment of the retention changes, create a PostgreSQL
 backup. After deploying the code that prevents new growth, inspect and remove

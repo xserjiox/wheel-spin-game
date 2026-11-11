@@ -42,7 +42,7 @@ export class RoomsController {
     const input = parseRequest(createRoomSchema, body);
     const result = await this.rooms.create(input);
     this.setSessionCookie(reply, result.code, result.token);
-    return { code: result.code, state: result.state };
+    return { code: result.code, state: result.state, experiment: result.experiment };
   }
 
   @Get(":code/meta")

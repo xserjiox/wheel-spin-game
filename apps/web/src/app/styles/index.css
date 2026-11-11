@@ -3353,6 +3353,177 @@ input::placeholder {
   animation: blink 0.8s ease-in-out infinite alternate;
 }
 
+.customize-step {
+  display: grid;
+  gap: 12px;
+  text-align: left;
+}
+
+.customize-step h2 {
+  text-align: center;
+}
+
+.customize-step .invite-description {
+  margin: 0 auto 4px;
+  text-align: center;
+}
+
+.quick-sets {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.quick-sets button {
+  min-height: 36px;
+  padding: 0 14px;
+  background: white;
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.quick-sets button:hover {
+  background: var(--acid);
+}
+
+.option-fields {
+  display: grid;
+  gap: 8px;
+}
+
+.option-fields-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.option-fields-list {
+  display: grid;
+  max-height: min(276px, 38vh);
+  margin: 0;
+  padding: 2px 2px 2px 0;
+  gap: 6px;
+  list-style: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.option-field {
+  display: grid;
+  grid-template-columns: 9px minmax(0, 1fr) 25px;
+  align-items: center;
+  gap: 9px;
+}
+
+.option-color.is-empty {
+  background: transparent;
+  border-style: dashed;
+}
+
+.option-field-input {
+  position: relative;
+  display: block;
+}
+
+.option-field input {
+  width: 100%;
+  min-height: 40px;
+  padding: 0 12px;
+  background: white;
+  border: 1.5px solid var(--ink);
+  border-radius: 0;
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.option-field input::placeholder {
+  color: #a3a69f;
+  font-weight: 500;
+}
+
+.option-field input:focus-visible {
+  outline: 2px solid var(--purple);
+  outline-offset: -3px;
+}
+
+.option-field.is-duplicate input {
+  padding-right: 84px;
+  border-style: dashed;
+  color: var(--muted);
+}
+
+.option-field-note {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+  text-transform: uppercase;
+  transform: translateY(-50%);
+}
+
+.option-fields .remove-option:disabled {
+  cursor: default;
+  opacity: 0.35;
+}
+
+.option-fields-add {
+  justify-self: start;
+  margin-left: 18px;
+}
+
+.option-fields-hint {
+  margin: -2px 0 0 18px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+@media (max-width: 600px) {
+  .quick-sets {
+    gap: 6px;
+  }
+
+  .quick-sets button {
+    padding: 0 11px;
+  }
+
+  /* iOS zooms into inputs smaller than 16px, which would push the dialog off screen. */
+  .option-field input {
+    font-size: 16px;
+  }
+}
+
+.customize-step .customize-toggle {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  justify-self: start;
+  gap: 10px;
+  color: var(--ink);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.customize-skip {
+  justify-self: center;
+}
+
 @media (max-width: 600px) {
   .invite-card {
     padding: 28px 18px 20px;
@@ -3361,6 +3532,141 @@ input::placeholder {
 
   .qr-code {
     width: min(100%, 200px);
+  }
+}
+
+.feature-interest {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: transparent;
+  border: 1.5px dashed var(--line);
+  border-radius: 999px;
+  color: var(--ink);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: left;
+}
+
+.feature-interest:hover {
+  border-color: var(--ink);
+}
+
+.feature-interest.noted {
+  border-style: solid;
+  border-color: var(--acid);
+  background: var(--acid);
+  cursor: default;
+}
+
+.soon-badge {
+  padding: 2px 7px;
+  background: var(--ink);
+  border-radius: 999px;
+  color: var(--acid);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.coming-soon h3 {
+  margin: 0 0 6px;
+  font-size: 15px;
+}
+
+.coming-soon p {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.feature-interest-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.coming-soon-panel {
+  border-top: 1px solid var(--line);
+}
+
+.history-footer {
+  margin-top: 18px;
+}
+
+.result-footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 14px;
+}
+
+.feature-survey {
+  position: fixed;
+  z-index: 25;
+  right: 20px;
+  bottom: 20px;
+  width: min(340px, calc(100vw - 32px));
+  padding: 20px 20px 14px;
+  background: var(--panel);
+  border: 2px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--purple);
+}
+
+.feature-survey h2 {
+  margin: 0 28px 6px 0;
+  font-size: 18px;
+}
+
+.feature-survey p {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.feature-survey .modal-close {
+  top: 10px;
+  right: 10px;
+}
+
+.feature-survey-options {
+  display: grid;
+  gap: 6px;
+}
+
+.feature-survey-options button {
+  min-height: 38px;
+  padding: 8px 12px;
+  background: white;
+  border: 1.5px solid var(--ink);
+  color: var(--ink);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: left;
+}
+
+.feature-survey-options button:hover {
+  background: var(--acid);
+}
+
+.feature-survey .feature-interest-thanks {
+  margin: 4px 0 6px;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+@media (max-width: 600px) {
+  .feature-survey {
+    right: 16px;
+    bottom: 16px;
   }
 }
 

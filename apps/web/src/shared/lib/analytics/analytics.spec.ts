@@ -104,6 +104,10 @@ describe("analytics consent application", () => {
       reason: "unauthorized",
     });
     trackAnalyticsEvent("template_save");
+    trackAnalyticsEvent("feature_interest", {
+      feature: "split_teams",
+      source: "survey",
+    });
 
     const commands = (testAnalyticsWindow().dataLayer ?? []).map((command) =>
       Array.from(command as ArrayLike<unknown>),
@@ -142,6 +146,11 @@ describe("analytics consent application", () => {
       "template_save",
       { send_to: "G-TEST123" },
     ]);
+    expect(commands).toContainEqual([
+      "event",
+      "feature_interest",
+      { feature: "split_teams", source: "survey", send_to: "G-TEST123" },
+    ]);
   });
 
   it("applies the normalized room location to every later event", async () => {
@@ -152,7 +161,7 @@ describe("analytics consent application", () => {
 
     applyAnalyticsConsent(true);
     trackAnalyticsPageView("/r/SecretRoom123", "?utm_source=telegram&invite=yes");
-    trackAnalyticsEvent("room_create", { has_password: false });
+    trackAnalyticsEvent("room_create", { has_password: false, experiment: "B" });
 
     const commands = (testAnalyticsWindow().dataLayer ?? []).map((command) =>
       Array.from(command as ArrayLike<unknown>),
@@ -174,8 +183,21 @@ describe("analytics consent application", () => {
     expect(commands).toContainEqual([
       "event",
       "room_create",
-      { has_password: false, send_to: "G-TEST123" },
+      { has_password: false, experiment: "B", send_to: "G-TEST123" },
     ]);
     expect(JSON.stringify(commands)).not.toContain("SecretRoom123");
+  });
+
+  it("only accepts the fixed feature and source values", () => {
+    // Compile-time guard: free text must never reach feature_interest.
+    const check = (track: typeof import("./analytics").trackAnalyticsEvent) => {
+      // @ts-expect-error unknown feature names are rejected
+      track("feature_interest", { feature: "dark mode", source: "survey" });
+      // @ts-expect-error unknown sources are rejected
+      track("feature_interest", { feature: "pro", source: "email" });
+      // @ts-expect-error room_create needs the experiment group
+      track("room_create", { has_password: true });
+    };
+    expect(check).toBeTypeOf("function");
   });
 });

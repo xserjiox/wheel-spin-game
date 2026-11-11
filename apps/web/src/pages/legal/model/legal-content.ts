@@ -67,7 +67,7 @@ const documents = {
           title: "3. Optional Google Analytics",
           items: [
             "Google Analytics 4 is not loaded and receives no analytics request until you actively allow analytics. Rejecting analytics does not restrict the service.",
-            "After consent, we send normalized page views and the product events room_create, room_join_start, room_join, room_join_failed, spin_start, share_room, share_room_failed, preset_select, template_select, template_save, elimination_enable, and round_reset. Room creation and join events may include the fixed-category parameters entry_type, has_password, and reason; share events may include role and method. These parameters do not contain user-provided content. Room URLs are replaced with /r/:room in every event; query strings are removed except utm_* campaign tags that show which link brought a visitor, and room codes, names, passwords, and wheel content are not sent.",
+            "After consent, we send normalized page views and the product events room_create, room_join_start, room_join, room_join_failed, spin_start, share_room, share_room_failed, preset_select, template_select, template_save, elimination_enable, round_reset, and feature_interest. Room creation and join events may include the fixed-category parameters entry_type, has_password, and reason, and room creation also includes experiment (the starting-wheel test group: A, B, or none); share events may include role and method; feature_interest includes feature (saved_group, permanent_room, split_teams, projector_mode, or pro) and source (settings, history, after_spin, or survey). These parameters do not contain user-provided content. Room URLs are replaced with /r/:room in every event; query strings are removed except utm_* campaign tags that show which link brought a visitor, and room codes, names, passwords, and wheel content are not sent.",
             "Google may process device/browser information, approximate location derived from the connection, IP address during transmission, referrer information, timestamps, and first-party analytics identifiers stored in _ga cookies.",
             "Advertising storage, ad user data, ad personalization, Google Signals, User-ID, and personalized advertising are disabled in our tag configuration.",
           ],
@@ -93,7 +93,7 @@ const documents = {
         {
           title: "6. Retention",
           items: [
-            "Rooms and related database records expire after seven days without activity and are removed by an hourly cleanup; a host may delete a room sooner. Room-session cookies expire after seven days. Before an expired room is removed, it is added to anonymous daily totals: the creation day, whether a password was set, the number of participants, and whether the wheel was spun. These totals contain no codes, names, or wheel content.",
+            "Rooms and related database records expire after seven days without activity and are removed by an hourly cleanup; a host may delete a room sooner. Room-session cookies expire after seven days. Before an expired room is removed, it is added to anonymous daily totals: the creation day, whether a password was set, the number of participants, whether the wheel was spun, the starting-wheel test group (A, B, or none), and whether the starting options were ever changed. These totals contain no codes, names, or wheel content.",
             "Failed-join records remain only in server memory. Hosting logs and backups follow the configured production-provider retention periods.",
             "Saved room shortcuts, language, and templates remain on the device until removed. The consent record expires after 180 days, after which we ask again.",
             "Analytics cookies are configured for no more than 180 days and do not have their expiry extended on later visits. Revoking consent asks the browser to delete GatherWheel's _ga cookies.",
@@ -141,6 +141,7 @@ const documents = {
             "gatherwheel-locale — language preference; localStorage; remains until changed or cleared.",
             "gatherwheel-rooms and legacy gatherwheel-host-rooms — room shortcuts saved at your request; localStorage; until removed or the room expires.",
             "gatherwheel-templates — wheel templates saved on this device; localStorage; until removed.",
+            "gatherwheel-feedback — whether the “What's missing?” survey was already shown and which “Coming soon” features you tapped, so you are not asked twice; localStorage; until cleared.",
             "gatherwheel-consent-v1 — analytics choice, decision time, and expiry; strictly necessary localStorage; 180 days.",
           ],
         },
@@ -194,7 +195,7 @@ const documents = {
           title: "3. Необязательная Google Analytics",
           items: [
             "GA4 не загружается и не получает аналитических запросов до вашего явного согласия. Отказ не ограничивает сервис.",
-            "После согласия отправляются нормализованные просмотры и продуктовые события room_create, room_join_start, room_join, room_join_failed, spin_start, share_room, share_room_failed, preset_select, template_select, template_save, elimination_enable и round_reset. События создания комнаты и присоединения могут содержать параметры с фиксированными категориями entry_type, has_password и reason, а события отправки ссылки — role и method. Эти параметры не содержат пользовательский контент. URL комнаты заменяется на /r/:room во всех событиях; из параметров запроса сохраняются только метки кампаний utm_*, показывающие, по какой ссылке пришёл посетитель, а коды, имена, пароли и содержимое колеса не отправляются.",
+            "После согласия отправляются нормализованные просмотры и продуктовые события room_create, room_join_start, room_join, room_join_failed, spin_start, share_room, share_room_failed, preset_select, template_select, template_save, elimination_enable, round_reset и feature_interest. События создания комнаты и присоединения могут содержать параметры с фиксированными категориями entry_type, has_password и reason, событие создания комнаты — также experiment (группа теста стартового колеса: A, B или none), события отправки ссылки — role и method, а feature_interest — feature (saved_group, permanent_room, split_teams, projector_mode или pro) и source (settings, history, after_spin или survey). Эти параметры не содержат пользовательский контент. URL комнаты заменяется на /r/:room во всех событиях; из параметров запроса сохраняются только метки кампаний utm_*, показывающие, по какой ссылке пришёл посетитель, а коды, имена, пароли и содержимое колеса не отправляются.",
             "Google может обработать данные устройства и браузера, приблизительное местоположение, IP при передаче, источник перехода, время и идентификаторы в first-party cookies _ga.",
             "Рекламное хранилище, рекламные пользовательские данные, персонализация рекламы, Google Signals, User-ID и персонализированная реклама отключены.",
           ],
@@ -220,7 +221,7 @@ const documents = {
         {
           title: "6. Сроки хранения",
           items: [
-            "Комнаты и связанные записи удаляются после семи дней без активности ежечасной очисткой; организатор может удалить раньше. Cookie сессии действует семь дней. Перед удалением истекшая комната добавляется в анонимные суточные итоги: день создания, был ли пароль, число участников и было ли вращение. В итогах нет кодов, имён и содержимого колеса.",
+            "Комнаты и связанные записи удаляются после семи дней без активности ежечасной очисткой; организатор может удалить раньше. Cookie сессии действует семь дней. Перед удалением истекшая комната добавляется в анонимные суточные итоги: день создания, был ли пароль, число участников, было ли вращение, группа теста стартового колеса (A, B или none) и менялись ли стартовые варианты. В итогах нет кодов, имён и содержимого колеса.",
             "Записи неудачных входов существуют только в памяти. Срок логов и резервных копий определяется production-настройками хостинга.",
             "Язык, ссылки и шаблоны остаются на устройстве до удаления. Согласие хранится 180 дней, затем запрашивается снова.",
             "Аналитические cookies ограничены 180 днями без продления при повторных визитах. При отзыве браузеру даётся команда удалить cookies _ga GatherWheel.",
@@ -268,6 +269,7 @@ const documents = {
             "gatherwheel-locale — выбор языка; localStorage; до изменения или очистки.",
             "gatherwheel-rooms и legacy gatherwheel-host-rooms — сохранённые по вашему запросу ссылки; localStorage; до удаления или истечения комнаты.",
             "gatherwheel-templates — сохранённые на устройстве шаблоны; localStorage; до удаления.",
+            "gatherwheel-feedback — показан ли уже опрос «Чего не хватает?» и какие функции из «Скоро» вы отметили, чтобы не спрашивать дважды; localStorage; до очистки.",
             "gatherwheel-consent-v1 — выбор аналитики, время и срок; необходимый localStorage; 180 дней.",
           ],
         },
@@ -320,7 +322,7 @@ const documents = {
           title: "3. Необов’язкова Google Analytics",
           items: [
             "GA4 не завантажується до активної згоди; відмова не обмежує сервіс.",
-            "Після згоди надсилаються нормалізовані перегляди та продуктові події room_create, room_join_start, room_join, room_join_failed, spin_start, share_room, share_room_failed, preset_select, template_select, template_save, elimination_enable і round_reset. Події створення кімнати та приєднання можуть містити параметри з фіксованими категоріями entry_type, has_password і reason, а події надсилання посилання — role і method. Ці параметри не містять користувацького вмісту. URL кімнати стає /r/:room в усіх подіях; з параметрів запиту зберігаються лише мітки кампаній utm_*, що показують, за яким посиланням прийшов відвідувач, а коди, імена, паролі та вміст колеса не передаються.",
+            "Після згоди надсилаються нормалізовані перегляди та продуктові події room_create, room_join_start, room_join, room_join_failed, spin_start, share_room, share_room_failed, preset_select, template_select, template_save, elimination_enable, round_reset і feature_interest. Події створення кімнати та приєднання можуть містити параметри з фіксованими категоріями entry_type, has_password і reason, подія створення кімнати — також experiment (група тесту стартового колеса: A, B або none), події надсилання посилання — role і method, а feature_interest — feature (saved_group, permanent_room, split_teams, projector_mode або pro) і source (settings, history, after_spin або survey). Ці параметри не містять користувацького вмісту. URL кімнати стає /r/:room в усіх подіях; з параметрів запиту зберігаються лише мітки кампаній utm_*, що показують, за яким посиланням прийшов відвідувач, а коди, імена, паролі та вміст колеса не передаються.",
             "Google може обробити дані пристрою/браузера, приблизне місце, IP під час передачі, джерело, час та _ga-ідентифікатори. Рекламні режими, Google Signals, User-ID і персоналізацію вимкнено.",
           ],
         },
@@ -344,7 +346,7 @@ const documents = {
         {
           title: "6. Зберігання",
           items: [
-            "Кімнати видаляються після семи днів без активності; cookie сесії — сім днів. Перед видаленням кімната, строк якої минув, додається до анонімних добових підсумків: день створення, чи був пароль, кількість учасників і чи крутили колесо. Підсумки не містять кодів, імен і вмісту колеса. Логи та backups залежать від production-хостингу.",
+            "Кімнати видаляються після семи днів без активності; cookie сесії — сім днів. Перед видаленням кімната, строк якої минув, додається до анонімних добових підсумків: день створення, чи був пароль, кількість учасників, чи крутили колесо, група тесту стартового колеса (A, B або none) і чи змінювали стартові варіанти. Підсумки не містять кодів, імен і вмісту колеса. Логи та backups залежать від production-хостингу.",
             "Локальні налаштування — до видалення; згода — 180 днів. _ga cookies — до 180 днів без поновлення; при відкликанні їх видалення запитується.",
             "Дані користувачів і подій GA4 передбачено зберігати два місяці; агреговані звіти або законні/безпекові записи Google можуть існувати довше.",
           ],
@@ -387,6 +389,7 @@ const documents = {
             "gatherwheel_session_<room-code> — захищений HttpOnly-токен кімнати; необхідний; 7 днів.",
             "gatherwheel-locale — мова; до зміни/очищення. gatherwheel-rooms і legacy gatherwheel-host-rooms — збережені посилання; до видалення/завершення кімнати.",
             "gatherwheel-templates — шаблони до видалення. gatherwheel-consent-v1 — вибір, час і строк; необхідний; 180 днів.",
+            "gatherwheel-feedback — чи вже показано опитування «Чого бракує?» і які функції з «Скоро» ви позначили, щоб не питати двічі; localStorage; до очищення.",
           ],
         },
         {
@@ -436,7 +439,7 @@ const documents = {
           title: "3. Optionales Google Analytics",
           items: [
             "GA4 wird erst nach aktiver Einwilligung geladen; Ablehnung schränkt den Dienst nicht ein.",
-            "Danach senden wir normalisierte Seitenaufrufe sowie die Produktereignisse room_create, room_join_start, room_join, room_join_failed, spin_start, share_room, share_room_failed, preset_select, template_select, template_save, elimination_enable und round_reset. Raumerstellungs- und Beitrittsereignisse können die Parameter entry_type, has_password und reason mit festen Kategorien enthalten; Freigabeereignisse können role und method enthalten. Diese Parameter enthalten keine von Nutzern eingegebenen Inhalte. Raum-URLs werden in allen Ereignissen zu /r/:room; von Abfrageparametern bleiben nur utm_*-Kampagnenparameter erhalten, die zeigen, über welchen Link jemand kam. Codes, Namen, Passwörter und Radinhalte werden nicht gesendet.",
+            "Danach senden wir normalisierte Seitenaufrufe sowie die Produktereignisse room_create, room_join_start, room_join, room_join_failed, spin_start, share_room, share_room_failed, preset_select, template_select, template_save, elimination_enable, round_reset und feature_interest. Raumerstellungs- und Beitrittsereignisse können die Parameter entry_type, has_password und reason mit festen Kategorien enthalten, die Raumerstellung zusätzlich experiment (Testgruppe des Startrads: A, B oder none); Freigabeereignisse können role und method enthalten; feature_interest enthält feature (saved_group, permanent_room, split_teams, projector_mode oder pro) und source (settings, history, after_spin oder survey). Diese Parameter enthalten keine von Nutzern eingegebenen Inhalte. Raum-URLs werden in allen Ereignissen zu /r/:room; von Abfrageparametern bleiben nur utm_*-Kampagnenparameter erhalten, die zeigen, über welchen Link jemand kam. Codes, Namen, Passwörter und Radinhalte werden nicht gesendet.",
             "Google kann Geräte-/Browserdaten, ungefähren Ort, IP bei Übertragung, Referrer, Zeit und _ga-Kennungen verarbeiten. Werbespeicher, Google Signals, User-ID und Personalisierung sind deaktiviert.",
           ],
         },
@@ -460,7 +463,7 @@ const documents = {
         {
           title: "6. Speicherdauer",
           items: [
-            "Räume werden nach sieben inaktiven Tagen gelöscht; Sitzungscookies gelten sieben Tage. Vor dem Löschen wird ein abgelaufener Raum in anonyme Tagessummen übernommen: Erstellungstag, ob ein Passwort gesetzt war, Teilnehmerzahl und ob gedreht wurde. Diese Summen enthalten keine Codes, Namen oder Radinhalte. Logs/Backups richten sich nach dem Produktionshosting.",
+            "Räume werden nach sieben inaktiven Tagen gelöscht; Sitzungscookies gelten sieben Tage. Vor dem Löschen wird ein abgelaufener Raum in anonyme Tagessummen übernommen: Erstellungstag, ob ein Passwort gesetzt war, Teilnehmerzahl, ob gedreht wurde, die Testgruppe des Startrads (A, B oder none) und ob die Startoptionen geändert wurden. Diese Summen enthalten keine Codes, Namen oder Radinhalte. Logs/Backups richten sich nach dem Produktionshosting.",
             "Lokale Daten bleiben bis zur Löschung; Einwilligung 180 Tage. _ga-Cookies höchstens 180 Tage ohne Verlängerung und werden beim Widerruf zu löschen versucht.",
             "GA4-Nutzer- und Ereignisdaten sollen zwei Monate gespeichert werden; aggregierte Berichte sowie gesetzlich/sicherheitsbedingt nötige Google-Daten können länger bestehen.",
           ],
@@ -503,6 +506,7 @@ const documents = {
             "gatherwheel_session_<room-code> — sicheres HttpOnly-Raumtoken; notwendig; 7 Tage.",
             "gatherwheel-locale — Sprache bis Änderung/Löschung. gatherwheel-rooms und legacy gatherwheel-host-rooms — gespeicherte Räume bis Löschung/Ablauf.",
             "gatherwheel-templates — Vorlagen bis Löschung. gatherwheel-consent-v1 — Wahl, Zeitpunkt, Ablauf; notwendig; 180 Tage.",
+            "gatherwheel-feedback — ob die Umfrage „Was fehlt?“ schon angezeigt wurde und welche „Demnächst“-Funktionen du angetippt hast, damit wir nicht doppelt fragen; localStorage; bis zur Löschung.",
           ],
         },
         {
@@ -552,7 +556,7 @@ const documents = {
           title: "3. 可选 Google Analytics",
           items: [
             "你主动同意前不会加载 GA4，也不会发送分析请求；拒绝不会限制服务。",
-            "同意后，我们会发送标准化页面浏览以及 room_create、room_join_start、room_join、room_join_failed、spin_start、share_room、share_room_failed、preset_select、template_select、template_save、elimination_enable 和 round_reset 产品事件。创建房间和加入事件可能包含采用固定分类值的 entry_type、has_password 和 reason 参数；分享事件可能包含 role 和 method 参数。这些参数不含用户提供的内容。所有事件中的房间路径都改为 /r/:room；查询参数仅保留用于识别访问来源链接的 utm_* 推广参数，不发送房间代码、姓名、密码或转盘内容。",
+            "同意后，我们会发送标准化页面浏览以及 room_create、room_join_start、room_join、room_join_failed、spin_start、share_room、share_room_failed、preset_select、template_select、template_save、elimination_enable、round_reset 和 feature_interest 产品事件。创建房间和加入事件可能包含采用固定分类值的 entry_type、has_password 和 reason 参数，创建房间事件还包含 experiment（初始转盘测试分组：A、B 或 none）；分享事件可能包含 role 和 method 参数；feature_interest 包含 feature（saved_group、permanent_room、split_teams、projector_mode 或 pro）和 source（settings、history、after_spin 或 survey）。这些参数不含用户提供的内容。所有事件中的房间路径都改为 /r/:room；查询参数仅保留用于识别访问来源链接的 utm_* 推广参数，不发送房间代码、姓名、密码或转盘内容。",
             "Google 可能处理设备/浏览器、连接时 IP、推断的大致位置、来源、时间及 _ga 标识。广告存储、Google Signals、User-ID 和个性化均已关闭。",
           ],
         },
@@ -576,7 +580,7 @@ const documents = {
         {
           title: "6. 保留期限",
           items: [
-            "房间闲置七天后删除；会话 cookie 七天。过期房间删除前会计入匿名每日汇总：创建日期、是否设置密码、参与人数以及是否转动过转盘。汇总不含房间代码、姓名或转盘内容。日志和备份期限取决于生产托管设置。",
+            "房间闲置七天后删除；会话 cookie 七天。过期房间删除前会计入匿名每日汇总：创建日期、是否设置密码、参与人数、是否转动过转盘、初始转盘测试分组（A、B 或 none）以及初始选项是否被修改过。汇总不含房间代码、姓名或转盘内容。日志和备份期限取决于生产托管设置。",
             "本地设置保留至删除；同意记录 180 天。_ga cookies 最长 180 天且回访不延长；撤回时会尝试删除。",
             "GA4 用户和事件级数据计划保留两个月；汇总报告或 Google 因法律/安全需保留的数据可能更久。",
           ],
@@ -615,6 +619,7 @@ const documents = {
             "gatherwheel_session_<room-code>——安全 HttpOnly 房间令牌；必要；7 天。",
             "gatherwheel-locale——语言，至更改/清除。gatherwheel-rooms 与旧 gatherwheel-host-rooms——主动保存的房间，至删除/过期。",
             "gatherwheel-templates——模板，至删除。gatherwheel-consent-v1——选择、时间与到期；必要；180 天。",
+            "gatherwheel-feedback——是否已显示“还缺什么？”问卷，以及你点过哪些“即将推出”功能，以免重复询问；localStorage；至清除。",
           ],
         },
         {

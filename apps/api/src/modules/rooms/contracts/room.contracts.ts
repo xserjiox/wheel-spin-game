@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { MAX_OPTIONS } from "../../../shared/config/room.config";
 
 const cleanText = (max: number) => z.string().trim().min(1).max(max);
 
@@ -7,6 +8,14 @@ export const createRoomSchema = z.object({
   title: cleanText(60).default("Кому повезёт?"),
   password: z.string().max(72).optional().default(""),
   options: z.array(cleanText(80)).min(2).max(100).optional(),
+  // Both candidate starting wheels for the A/B test, sent only when no template was picked.
+  // The server chooses one, so the client cannot steer which group a room lands in.
+  starterWheels: z
+    .object({
+      standard: z.array(cleanText(80)).min(2).max(MAX_OPTIONS),
+      blank: z.array(cleanText(80)).min(2).max(MAX_OPTIONS),
+    })
+    .optional(),
   selectionMode: z.enum(["REPEAT", "ELIMINATION"]).default("REPEAT"),
 });
 
@@ -20,6 +29,9 @@ export const roomCodeSchema = z.string().trim().min(6).max(16);
 export const titleSchema = z.object({ title: cleanText(60) });
 export const passwordSchema = z.object({ password: z.string().max(72) });
 export const optionSchema = z.object({ label: cleanText(80) });
+export const optionsReplaceSchema = z.object({
+  labels: z.array(cleanText(80)).min(2).max(MAX_OPTIONS),
+});
 export const optionRemoveSchema = z.object({ optionId: z.string().uuid() });
 export const optionRestoreSchema = z.object({ optionId: z.string().uuid() });
 export const optionChanceSchema = z.object({

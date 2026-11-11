@@ -27,7 +27,8 @@ type CreateInput = {
   hostName: string;
   title: string;
   password: string;
-  options: string[];
+  options?: string[];
+  starterWheels?: { standard: string[]; blank: string[] };
   selectionMode: WheelSelectionMode;
 };
 
@@ -95,10 +96,23 @@ export function HomePage() {
         hostName,
         title,
         password: roomPassword,
-        options: templateOptions ?? defaultRoomOptions,
+        // Without a template the server picks one of the two starting wheels (A/B test).
+        ...(templateOptions
+          ? { options: templateOptions }
+          : {
+              starterWheels: {
+                standard: defaultRoomOptions,
+                blank: defaultRoomOptions.map((_, index) =>
+                  t("starterOptionLabel", { n: index + 1 }),
+                ),
+              },
+            }),
         selectionMode,
       } satisfies CreateInput);
-      trackAnalyticsEvent("room_create", { has_password: roomPassword !== "" });
+      trackAnalyticsEvent("room_create", {
+        has_password: roomPassword !== "",
+        experiment: result.experiment ?? "none",
+      });
       navigate(roomPath(result.code), {
         state: {
           initialRoomState: result.state,

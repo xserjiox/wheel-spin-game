@@ -65,6 +65,37 @@ describe("InviteRoomDialog", () => {
     expect(screen.getByText("ROOM ABCD1234")).toBeTruthy();
   });
 
+  it("shows the customize step first and the invitation after it", () => {
+    render(
+      <I18nProvider>
+        <InviteRoomDialog
+          code="ABCD1234"
+          variant="created"
+          guestCount={0}
+          onClose={vi.fn()}
+          onShared={vi.fn()}
+          onShareFailed={vi.fn()}
+          customizeStep={({ next, titleId }) => (
+            <button id={titleId} type="button" onClick={next}>
+              Custom step
+            </button>
+          )}
+        />
+      </I18nProvider>,
+    );
+
+    expect(screen.getByText("Room is ready · Step 1 of 2")).toBeTruthy();
+    expect(
+      screen.queryByRole("img", { name: "Point a phone camera here to join" }),
+    ).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "Custom step" }));
+    expect(screen.getByText("Step 2 of 2")).toBeTruthy();
+    expect(
+      screen.getByRole("img", { name: "Point a phone camera here to join" }),
+    ).toBeTruthy();
+  });
+
   it("closes on Escape", () => {
     const { onClose } = renderDialog();
     fireEvent.keyDown(document, { key: "Escape" });

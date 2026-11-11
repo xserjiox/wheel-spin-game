@@ -6,9 +6,15 @@ export function createRoom(input: {
   title: string;
   password: string;
   options?: string[];
+  starterWheels?: { standard: string[]; blank: string[] };
   selectionMode?: "REPEAT" | "ELIMINATION";
 }) {
-  return apiRequest<{ code: string; state: RoomState }>("/api/rooms", {
+  return apiRequest<{
+    code: string;
+    state: RoomState;
+    // Starting-wheel A/B group; null when the room was created from a template.
+    experiment?: "A" | "B" | null;
+  }>("/api/rooms", {
     method: "POST",
     body: JSON.stringify(input),
   });

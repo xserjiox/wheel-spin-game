@@ -15,6 +15,7 @@ import {
   optionRemoveSchema,
   optionRestoreSchema,
   optionSchema,
+  optionsReplaceSchema,
   participantKickSchema,
   participantSpinPermissionSchema,
   passwordSchema,
@@ -147,6 +148,17 @@ export class RoomsGateway
     return this.mutate(client, "option.add", async (participant) => {
       const { label } = optionSchema.parse(body);
       await this.rooms.addOption(participant, label);
+    });
+  }
+
+  @SubscribeMessage("options.replace")
+  async replaceOptions(
+    @ConnectedSocket() client: RoomSocket,
+    @MessageBody() body: unknown,
+  ) {
+    return this.mutate(client, "options.replace", async (participant) => {
+      const { labels } = optionsReplaceSchema.parse(body);
+      await this.rooms.replaceOptions(participant, labels);
     });
   }
 

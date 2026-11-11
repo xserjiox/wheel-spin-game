@@ -40,7 +40,7 @@ export const malayLegalDocuments = {
         title: "3. Google Analytics pilihan",
         items: [
           "Google Analytics 4 tidak dimuatkan dan tidak menerima sebarang permintaan analitik sehingga anda secara aktif membenarkan analitik. Menolak analitik tidak mengehadkan perkhidmatan.",
-          "Selepas persetujuan diberikan, kami menghantar paparan halaman yang diseragamkan dan peristiwa produk room_create, room_join_start, room_join, room_join_failed, spin_start, share_room, share_room_failed, preset_select, template_select, template_save, elimination_enable dan round_reset. Peristiwa penciptaan bilik dan penyertaan mungkin mengandungi parameter kategori tetap entry_type, has_password dan reason; peristiwa perkongsian mungkin mengandungi role dan method. Parameter ini tidak mengandungi kandungan yang diberikan oleh pengguna. URL bilik digantikan dengan /r/:room dalam semua peristiwa; daripada rentetan pertanyaan, hanya tag kempen utm_* yang menunjukkan pautan yang membawa pelawat dikekalkan, manakala kod bilik, nama, kata laluan dan kandungan roda tidak dihantar.",
+          "Selepas persetujuan diberikan, kami menghantar paparan halaman yang diseragamkan dan peristiwa produk room_create, room_join_start, room_join, room_join_failed, spin_start, share_room, share_room_failed, preset_select, template_select, template_save, elimination_enable, round_reset dan feature_interest. Peristiwa penciptaan bilik dan penyertaan mungkin mengandungi parameter kategori tetap entry_type, has_password dan reason, dan penciptaan bilik turut mengandungi experiment (kumpulan ujian roda permulaan: A, B atau none); peristiwa perkongsian mungkin mengandungi role dan method; feature_interest mengandungi feature (saved_group, permanent_room, split_teams, projector_mode atau pro) dan source (settings, history, after_spin atau survey). Parameter ini tidak mengandungi kandungan yang diberikan oleh pengguna. URL bilik digantikan dengan /r/:room dalam semua peristiwa; daripada rentetan pertanyaan, hanya tag kempen utm_* yang menunjukkan pautan yang membawa pelawat dikekalkan, manakala kod bilik, nama, kata laluan dan kandungan roda tidak dihantar.",
           "Google mungkin memproses maklumat peranti/pelayar, lokasi anggaran yang diperoleh daripada sambungan, alamat IP semasa penghantaran, maklumat perujuk, cap masa dan pengecam analitik pihak pertama yang disimpan dalam kuki _ga.",
           "Storan pengiklanan, data pengguna iklan, pemperibadian iklan, Google Signals, User-ID dan pengiklanan diperibadikan dilumpuhkan dalam konfigurasi tag kami.",
         ],
@@ -66,7 +66,7 @@ export const malayLegalDocuments = {
       {
         title: "6. Tempoh penyimpanan",
         items: [
-          "Bilik dan rekod pangkalan data yang berkaitan tamat tempoh selepas tujuh hari tanpa aktiviti dan dipadam melalui pembersihan setiap jam; hos boleh memadam bilik lebih awal. Kuki sesi bilik tamat tempoh selepas tujuh hari. Sebelum bilik yang tamat tempoh dipadam, ia ditambah ke jumlah harian tanpa nama: hari dicipta, sama ada kata laluan ditetapkan, bilangan peserta dan sama ada roda diputar. Jumlah ini tidak mengandungi kod, nama atau kandungan roda.",
+          "Bilik dan rekod pangkalan data yang berkaitan tamat tempoh selepas tujuh hari tanpa aktiviti dan dipadam melalui pembersihan setiap jam; hos boleh memadam bilik lebih awal. Kuki sesi bilik tamat tempoh selepas tujuh hari. Sebelum bilik yang tamat tempoh dipadam, ia ditambah ke jumlah harian tanpa nama: hari dicipta, sama ada kata laluan ditetapkan, bilangan peserta, sama ada roda diputar, kumpulan ujian roda permulaan (A, B atau none) dan sama ada pilihan permulaan pernah diubah. Jumlah ini tidak mengandungi kod, nama atau kandungan roda.",
           "Rekod percubaan menyertai yang gagal hanya kekal dalam memori pelayan. Log pengehosan dan sandaran mengikut tempoh penyimpanan yang dikonfigurasi oleh penyedia perkhidmatan sebenar.",
           "Pintasan bilik tersimpan, bahasa dan templat kekal pada peranti sehingga dipadam. Rekod persetujuan tamat tempoh selepas 180 hari, dan kami akan meminta persetujuan semula selepas itu.",
           "Kuki analitik dikonfigurasi untuk tempoh tidak melebihi 180 hari dan tarikh luputnya tidak dilanjutkan pada lawatan berikutnya. Menarik balik persetujuan meminta pelayar memadam kuki _ga milik GatherWheel.",
@@ -114,6 +114,7 @@ export const malayLegalDocuments = {
           "gatherwheel-locale — pilihan bahasa; localStorage; kekal sehingga diubah atau dipadam.",
           "gatherwheel-rooms dan kunci lama gatherwheel-host-rooms — pintasan bilik yang disimpan atas permintaan anda; localStorage; sehingga dipadam atau bilik tamat tempoh.",
           "gatherwheel-templates — templat roda yang disimpan pada peranti ini; localStorage; sehingga dipadam.",
+          "gatherwheel-feedback — sama ada tinjauan “Apa yang kurang?” sudah dipaparkan dan ciri “Akan datang” yang anda ketik, supaya anda tidak ditanya dua kali; localStorage; sehingga dikosongkan.",
           "gatherwheel-consent-v1 — pilihan analitik, masa keputusan dan tarikh luput; localStorage yang sangat diperlukan; 180 hari.",
         ],
       },

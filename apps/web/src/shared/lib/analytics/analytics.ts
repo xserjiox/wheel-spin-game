@@ -226,6 +226,22 @@ type ShareAnalyticsParameters = {
 };
 type CreateAnalyticsParameters = {
   has_password: boolean;
+  // Starting-wheel A/B group assigned by the server; "none" for rooms created from a template.
+  experiment: "A" | "B" | "none";
+};
+// Fixed lists only: interest in a planned feature is counted without any free text.
+export const INTEREST_FEATURES = [
+  "saved_group",
+  "permanent_room",
+  "split_teams",
+  "projector_mode",
+  "pro",
+] as const;
+export type InterestFeature = (typeof INTEREST_FEATURES)[number];
+export type InterestSource = "settings" | "history" | "after_spin" | "survey";
+type FeatureInterestParameters = {
+  feature: InterestFeature;
+  source: InterestSource;
 };
 type ParameterlessAnalyticsEventName =
   | "spin_start"
@@ -241,7 +257,8 @@ type AnalyticsEventName =
   | "room_join"
   | "room_join_failed"
   | "share_room"
-  | "share_room_failed";
+  | "share_room_failed"
+  | "feature_interest";
 type AnalyticsEventParameters = Record<string, string | number | boolean>;
 
 export function trackAnalyticsEvent(eventName: ParameterlessAnalyticsEventName): void;
@@ -260,6 +277,10 @@ export function trackAnalyticsEvent(
 export function trackAnalyticsEvent(
   eventName: "share_room" | "share_room_failed",
   parameters: ShareAnalyticsParameters,
+): void;
+export function trackAnalyticsEvent(
+  eventName: "feature_interest",
+  parameters: FeatureInterestParameters,
 ): void;
 export function trackAnalyticsEvent(
   eventName: AnalyticsEventName,

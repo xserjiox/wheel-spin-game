@@ -1,6 +1,7 @@
 import {
   type CSSProperties,
   type FormEvent,
+  type ReactNode,
   useCallback,
   useEffect,
   useId,
@@ -23,6 +24,17 @@ import { readSavedRooms, removeSavedRoom, saveRoom } from "@/entities/saved-room
 import { LanguageSwitcher } from "@/features/change-language";
 import { SpinControls } from "@/features/control-spin";
 import {
+  CustomizeWheelStep,
+  type CustomizeWheelResult,
+} from "@/features/customize-wheel";
+import {
+  claimSurvey,
+  ComingSoonFeatures,
+  FeatureInterestButton,
+  MissingFeatureSurvey,
+} from "@/features/feature-interest";
+import {
+  type InviteCustomizeStep,
   type InviteDialogVariant,
   InviteRoomDialog,
   type InviteShareMethod,
@@ -68,6 +80,9 @@ export function RoomPage({
   const [inviteVariant, setInviteVariant] = useState<InviteDialogVariant | null>(() =>
     showInvite && initialState.role === "HOST" ? "created" : null,
   );
+  const [surveyOpen, setSurveyOpen] = useState(false);
+  const surveyOffered = useRef(false);
+  const closeSurvey = useCallback(() => setSurveyOpen(false), []);
   const isHost = state.role === "HOST";
   const guestCount = state.participants.filter(
     (participant) => participant.role === "GUEST",
@@ -136,6 +151,14 @@ export function RoomPage({
     if (result.ok) trackAnalyticsEvent("round_reset");
   };
 
+  // Asked once per device, after the host closes a result and the room has a few spins behind it.
+  const offerSurvey = () => {
+    if (!isHost || surveyOffered.current) return;
+    if (!claimSurvey(window.localStorage, state.history.length)) return;
+    surveyOffered.current = true;
+    setSurveyOpen(true);
+  };
+
   const trackInviteShared = (method: InviteShareMethod) => {
     trackAnalyticsEvent("share_room", { role: isHost ? "host" : "guest", method });
   };
@@ -146,6 +169,34 @@ export function RoomPage({
       method: "copy_link",
     });
   };
+
+  const applyCustomOptions = async (
+    labels: string[],
+    noRepeats: boolean,
+  ): Promise<CustomizeWheelResult> => {
+    const result = await command("options.replace", { labels });
+    if (!result.ok) return result;
+    if (noRepeats && state.selectionMode !== "ELIMINATION") {
+      await updateSelectionMode("ELIMINATION");
+    }
+    return { ok: true };
+  };
+
+  // Only the dialog that opens right after creation starts with tailoring the wheel.
+  const customizeStep: InviteCustomizeStep | undefined =
+    inviteVariant === "created"
+      ? ({ next, titleId }) => (
+          <CustomizeWheelStep
+            titleId={titleId}
+            onApply={async (labels, noRepeats) => {
+              const result = await applyCustomOptions(labels, noRepeats);
+              if (result.ok) next();
+              return result;
+            }}
+            onSkip={next}
+          />
+        )
+      : undefined;
 
   return (
     <main className="room-shell">
@@ -182,6 +233,8 @@ export function RoomPage({
         </div>
       )}
 
+      {surveyOpen && <MissingFeatureSurvey onClose={closeSurvey} />}
+
       {inviteVariant && (
         <InviteRoomDialog
           code={state.code}
@@ -190,6 +243,7 @@ export function RoomPage({
           onClose={closeInvite}
           onShared={trackInviteShared}
           onShareFailed={trackInviteShareFailed}
+          customizeStep={customizeStep}
         />
       )}
 
@@ -232,6 +286,12 @@ export function RoomPage({
             isHost={isHost}
             connected={connected}
             onSpin={run}
+            resultFooter={
+              isHost ? (
+                <FeatureInterestButton feature="split_teams" source="after_spin" />
+              ) : undefined
+            }
+            onResultClose={offerSurvey}
           />
 
           {state.selectionMode === "ELIMINATION" && (
@@ -344,7 +404,16 @@ export function RoomPage({
             />
           )}
 
-          {tab === "history" && <History state={state} />}
+          {tab === "history" && (
+            <History
+              state={state}
+              footer={
+                isHost && state.history.length > 0 ? (
+                  <FeatureInterestButton feature="saved_group" source="history" />
+                ) : null
+              }
+            />
+          )}
 
           {tab === "settings" && (
             <RoomSettings
@@ -355,6 +424,14 @@ export function RoomPage({
               update={(password) => command("room.updatePassword", { password })}
               onExit={onExit}
             />
+          )}
+          {tab === "settings" && isHost && (
+            <section className="panel-content coming-soon-panel">
+              <ComingSoonFeatures
+                features={["permanent_room", "projector_mode", "pro"]}
+                source="settings"
+              />
+            </section>
           )}
         </aside>
       </section>
@@ -908,7 +985,7 @@ function ProposalList({
   );
 }
 
-function History({ state }: { state: RoomState }) {
+function History({ state, footer }: { state: RoomState; footer: ReactNode }) {
   const { localeTag, t } = useI18n();
   return (
     <section className="panel-content">
@@ -942,6 +1019,7 @@ function History({ state }: { state: RoomState }) {
           ))}
         </ol>
       )}
+      {footer && <div className="history-footer">{footer}</div>}
     </section>
   );
 }

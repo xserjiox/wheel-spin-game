@@ -40,7 +40,7 @@ export const vietnameseLegalDocuments = {
         title: "3. Google Analytics tùy chọn",
         items: [
           "Google Analytics 4 không được tải và không nhận yêu cầu phân tích nào cho đến khi bạn chủ động cho phép phân tích. Việc từ chối phân tích không hạn chế dịch vụ.",
-          "Sau khi có sự đồng ý, chúng tôi gửi lượt xem trang đã chuẩn hóa và các sự kiện sản phẩm room_create, room_join_start, room_join, room_join_failed, spin_start, share_room, share_room_failed, preset_select, template_select, template_save, elimination_enable và round_reset. Sự kiện tạo phòng và tham gia có thể bao gồm các tham số phân loại cố định entry_type, has_password và reason; sự kiện chia sẻ có thể bao gồm role và method. Các tham số này không chứa nội dung do người dùng cung cấp. URL phòng được thay bằng /r/:room trong mọi sự kiện; từ chuỗi truy vấn, chỉ giữ lại các thẻ chiến dịch utm_* cho biết liên kết nào đưa khách truy cập đến, còn mã phòng, tên, mật khẩu và nội dung vòng quay không được gửi.",
+          "Sau khi có sự đồng ý, chúng tôi gửi lượt xem trang đã chuẩn hóa và các sự kiện sản phẩm room_create, room_join_start, room_join, room_join_failed, spin_start, share_room, share_room_failed, preset_select, template_select, template_save, elimination_enable, round_reset và feature_interest. Sự kiện tạo phòng và tham gia có thể bao gồm các tham số phân loại cố định entry_type, has_password và reason, riêng sự kiện tạo phòng còn có experiment (nhóm thử nghiệm vòng quay ban đầu: A, B hoặc none); sự kiện chia sẻ có thể bao gồm role và method; feature_interest bao gồm feature (saved_group, permanent_room, split_teams, projector_mode hoặc pro) và source (settings, history, after_spin hoặc survey). Các tham số này không chứa nội dung do người dùng cung cấp. URL phòng được thay bằng /r/:room trong mọi sự kiện; từ chuỗi truy vấn, chỉ giữ lại các thẻ chiến dịch utm_* cho biết liên kết nào đưa khách truy cập đến, còn mã phòng, tên, mật khẩu và nội dung vòng quay không được gửi.",
           "Google có thể xử lý thông tin thiết bị/trình duyệt, vị trí gần đúng suy ra từ kết nối, địa chỉ IP trong quá trình truyền, thông tin nguồn giới thiệu, dấu thời gian và mã định danh phân tích bên thứ nhất được lưu trong cookie _ga.",
           "Lưu trữ quảng cáo, dữ liệu người dùng quảng cáo, cá nhân hóa quảng cáo, Google Signals, User-ID và quảng cáo được cá nhân hóa đều bị tắt trong cấu hình thẻ của chúng tôi.",
         ],
@@ -66,7 +66,7 @@ export const vietnameseLegalDocuments = {
       {
         title: "6. Thời gian lưu giữ",
         items: [
-          "Phòng và các bản ghi cơ sở dữ liệu liên quan hết hạn sau bảy ngày không hoạt động và được xóa trong quy trình dọn dẹp hằng giờ; chủ phòng có thể xóa phòng sớm hơn. Cookie phiên phòng hết hạn sau bảy ngày. Trước khi phòng hết hạn bị xóa, phòng được cộng vào số liệu tổng hợp ẩn danh theo ngày: ngày tạo, có đặt mật khẩu hay không, số người tham gia và vòng quay đã được quay hay chưa. Số liệu này không chứa mã phòng, tên hay nội dung vòng quay.",
+          "Phòng và các bản ghi cơ sở dữ liệu liên quan hết hạn sau bảy ngày không hoạt động và được xóa trong quy trình dọn dẹp hằng giờ; chủ phòng có thể xóa phòng sớm hơn. Cookie phiên phòng hết hạn sau bảy ngày. Trước khi phòng hết hạn bị xóa, phòng được cộng vào số liệu tổng hợp ẩn danh theo ngày: ngày tạo, có đặt mật khẩu hay không, số người tham gia, vòng quay đã được quay hay chưa, nhóm thử nghiệm vòng quay ban đầu (A, B hoặc none) và các lựa chọn ban đầu đã từng được thay đổi hay chưa. Số liệu này không chứa mã phòng, tên hay nội dung vòng quay.",
           "Bản ghi tham gia thất bại chỉ tồn tại trong bộ nhớ máy chủ. Nhật ký lưu trữ và bản sao lưu tuân theo thời gian lưu giữ đã cấu hình của nhà cung cấp vận hành chính thức.",
           "Lối tắt phòng đã lưu, ngôn ngữ và mẫu vẫn nằm trên thiết bị cho đến khi bị xóa. Bản ghi đồng ý hết hạn sau 180 ngày, sau đó chúng tôi sẽ hỏi lại.",
           "Cookie phân tích được cấu hình để tồn tại không quá 180 ngày và không được gia hạn khi bạn truy cập lại. Khi bạn rút lại sự đồng ý, trình duyệt được yêu cầu xóa cookie _ga của GatherWheel.",
@@ -114,6 +114,7 @@ export const vietnameseLegalDocuments = {
           "gatherwheel-locale — tùy chọn ngôn ngữ; localStorage; giữ lại cho đến khi được thay đổi hoặc xóa.",
           "gatherwheel-rooms và khóa cũ gatherwheel-host-rooms — lối tắt phòng được lưu theo yêu cầu của bạn; localStorage; cho đến khi bị xóa hoặc phòng hết hạn.",
           "gatherwheel-templates — mẫu vòng quay được lưu trên thiết bị này; localStorage; cho đến khi bị xóa.",
+          "gatherwheel-feedback — khảo sát “Còn thiếu gì?” đã hiển thị hay chưa và những tính năng “Sắp có” bạn đã chạm, để không hỏi lại; localStorage; cho đến khi bị xóa.",
           "gatherwheel-consent-v1 — lựa chọn phân tích, thời điểm quyết định và ngày hết hạn; localStorage hoàn toàn cần thiết; 180 ngày.",
         ],
       },

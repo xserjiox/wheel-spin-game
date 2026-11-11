@@ -5,6 +5,7 @@ import { Prisma, type PrismaClient } from "@prisma/client";
 export const roomSummaryColumns = Prisma.sql`
   room."createdAt"::date AS day,
   room."passwordHash" IS NOT NULL AS has_password,
+  COALESCE(room.experiment, 'none') AS experiment,
   (
     SELECT COUNT(*)::int
     FROM "Participant" AS participant
@@ -16,7 +17,17 @@ export const roomSummaryColumns = Prisma.sql`
     FROM "Participant" AS participant
     WHERE participant."roomId" = room.id
   ) AS participants,
-  EXISTS (SELECT 1 FROM "Spin" AS spin WHERE spin."roomId" = room.id) AS has_spins
+  EXISTS (SELECT 1 FROM "Spin" AS spin WHERE spin."roomId" = room.id) AS has_spins,
+  -- Compared as a fingerprint so the labels themselves never leave the Option table.
+  -- Must match starterOptionsHash() in starting-wheel-experiment.ts.
+  COALESCE(
+    room."starterOptionsHash" = (
+      SELECT md5(string_agg(option.label, chr(10) ORDER BY option.position))
+      FROM "Option" AS option
+      WHERE option."roomId" = room.id
+    ),
+    false
+  ) AS untouched
 `;
 
 // Aggregates rows produced by roomSummaryColumns into the DailyRoomStat columns.
@@ -33,7 +44,8 @@ export const roomTotalsColumns = Prisma.sql`
   COUNT(*) FILTER (WHERE participants BETWEEN 5 AND 11)::int AS "participants5to11",
   COUNT(*) FILTER (WHERE participants BETWEEN 12 AND 31)::int AS "participants12to31",
   COUNT(*) FILTER (WHERE participants BETWEEN 32 AND 49)::int AS "participants32to49",
-  COUNT(*) FILTER (WHERE participants >= 50)::int AS "participants50plus"
+  COUNT(*) FILTER (WHERE participants >= 50)::int AS "participants50plus",
+  COUNT(*) FILTER (WHERE untouched)::int AS "untouchedRooms"
 `;
 
 export type WeeklyRoomStats = {
@@ -55,32 +67,58 @@ export type WeeklyRoomStats = {
   participants50plus: number;
 };
 
-// Combines totals of already deleted rooms with rooms that still exist.
+export type WeeklyExperimentStats = {
+  week: string;
+  experiment: "A" | "B";
+  rooms: number;
+  roomsWithGuests: number;
+  liveRooms: number;
+  abandonedRooms: number;
+  untouchedRooms: number;
+};
+
+// Totals of already deleted rooms plus rooms that still exist, limited to the last `weeks` weeks.
+function combinedDailyTotals(weeks: number) {
+  return Prisma.sql`
+    current_totals AS (
+      SELECT
+        day,
+        has_password AS "hasPassword",
+        experiment,
+        ${roomTotalsColumns}
+      FROM (SELECT ${roomSummaryColumns} FROM "Room" AS room) AS summaries
+      GROUP BY day, has_password, experiment
+    ),
+    combined AS (
+      SELECT
+        day, "hasPassword", experiment, rooms, "roomsWithGuests", "liveRooms",
+        "soloSpunRooms", "abandonedRooms", guests, "maxGuests", "participants1",
+        "participants2to4", "participants5to11", "participants12to31",
+        "participants32to49", "participants50plus", "untouchedRooms"
+      FROM "DailyRoomStat"
+      UNION ALL
+      SELECT
+        day, "hasPassword", experiment, rooms, "roomsWithGuests", "liveRooms",
+        "soloSpunRooms", "abandonedRooms", guests, "maxGuests", "participants1",
+        "participants2to4", "participants5to11", "participants12to31",
+        "participants32to49", "participants50plus", "untouchedRooms"
+      FROM current_totals
+    ),
+    recent AS (
+      SELECT *
+      FROM combined
+      WHERE day >= date_trunc('week', CURRENT_DATE::timestamp)
+        - make_interval(weeks => ${weeks - 1}::int)
+    )
+  `;
+}
+
 export async function loadWeeklyRoomStats(
   prisma: PrismaClient,
   weeks: number,
 ): Promise<WeeklyRoomStats[]> {
   return prisma.$queryRaw<WeeklyRoomStats[]>`
-    WITH current_totals AS (
-      SELECT day, has_password AS "hasPassword", ${roomTotalsColumns}
-      FROM (SELECT ${roomSummaryColumns} FROM "Room" AS room) AS summaries
-      GROUP BY day, has_password
-    ),
-    combined AS (
-      SELECT
-        day, "hasPassword", rooms, "roomsWithGuests", "liveRooms", "soloSpunRooms",
-        "abandonedRooms", guests, "maxGuests", "participants1", "participants2to4",
-        "participants5to11", "participants12to31", "participants32to49",
-        "participants50plus"
-      FROM "DailyRoomStat"
-      UNION ALL
-      SELECT
-        day, "hasPassword", rooms, "roomsWithGuests", "liveRooms", "soloSpunRooms",
-        "abandonedRooms", guests, "maxGuests", "participants1", "participants2to4",
-        "participants5to11", "participants12to31", "participants32to49",
-        "participants50plus"
-      FROM current_totals
-    )
+    WITH ${combinedDailyTotals(weeks)}
     SELECT
       to_char(date_trunc('week', day::timestamp), 'YYYY-MM-DD') AS week,
       SUM(rooms)::int AS rooms,
@@ -99,10 +137,30 @@ export async function loadWeeklyRoomStats(
       SUM("participants12to31")::int AS "participants12to31",
       SUM("participants32to49")::int AS "participants32to49",
       SUM("participants50plus")::int AS "participants50plus"
-    FROM combined
-    WHERE day >= date_trunc('week', CURRENT_DATE::timestamp)
-      - make_interval(weeks => ${weeks - 1}::int)
+    FROM recent
     GROUP BY 1
     ORDER BY 1
+  `;
+}
+
+// Starting-wheel A/B test: rooms outside the test ("none") are left out.
+export async function loadWeeklyExperimentStats(
+  prisma: PrismaClient,
+  weeks: number,
+): Promise<WeeklyExperimentStats[]> {
+  return prisma.$queryRaw<WeeklyExperimentStats[]>`
+    WITH ${combinedDailyTotals(weeks)}
+    SELECT
+      to_char(date_trunc('week', day::timestamp), 'YYYY-MM-DD') AS week,
+      experiment,
+      SUM(rooms)::int AS rooms,
+      SUM("roomsWithGuests")::int AS "roomsWithGuests",
+      SUM("liveRooms")::int AS "liveRooms",
+      SUM("abandonedRooms")::int AS "abandonedRooms",
+      SUM("untouchedRooms")::int AS "untouchedRooms"
+    FROM recent
+    WHERE experiment IN ('A', 'B')
+    GROUP BY 1, 2
+    ORDER BY 1, 2
   `;
 }
