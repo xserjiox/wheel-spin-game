@@ -288,7 +288,7 @@ export function RoomPage({
             onSpin={run}
             resultFooter={
               isHost ? (
-                <FeatureInterestButton feature="split_teams" source="after_spin" />
+                <FeatureInterestButton feature="split_teams" placement="after_spin" />
               ) : undefined
             }
             onResultClose={offerSurvey}
@@ -409,7 +409,7 @@ export function RoomPage({
               state={state}
               footer={
                 isHost && state.history.length > 0 ? (
-                  <FeatureInterestButton feature="saved_group" source="history" />
+                  <FeatureInterestButton feature="saved_group" placement="history" />
                 ) : null
               }
             />
@@ -429,7 +429,7 @@ export function RoomPage({
             <section className="panel-content coming-soon-panel">
               <ComingSoonFeatures
                 features={["permanent_room", "projector_mode", "pro"]}
-                source="settings"
+                placement="settings"
               />
             </section>
           )}

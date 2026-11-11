@@ -3,7 +3,7 @@ export {
   applyAnalyticsConsent,
   INTEREST_FEATURES,
   type InterestFeature,
-  type InterestSource,
+  type InterestPlacement,
   normalizeAnalyticsPath,
   trackAnalyticsEvent,
   trackAnalyticsPageView,

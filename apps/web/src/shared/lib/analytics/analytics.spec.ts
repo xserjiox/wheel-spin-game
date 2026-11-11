@@ -106,7 +106,7 @@ describe("analytics consent application", () => {
     trackAnalyticsEvent("template_save");
     trackAnalyticsEvent("feature_interest", {
       feature: "split_teams",
-      source: "survey",
+      placement: "survey",
     });
 
     const commands = (testAnalyticsWindow().dataLayer ?? []).map((command) =>
@@ -149,7 +149,7 @@ describe("analytics consent application", () => {
     expect(commands).toContainEqual([
       "event",
       "feature_interest",
-      { feature: "split_teams", source: "survey", send_to: "G-TEST123" },
+      { feature: "split_teams", placement: "survey", send_to: "G-TEST123" },
     ]);
   });
 
@@ -192,9 +192,9 @@ describe("analytics consent application", () => {
     // Compile-time guard: free text must never reach feature_interest.
     const check = (track: typeof import("./analytics").trackAnalyticsEvent) => {
       // @ts-expect-error unknown feature names are rejected
-      track("feature_interest", { feature: "dark mode", source: "survey" });
+      track("feature_interest", { feature: "dark mode", placement: "survey" });
       // @ts-expect-error unknown sources are rejected
-      track("feature_interest", { feature: "pro", source: "email" });
+      track("feature_interest", { feature: "pro", placement: "email" });
       // @ts-expect-error room_create needs the experiment group
       track("room_create", { has_password: true });
     };

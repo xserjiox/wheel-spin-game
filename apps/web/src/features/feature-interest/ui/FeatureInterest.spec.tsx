@@ -25,7 +25,7 @@ describe("feature interest", () => {
   it("thanks the host and counts the tap once", () => {
     render(
       <I18nProvider>
-        <FeatureInterestButton feature="split_teams" source="after_spin" />
+        <FeatureInterestButton feature="split_teams" placement="after_spin" />
       </I18nProvider>,
     );
     const button = screen.getByRole("button", { name: /Split into teams/ });
@@ -38,7 +38,7 @@ describe("feature interest", () => {
     expect(trackAnalyticsEvent).toHaveBeenCalledOnce();
     expect(trackAnalyticsEvent).toHaveBeenCalledWith("feature_interest", {
       feature: "split_teams",
-      source: "after_spin",
+      placement: "after_spin",
     });
   });
 
@@ -46,7 +46,7 @@ describe("feature interest", () => {
     const view = () =>
       render(
         <I18nProvider>
-          <FeatureInterestButton feature="pro" source="settings" />
+          <FeatureInterestButton feature="pro" placement="settings" />
         </I18nProvider>,
       );
     view();
@@ -76,7 +76,7 @@ describe("feature interest", () => {
     fireEvent.click(screen.getByRole("button", { name: "Projector mode" }));
     expect(trackAnalyticsEvent).toHaveBeenCalledWith("feature_interest", {
       feature: "projector_mode",
-      source: "survey",
+      placement: "survey",
     });
     expect(screen.getByText("Coming soon! Thanks — noted.")).toBeTruthy();
 

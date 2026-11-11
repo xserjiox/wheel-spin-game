@@ -24,7 +24,7 @@ export function MissingFeatureSurvey({ onClose }: { onClose: () => void }) {
 
   const answer = (feature: InterestFeature) => {
     noteInterest(window.localStorage, feature);
-    trackAnalyticsEvent("feature_interest", { feature, source: "survey" });
+    trackAnalyticsEvent("feature_interest", { feature, placement: "survey" });
     setAnswered(true);
   };
 

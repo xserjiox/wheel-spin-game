@@ -1,14 +1,14 @@
 import { useId } from "react";
-import type { InterestFeature, InterestSource } from "@/shared/lib/analytics";
+import type { InterestFeature, InterestPlacement } from "@/shared/lib/analytics";
 import { useI18n } from "@/shared/lib/i18n";
 import { FeatureInterestButton } from "./FeatureInterestButton";
 
 export function ComingSoonFeatures({
   features,
-  source,
+  placement,
 }: {
   features: InterestFeature[];
-  source: InterestSource;
+  placement: InterestPlacement;
 }) {
   const { t } = useI18n();
   const titleId = useId();
@@ -18,7 +18,11 @@ export function ComingSoonFeatures({
       <p>{t("comingSoonCopy")}</p>
       <div className="feature-interest-list">
         {features.map((feature) => (
-          <FeatureInterestButton key={feature} feature={feature} source={source} />
+          <FeatureInterestButton
+            key={feature}
+            feature={feature}
+            placement={placement}
+          />
         ))}
       </div>
     </section>

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   type InterestFeature,
-  type InterestSource,
+  type InterestPlacement,
   trackAnalyticsEvent,
 } from "@/shared/lib/analytics";
 import { useI18n } from "@/shared/lib/i18n";
@@ -11,10 +11,10 @@ import { featureLabelKeys } from "./feature-labels";
 // A quiet "Soon" button that measures interest in a planned feature. No contact details are asked.
 export function FeatureInterestButton({
   feature,
-  source,
+  placement,
 }: {
   feature: InterestFeature;
-  source: InterestSource;
+  placement: InterestPlacement;
 }) {
   const { t } = useI18n();
   const [noted, setNoted] = useState(false);
@@ -22,7 +22,7 @@ export function FeatureInterestButton({
   const register = () => {
     if (noted) return;
     if (noteInterest(window.localStorage, feature)) {
-      trackAnalyticsEvent("feature_interest", { feature, source });
+      trackAnalyticsEvent("feature_interest", { feature, placement });
     }
     setNoted(true);
   };

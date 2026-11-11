@@ -151,13 +151,13 @@ checklist so the property matches the code and legal notices:
    `has_password` and `experiment` (`A`, `B`, or `none`) on `room_create`,
    `entry_type`, `has_password`, and `reason` on join events, `role` and
    `method` on share events, and `feature` (`saved_group`, `permanent_room`,
-   `split_teams`, `projector_mode`, `pro`) and `source` (`settings`, `history`,
+   `split_teams`, `projector_mode`, `pro`) and `placement` (`settings`, `history`,
    `after_spin`, `survey`) on `feature_interest`; none may contain room
    identifiers or user-provided content. Every event reports `/r/:room` instead
    of the room URL; only `utm_*` campaign tags are kept from query strings.
 6. Mark `room_join` and `share_room` as key events. Use the recommended
    **Once per event** counting method, and register `entry_type`, `has_password`,
-   `reason`, `role`, `method`, `experiment`, `feature`, and `source` as
+   `reason`, `role`, `method`, `experiment`, `feature`, and `placement` as
    event-scoped custom dimensions when these breakdowns are needed in reports.
 
 GatherWheel uses Basic Consent Mode: the Google tag is not loaded until a

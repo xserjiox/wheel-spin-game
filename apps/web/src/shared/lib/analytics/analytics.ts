@@ -238,10 +238,11 @@ export const INTEREST_FEATURES = [
   "pro",
 ] as const;
 export type InterestFeature = (typeof INTEREST_FEATURES)[number];
-export type InterestSource = "settings" | "history" | "after_spin" | "survey";
+// Not `source`: GA adds its own `source` parameter to events from UTM-tagged pages.
+export type InterestPlacement = "settings" | "history" | "after_spin" | "survey";
 type FeatureInterestParameters = {
   feature: InterestFeature;
-  source: InterestSource;
+  placement: InterestPlacement;
 };
 type ParameterlessAnalyticsEventName =
   | "spin_start"
