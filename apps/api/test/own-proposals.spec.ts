@@ -142,6 +142,7 @@ describe("own proposals", () => {
         label: "Latest label",
         position: 2,
       },
+      select: { id: true },
     });
     expect(tx.proposal.delete).toHaveBeenCalledWith({
       where: { id: "proposal-id" },

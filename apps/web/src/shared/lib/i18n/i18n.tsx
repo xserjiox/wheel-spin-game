@@ -528,6 +528,7 @@ const en = {
   chanceMinimum: "Min {value}%",
   chanceMaximum: "Max {value}%",
   equalChanceShort: "Equal",
+  equalizeAllChances: "Equal chances for all",
   weightChanceHint:
     "Set a chance directly. The remaining percentage is shared between the other slots.",
   showWeightEditorFor: "Adjust chance for {name}",
@@ -848,6 +849,7 @@ const ru: Dictionary = {
   chanceMinimum: "Мин. {value}%",
   chanceMaximum: "Макс. {value}%",
   equalChanceShort: "Поровну",
+  equalizeAllChances: "Выровнять шансы поровну",
   weightChanceHint:
     "Задайте шанс напрямую. Оставшийся процент распределится между другими слотами.",
   showWeightEditorFor: "Настроить шанс слота «{name}»",
@@ -1163,6 +1165,7 @@ const uk: Dictionary = {
   chanceMinimum: "Мін. {value}%",
   chanceMaximum: "Макс. {value}%",
   equalChanceShort: "Порівну",
+  equalizeAllChances: "Вирівняти шанси порівну",
   weightChanceHint:
     "Задайте шанс напряму. Решта відсотків розподілиться між іншими слотами.",
   showWeightEditorFor: "Налаштувати шанс слота «{name}»",
@@ -1479,6 +1482,7 @@ const de: Dictionary = {
   chanceMinimum: "Min. {value}%",
   chanceMaximum: "Max. {value}%",
   equalChanceShort: "Gleich",
+  equalizeAllChances: "Alle Chancen angleichen",
   weightChanceHint:
     "Lege die Chance direkt fest. Der verbleibende Anteil wird auf die anderen Felder verteilt.",
   showWeightEditorFor: "Chance für {name} anpassen",
@@ -1783,6 +1787,7 @@ const zh: Dictionary = {
   chanceMinimum: "最低 {value}%",
   chanceMaximum: "最高 {value}%",
   equalChanceShort: "均分",
+  equalizeAllChances: "所有概率平均分配",
   weightChanceHint: "直接设置概率，其余百分比会分配给其他选项。",
   showWeightEditorFor: "调整{name}的概率",
   hideWeightEditorFor: "隐藏{name}的概率设置",

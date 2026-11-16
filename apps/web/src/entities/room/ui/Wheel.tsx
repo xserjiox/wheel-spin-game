@@ -7,6 +7,7 @@ import {
   useState,
 } from "react";
 import { useI18n } from "@/shared/lib/i18n";
+import { useModalLayer } from "@/shared/lib/modal-layer";
 import { Confetti } from "@/shared/ui/confetti";
 import type { ActiveSpin, Option } from "../model/types";
 import {
@@ -117,6 +118,7 @@ export function Wheel({
     setWinner("");
     onResultCloseRef.current?.();
   }, []);
+  const isTopResultLayer = useModalLayer(Boolean(winner));
   const [optionTooltip, setOptionTooltip] = useState<OptionTooltip | null>(null);
   const [soundEnabled, setSoundEnabled] = useState(() => {
     try {
@@ -387,15 +389,14 @@ export function Wheel({
     if (!winner) return;
 
     const modal = modalRef.current;
-    const previousBodyOverflow = document.body.style.overflow;
     previousFocusRef.current =
       document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    document.body.style.overflow = "hidden";
 
     const focusFrame = window.requestAnimationFrame(() =>
       closeButtonRef.current?.focus(),
     );
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (!isTopResultLayer()) return;
       if (event.key === "Escape") {
         event.preventDefault();
         closeResult();
@@ -431,11 +432,10 @@ export function Wheel({
     return () => {
       window.cancelAnimationFrame(focusFrame);
       document.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = previousBodyOverflow;
       previousFocusRef.current?.focus();
       previousFocusRef.current = null;
     };
-  }, [closeResult, winner]);
+  }, [closeResult, isTopResultLayer, winner]);
 
   return (
     <>
