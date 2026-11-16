@@ -122,6 +122,35 @@ export function redistributeChanceWeights(
   }));
 }
 
+// Stored chances have one decimal, so 33.3 / 33.3 / 33.4 still counts as an even split.
+// The extra half step also covers rooms whose chances no longer add up to exactly 100.
+const EVEN_SPREAD_UNITS = 1.5;
+
+function hasEvenChances(options: WeightedOption[]): boolean {
+  if (options.length < 2) return true;
+  const weights = options.map((option) => option.weight);
+  const total = weights.reduce((sum, weight) => sum + weight, 0);
+  if (!(total > 0)) return true;
+  const spread = Math.max(...weights) - Math.min(...weights);
+  return spread / total <= EVEN_SPREAD_UNITS / TOTAL_CHANCE_UNITS;
+}
+
+// Equal weights give every slot exactly the same share, without rounding leftovers.
+export function equalChanceWeights(options: WeightedOption[]): WeightedOption[] {
+  return options.map((option) => ({ id: option.id, weight: 1 }));
+}
+
+// A new slot gets the same share as an average slot. An even wheel stays even, and a
+// tuned wheel keeps the proportions the host set between the older slots.
+export function addOptionWithEqualChance(
+  options: WeightedOption[],
+  newOptionId: string,
+): WeightedOption[] {
+  const existing = options.filter((option) => option.id !== newOptionId);
+  if (hasEvenChances(existing)) return equalChanceWeights(options);
+  return redistributeChanceWeights(options, newOptionId, 100 / options.length);
+}
+
 function toWeightUnits(weight: number): number {
   if (!Number.isFinite(weight) || weight <= 0) {
     throw new RangeError("Option weights must be positive finite numbers");

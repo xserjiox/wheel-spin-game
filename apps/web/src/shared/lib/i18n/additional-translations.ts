@@ -280,6 +280,7 @@ const es = {
   chanceMinimum: "Mín. {value}%",
   chanceMaximum: "Máx. {value}%",
   equalChanceShort: "Igualar",
+  equalizeAllChances: "Igualar todas las probabilidades",
   weightChanceHint:
     "Define la probabilidad directamente. El porcentaje restante se reparte entre las demás opciones.",
   decreaseWeightFor: "Reducir el peso de {name}",
@@ -652,6 +653,7 @@ const pt = {
   chanceMinimum: "Mín. {value}%",
   chanceMaximum: "Máx. {value}%",
   equalChanceShort: "Igualar",
+  equalizeAllChances: "Igualar todas as chances",
   weightChanceHint:
     "Defina a chance diretamente. A percentagem restante é dividida entre as outras opções.",
   decreaseWeightFor: "Diminuir o peso de {name}",
@@ -1019,6 +1021,7 @@ const ja = {
   chanceMinimum: "最小 {value}%",
   chanceMaximum: "最大 {value}%",
   equalChanceShort: "均等",
+  equalizeAllChances: "すべての確率を均等にする",
   weightChanceHint: "確率を直接設定します。残りの割合は他の項目に振り分けられます。",
   decreaseWeightFor: "{name}の重みを減らす",
   increaseWeightFor: "{name}の重みを増やす",
@@ -1369,6 +1372,7 @@ const zhHant = {
   chanceMinimum: "最低 {value}%",
   chanceMaximum: "最高 {value}%",
   equalChanceShort: "平均",
+  equalizeAllChances: "所有機率平均分配",
   weightChanceHint: "直接設定機率，其餘百分比會分配給其他選項。",
   decreaseWeightFor: "降低 {name} 的權重",
   increaseWeightFor: "提高 {name} 的權重",

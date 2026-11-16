@@ -1,6 +1,7 @@
 import { type ReactNode, useEffect, useId, useRef, useState } from "react";
 import { copyToClipboard } from "@/shared/lib/clipboard";
 import { useI18n } from "@/shared/lib/i18n";
+import { useModalLayer } from "@/shared/lib/modal-layer";
 import { roomPath } from "@/shared/lib/router";
 import { QrCode } from "@/shared/ui/qr-code";
 
@@ -45,13 +46,14 @@ export function InviteRoomDialog({
   const qrUrl = `${roomUrl}?via=qr`;
   const canShare = typeof navigator.share === "function";
 
+  const isTopLayer = useModalLayer();
+
   useEffect(() => {
-    const previousBodyOverflow = document.body.style.overflow;
     const previousFocus =
       document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    document.body.style.overflow = "hidden";
 
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (!isTopLayer()) return;
       if (event.key === "Escape") {
         event.preventDefault();
         onClose();
@@ -83,10 +85,9 @@ export function InviteRoomDialog({
     document.addEventListener("keydown", handleKeyDown);
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = previousBodyOverflow;
       previousFocus?.focus();
     };
-  }, [onClose]);
+  }, [isTopLayer, onClose]);
 
   useEffect(() => {
     if (cardRef.current) cardRef.current.scrollTop = 0;

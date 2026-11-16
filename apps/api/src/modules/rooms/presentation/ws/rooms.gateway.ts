@@ -184,6 +184,13 @@ export class RoomsGateway
     });
   }
 
+  @SubscribeMessage("options.equalize")
+  async equalizeOptionChances(@ConnectedSocket() client: RoomSocket) {
+    return this.mutate(client, "options.equalize", async (participant) => {
+      await this.rooms.equalizeOptionChances(participant);
+    });
+  }
+
   @SubscribeMessage("option.restore")
   async restoreOption(
     @ConnectedSocket() client: RoomSocket,

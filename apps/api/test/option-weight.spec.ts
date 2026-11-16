@@ -6,6 +6,7 @@ import {
 import { ParticipantRole, RoomStatus } from "@prisma/client";
 import { describe, expect, it, vi } from "vitest";
 import { RoomsService } from "../src/modules/rooms/application/rooms.service";
+import { addOptionWithEqualChance } from "../src/modules/rooms/domain/wheel-engine";
 import type { PrismaService } from "../src/shared/database/prisma.service";
 import { SessionService } from "../src/shared/security/session.service";
 
@@ -33,8 +34,11 @@ function createPrisma(options = activeOptions) {
         { status: RoomStatus.LOBBY, expiresAt: new Date("2099-01-01") },
       ]),
     option: {
+      count: vi.fn().mockResolvedValue(options.length - 1),
+      create: vi.fn().mockResolvedValue({ id: options.at(-1)?.id }),
       findMany: vi.fn().mockResolvedValue(options),
       update: optionUpdate,
+      updateMany: vi.fn().mockResolvedValue({ count: options.length }),
     },
     room: { update: roomUpdate },
   };
@@ -50,7 +54,7 @@ function createPrisma(options = activeOptions) {
     ),
   } as unknown as PrismaService;
 
-  return { prisma, optionUpdate, roomUpdate };
+  return { prisma, transaction, optionUpdate, roomUpdate };
 }
 
 describe("option chances", () => {
@@ -106,5 +110,83 @@ describe("option chances", () => {
         96,
       ),
     ).rejects.toBeInstanceOf(BadRequestException);
+  });
+});
+
+describe("equal chances for new and existing slots", () => {
+  it("keeps an even wheel even when a slot is added", () => {
+    // Weights left behind by an earlier normalization, plus the fresh slot.
+    const distribution = addOptionWithEqualChance(
+      [
+        { id: "a", weight: 24.8 },
+        { id: "b", weight: 24.8 },
+        { id: "c", weight: 24.7 },
+        { id: "d", weight: 24.7 },
+        { id: "new", weight: 1 },
+      ],
+      "new",
+    );
+
+    expect(distribution.map((option) => option.weight)).toEqual([1, 1, 1, 1, 1]);
+  });
+
+  it("gives a new slot an average share and keeps tuned proportions", () => {
+    const distribution = addOptionWithEqualChance(
+      [
+        { id: "a", weight: 50 },
+        { id: "b", weight: 25 },
+        { id: "c", weight: 25 },
+        { id: "new", weight: 1 },
+      ],
+      "new",
+    );
+
+    const byId = new Map(distribution.map((option) => [option.id, option.weight]));
+    expect(byId.get("new")).toBe(25);
+    expect(byId.get("a")).toBe(37.5);
+    expect(byId.get("b")).toBe(18.8);
+    expect(byId.get("c")).toBe(18.7);
+  });
+
+  it("stores the new slot with an equal share when the host adds it", async () => {
+    const options = [
+      { id: "option-1", weight: 25 },
+      { id: "option-2", weight: 25 },
+      { id: "option-3", weight: 25 },
+      { id: "option-4", weight: 25 },
+      { id: "option-5", weight: 1 },
+    ];
+    const { prisma, transaction, optionUpdate } = createPrisma(options);
+
+    await new RoomsService(prisma, new SessionService()).addOption(host, "Fifth");
+
+    expect(transaction.option.create).toHaveBeenCalledWith({
+      data: { roomId: host.roomId, label: "Fifth", position: 4 },
+      select: { id: true },
+    });
+    expect(optionUpdate.mock.calls.map(([input]) => input.data.weight)).toEqual([
+      1, 1, 1, 1, 1,
+    ]);
+  });
+
+  it("lets only the host make every chance equal", async () => {
+    const { prisma, transaction, roomUpdate } = createPrisma();
+    const service = new RoomsService(prisma, new SessionService());
+
+    await expect(
+      service.equalizeOptionChances({ ...host, role: ParticipantRole.GUEST }),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+
+    await service.equalizeOptionChances(host);
+
+    expect(transaction.option.updateMany).toHaveBeenCalledWith({
+      where: { roomId: host.roomId },
+      data: { weight: 1 },
+    });
+    expect(roomUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ version: { increment: 1 } }),
+      }),
+    );
   });
 });

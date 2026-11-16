@@ -10,6 +10,7 @@ type Command =
   | "option.add"
   | "options.replace"
   | "option.updateChance"
+  | "options.equalize"
   | "option.remove"
   | "option.restore"
   | "round.reset"

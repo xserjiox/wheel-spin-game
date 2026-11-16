@@ -13,6 +13,7 @@ import {
   type Ack,
   getOptionChanceMaximum,
   getOptionProbability,
+  getOptionWeight,
   MIN_OPTION_CHANCE,
   type Option,
   type RoomState,
@@ -360,6 +361,7 @@ export function RoomPage({
                 updateChance={(optionId, chance) =>
                   command("option.updateChance", { optionId, chance })
                 }
+                equalizeChances={() => command("options.equalize", {})}
                 remove={(optionId) => command("option.remove", { optionId })}
                 restore={(optionId) => command("option.restore", { optionId })}
                 updateSelectionMode={updateSelectionMode}
@@ -463,6 +465,7 @@ function HostOptions({
   setDuration,
   add,
   updateChance,
+  equalizeChances,
   remove,
   restore,
   updateSelectionMode,
@@ -477,6 +480,7 @@ function HostOptions({
   setDuration: (duration: string) => void;
   add: (label: string) => Promise<unknown>;
   updateChance: (id: string, chance: number) => Promise<unknown>;
+  equalizeChances: () => Promise<unknown>;
   remove: (id: string) => Promise<unknown>;
   restore: (id: string) => Promise<unknown>;
   updateSelectionMode: (mode: RoomState["selectionMode"]) => Promise<void>;
@@ -488,6 +492,10 @@ function HostOptions({
   const [label, setLabel] = useState("");
   const availableOptions = state.options.filter((option) => !option.excluded);
   const excludedCount = state.options.length - availableOptions.length;
+  // Set-aside slots count too, so a restored slot comes back with an equal share.
+  const chancesAreEqual = state.options.every(
+    (option) => getOptionWeight(option) === getOptionWeight(state.options[0]),
+  );
   const choiceCountLabel =
     state.selectionMode === "ELIMINATION"
       ? t("availableChoices", {
@@ -588,6 +596,17 @@ function HostOptions({
         <span aria-hidden="true">i</span>
         {t("weightChanceHint")}
       </p>
+      {state.options.length >= 2 && (
+        <button
+          className="equalize-chances-button"
+          type="button"
+          disabled={disabled || !connected || chancesAreEqual}
+          onClick={() => void equalizeChances()}
+        >
+          <span aria-hidden="true">=</span>
+          {t("equalizeAllChances")}
+        </button>
+      )}
       <div className="options-list">
         {state.options.map((option, index) => {
           const chance = option.excluded

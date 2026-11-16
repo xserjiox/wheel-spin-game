@@ -278,6 +278,7 @@ export const ms = {
   chanceMinimum: "Minimum {value}%",
   chanceMaximum: "Maksimum {value}%",
   equalChanceShort: "Sama rata",
+  equalizeAllChances: "Samakan semua peluang",
   weightChanceHint:
     "Tetapkan peluang secara terus. Baki peratusan dikongsi antara petak lain.",
   showWeightEditorFor: "Laraskan peluang untuk {name}",

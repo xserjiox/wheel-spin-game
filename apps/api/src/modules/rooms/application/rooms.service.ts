@@ -37,7 +37,9 @@ import {
   starterOptionsHash,
 } from "../domain/starting-wheel-experiment";
 import {
+  addOptionWithEqualChance,
   calculateFinalRotation,
+  type WeightedOption,
   normalizeChanceWeights,
   redistributeChanceWeights,
   selectWeightedIndex,
@@ -596,10 +598,11 @@ export class RoomsService {
       await this.lockRoom(tx, participant.roomId, RoomStatus.LOBBY);
       const count = await tx.option.count({ where: { roomId: participant.roomId } });
       if (count >= MAX_OPTIONS) throw new BadRequestException("Достигнут лимит слотов");
-      await tx.option.create({
+      const option = await tx.option.create({
         data: { roomId: participant.roomId, label, position: count },
+        select: { id: true },
       });
-      await this.normalizeOptionChances(tx, participant.roomId);
+      await this.giveNewOptionEqualChance(tx, participant.roomId, option.id);
       await tx.room.update({
         where: { id: participant.roomId },
         data: { version: { increment: 1 }, ...this.activityData() },
@@ -676,6 +679,23 @@ export class RoomsService {
           data: { weight: option.weight },
         });
       }
+      await tx.room.update({
+        where: { id: participant.roomId },
+        data: { version: { increment: 1 }, ...this.activityData() },
+      });
+    });
+  }
+
+  // Gives every slot, including ones set aside in no-repeat mode, the same chance.
+  async equalizeOptionChances(participant: SessionParticipant): Promise<void> {
+    this.assertHost(participant);
+    await this.assertEditable(participant.roomId);
+    await this.prisma.$transaction(async (tx) => {
+      await this.lockRoom(tx, participant.roomId, RoomStatus.LOBBY);
+      await tx.option.updateMany({
+        where: { roomId: participant.roomId },
+        data: { weight: 1 },
+      });
       await tx.room.update({
         where: { id: participant.roomId },
         data: { version: { increment: 1 }, ...this.activityData() },
@@ -821,14 +841,15 @@ export class RoomsService {
         const count = await tx.option.count({ where: { roomId: participant.roomId } });
         if (count >= MAX_OPTIONS)
           throw new BadRequestException("Достигнут лимит слотов");
-        await tx.option.create({
+        const option = await tx.option.create({
           data: {
             roomId: participant.roomId,
             label: proposal.label,
             position: count,
           },
+          select: { id: true },
         });
-        await this.normalizeOptionChances(tx, participant.roomId);
+        await this.giveNewOptionEqualChance(tx, participant.roomId, option.id);
       }
       await tx.room.update({
         where: { id: participant.roomId },
@@ -1167,15 +1188,35 @@ export class RoomsService {
     tx: Prisma.TransactionClient,
     roomId: string,
   ): Promise<void> {
+    const options = await this.findActiveOptionWeights(tx, roomId);
+    await this.saveOptionWeights(tx, normalizeChanceWeights(options));
+  }
+
+  private async giveNewOptionEqualChance(
+    tx: Prisma.TransactionClient,
+    roomId: string,
+    optionId: string,
+  ): Promise<void> {
+    const options = await this.findActiveOptionWeights(tx, roomId);
+    await this.saveOptionWeights(tx, addOptionWithEqualChance(options, optionId));
+  }
+
+  private async findActiveOptionWeights(
+    tx: Prisma.TransactionClient,
+    roomId: string,
+  ): Promise<WeightedOption[]> {
     const options = await tx.option.findMany({
       where: { roomId, excludedAt: null },
       orderBy: { position: "asc" },
       select: { id: true, weight: true },
     });
-    const distribution = normalizeChanceWeights(
-      options.map((option) => ({ id: option.id, weight: Number(option.weight) })),
-    );
+    return options.map((option) => ({ id: option.id, weight: Number(option.weight) }));
+  }
 
+  private async saveOptionWeights(
+    tx: Prisma.TransactionClient,
+    distribution: WeightedOption[],
+  ): Promise<void> {
     for (const option of distribution) {
       await tx.option.update({
         where: { id: option.id },

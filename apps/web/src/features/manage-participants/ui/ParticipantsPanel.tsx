@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Ack, RoomParticipant } from "@/entities/room";
 import { useI18n } from "@/shared/lib/i18n";
+import { useModalLayer } from "@/shared/lib/modal-layer";
 
 export function ParticipantsPanel({
   participants,
@@ -146,16 +147,17 @@ function KickParticipantModal({
     [participant.id],
   );
 
+  const isTopLayer = useModalLayer();
+
   useEffect(() => {
-    const previousBodyOverflow = document.body.style.overflow;
     const previousFocus =
       document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    document.body.style.overflow = "hidden";
     const focusFrame = window.requestAnimationFrame(() =>
       cancelButtonRef.current?.focus(),
     );
 
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (!isTopLayer()) return;
       if (event.key === "Escape" && !removing) {
         event.preventDefault();
         onClose();
@@ -188,10 +190,9 @@ function KickParticipantModal({
     return () => {
       window.cancelAnimationFrame(focusFrame);
       document.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = previousBodyOverflow;
       previousFocus?.focus();
     };
-  }, [onClose, removing]);
+  }, [isTopLayer, onClose, removing]);
 
   return (
     <div

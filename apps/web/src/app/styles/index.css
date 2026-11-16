@@ -2105,12 +2105,14 @@ input::placeholder {
 }
 
 .selection-mode-buttons button:disabled,
-.round-reset-button:disabled {
+.round-reset-button:disabled,
+.equalize-chances-button:disabled {
   cursor: not-allowed;
   opacity: 0.55;
 }
 
-.round-reset-button {
+.round-reset-button,
+.equalize-chances-button {
   display: inline-flex;
   width: 100%;
   gap: 7px;
@@ -2119,7 +2121,19 @@ input::placeholder {
   background: var(--panel);
 }
 
-.round-reset-button span {
+.equalize-chances-button {
+  min-height: 34px;
+  margin-bottom: 10px;
+  padding: 0 8px;
+  border: 1px solid var(--ink);
+  color: var(--ink);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.round-reset-button span,
+.equalize-chances-button span {
   font-size: 14px;
 }
 

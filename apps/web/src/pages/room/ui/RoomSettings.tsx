@@ -2,6 +2,7 @@ import { type FormEvent, useEffect, useId, useRef, useState } from "react";
 import { deleteOwnData, deleteRoomData, exportOwnData } from "@/entities/room";
 import { removeSavedRoom } from "@/entities/saved-room";
 import { translateError, useI18n } from "@/shared/lib/i18n";
+import { useModalLayer } from "@/shared/lib/modal-layer";
 
 export function RoomSettings({
   code,
@@ -199,16 +200,17 @@ function DeleteDataConfirmationModal({
   const actionKey = isHost ? "deleteRoomData" : "deleteMyData";
   const confirmationKey = isHost ? "deleteRoomDataConfirm" : "deleteMyDataConfirm";
 
+  const isTopLayer = useModalLayer();
+
   useEffect(() => {
-    const previousBodyOverflow = document.body.style.overflow;
     const previousFocus =
       document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    document.body.style.overflow = "hidden";
     const focusFrame = window.requestAnimationFrame(() =>
       cancelButtonRef.current?.focus(),
     );
 
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (!isTopLayer()) return;
       if (event.key === "Escape" && !deleting) {
         event.preventDefault();
         onClose();
@@ -241,10 +243,9 @@ function DeleteDataConfirmationModal({
     return () => {
       window.cancelAnimationFrame(focusFrame);
       document.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = previousBodyOverflow;
       previousFocus?.focus();
     };
-  }, [deleting, onClose]);
+  }, [deleting, isTopLayer, onClose]);
 
   return (
     <div
