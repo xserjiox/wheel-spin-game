@@ -273,6 +273,7 @@ export const vi = {
   chanceMinimum: "Tối thiểu {value}%",
   chanceMaximum: "Tối đa {value}%",
   equalChanceShort: "Bằng nhau",
+  equalizeAllChances: "Chia đều tất cả xác suất",
   weightChanceHint:
     "Đặt xác suất trực tiếp. Phần trăm còn lại được chia cho các ô khác.",
   showWeightEditorFor: "Điều chỉnh xác suất của {name}",
