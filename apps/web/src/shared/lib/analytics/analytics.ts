@@ -235,6 +235,7 @@ export const INTEREST_FEATURES = [
   "permanent_room",
   "split_teams",
   "projector_mode",
+  "wheel_themes",
   "pro",
 ] as const;
 export type InterestFeature = (typeof INTEREST_FEATURES)[number];

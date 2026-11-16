@@ -6,5 +6,6 @@ export const featureLabelKeys: Record<InterestFeature, Parameters<Translate>[0]>
   permanent_room: "featurePermanentRoom",
   split_teams: "featureSplitTeams",
   projector_mode: "featureProjectorMode",
+  wheel_themes: "featureWheelThemes",
   pro: "featurePro",
 };

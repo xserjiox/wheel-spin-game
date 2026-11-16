@@ -236,6 +236,7 @@ export const ms = {
   featurePermanentRoom: "Pautan bilik kekal",
   featureSplitTeams: "Bahagi kepada pasukan",
   featureProjectorMode: "Mod projektor",
+  featureWheelThemes: "Tema roda",
   featurePro: "Ciri Pro untuk pasukan dan kelas",
   comingSoonTitle: "Akan datang di GatherWheel",
   comingSoonCopy:

@@ -232,6 +232,7 @@ export const vi = {
   featurePermanentRoom: "Liên kết phòng cố định",
   featureSplitTeams: "Chia thành đội",
   featureProjectorMode: "Chế độ máy chiếu",
+  featureWheelThemes: "Giao diện vòng quay",
   featurePro: "Tính năng Pro cho nhóm và lớp học",
   comingSoonTitle: "Sắp có trên GatherWheel",
   comingSoonCopy:

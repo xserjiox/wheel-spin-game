@@ -488,6 +488,7 @@ const en = {
   featurePermanentRoom: "Permanent room link",
   featureSplitTeams: "Split into teams",
   featureProjectorMode: "Projector mode",
+  featureWheelThemes: "Wheel themes",
   featurePro: "Pro features for teams and classes",
   comingSoonTitle: "Coming soon to GatherWheel",
   comingSoonCopy: "Tap what you would use — it helps us decide what to build next.",
@@ -807,6 +808,7 @@ const ru: Dictionary = {
   featurePermanentRoom: "Постоянная ссылка на комнату",
   featureSplitTeams: "Разделить на команды",
   featureProjectorMode: "Режим для проектора",
+  featureWheelThemes: "Темы колеса",
   featurePro: "Pro-функции для команд и классов",
   comingSoonTitle: "Скоро в GatherWheel",
   comingSoonCopy:
@@ -1122,6 +1124,7 @@ const uk: Dictionary = {
   featurePermanentRoom: "Постійне посилання на кімнату",
   featureSplitTeams: "Поділити на команди",
   featureProjectorMode: "Режим для проєктора",
+  featureWheelThemes: "Теми колеса",
   featurePro: "Pro-функції для команд і класів",
   comingSoonTitle: "Скоро в GatherWheel",
   comingSoonCopy:
@@ -1438,6 +1441,7 @@ const de: Dictionary = {
   featurePermanentRoom: "Dauerhafter Raumlink",
   featureSplitTeams: "In Teams aufteilen",
   featureProjectorMode: "Beamer-Modus",
+  featureWheelThemes: "Rad-Designs",
   featurePro: "Pro-Funktionen für Teams und Klassen",
   comingSoonTitle: "Demnächst in GatherWheel",
   comingSoonCopy:
@@ -1743,6 +1747,7 @@ const zh: Dictionary = {
   featurePermanentRoom: "永久房间链接",
   featureSplitTeams: "分成小队",
   featureProjectorMode: "投影模式",
+  featureWheelThemes: "转盘主题",
   featurePro: "面向团队和班级的 Pro 功能",
   comingSoonTitle: "GatherWheel 即将推出",
   comingSoonCopy: "点一下你会用的功能，帮助我们决定接下来做什么。",

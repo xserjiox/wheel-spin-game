@@ -233,6 +233,7 @@ const es = {
   featurePermanentRoom: "Enlace de sala permanente",
   featureSplitTeams: "Dividir en equipos",
   featureProjectorMode: "Modo proyector",
+  featureWheelThemes: "Temas de la ruleta",
   featurePro: "Funciones Pro para equipos y clases",
   comingSoonTitle: "Próximamente en GatherWheel",
   comingSoonCopy: "Toca lo que usarías: así sabremos qué construir después.",
@@ -603,6 +604,7 @@ const pt = {
   featurePermanentRoom: "Link de sala permanente",
   featureSplitTeams: "Dividir em equipes",
   featureProjectorMode: "Modo projetor",
+  featureWheelThemes: "Temas da roleta",
   featurePro: "Recursos Pro para equipes e turmas",
   comingSoonTitle: "Em breve no GatherWheel",
   comingSoonCopy:
@@ -969,6 +971,7 @@ const ja = {
   featurePermanentRoom: "固定のルームリンク",
   featureSplitTeams: "チームに分ける",
   featureProjectorMode: "プロジェクターモード",
+  featureWheelThemes: "ルーレットのテーマ",
   featurePro: "チームやクラス向けのPro機能",
   comingSoonTitle: "GatherWheelで近日公開",
   comingSoonCopy:
@@ -1319,6 +1322,7 @@ const zhHant = {
   featurePermanentRoom: "永久房間連結",
   featureSplitTeams: "分成隊伍",
   featureProjectorMode: "投影模式",
+  featureWheelThemes: "轉盤主題",
   featurePro: "適合團隊和班級的 Pro 功能",
   comingSoonTitle: "GatherWheel 即將推出",
   comingSoonCopy: "點一下你會用的功能，幫助我們決定接下來做什麼。",

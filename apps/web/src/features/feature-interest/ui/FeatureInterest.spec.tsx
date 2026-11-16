@@ -71,7 +71,7 @@ describe("feature interest", () => {
     const answers = screen
       .getAllByRole("button")
       .filter((button) => button.textContent !== "×");
-    expect(answers).toHaveLength(5);
+    expect(answers).toHaveLength(6);
 
     fireEvent.click(screen.getByRole("button", { name: "Projector mode" }));
     expect(trackAnalyticsEvent).toHaveBeenCalledWith("feature_interest", {

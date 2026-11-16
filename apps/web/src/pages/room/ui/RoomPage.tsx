@@ -428,7 +428,7 @@ export function RoomPage({
           {tab === "settings" && isHost && (
             <section className="panel-content coming-soon-panel">
               <ComingSoonFeatures
-                features={["permanent_room", "projector_mode", "pro"]}
+                features={["wheel_themes", "permanent_room", "projector_mode", "pro"]}
                 placement="settings"
               />
             </section>
